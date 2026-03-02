@@ -1,10 +1,77 @@
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
-import { Code2, GraduationCap, Languages, Award, User } from "lucide-react";
+import { Code2, GraduationCap, Languages, Award, User, Heart, Users } from "lucide-react";
 import AnimatedBlob from "../components/AnimatedBlob";
-import { STATS, TOOLS_TAGS, ABOUT_ME } from "../data/constants";
+import { TOOLS_TAGS, ABOUT_ME } from "../data/constants";
+import { supabase } from "../lib/supabase";
 
 export default function HomePage({ setPage }) {
+  const [realStats, setRealStats] = useState([
+    { icon: <Code2 size={24} />, label: "Total Projects", value: "..." },
+    { icon: <Users size={24} />, label: "Profile Views", value: "..." },
+    { icon: <Heart size={24} />, label: "Cheer Ups", value: "..." },
+  ]);
+
+  // ใช้ useRef เพื่อเก็บจำนวนโปรเจกต์ไว้ จะได้ไม่หายตอนยอดวิวอัปเดต
+  const projectCountRef = useRef(0);
+
+  useEffect(() => {
+    // ฟังก์ชันสำหรับจัดรูปแบบข้อมูลใส่ State
+    const updateStatsUI = (pCount, views, cheers) => {
+      setRealStats([
+        { icon: <Code2 size={24} />, label: "Total Projects", value: pCount || 0 },
+        { icon: <Users size={24} />, label: "Profile Views", value: views.toLocaleString() },
+        { icon: <Heart size={24} />, label: "Cheer Ups", value: cheers.toLocaleString() },
+      ]);
+    };
+
+    const fetchDashboardStats = async () => {
+      try {
+        await supabase.rpc('increment_views');
+
+        const { count: projectCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true });
+          
+        projectCountRef.current = projectCount || 0;
+
+        const { data: statsData } = await supabase
+          .from('site_stats')
+          .select('*')
+          .eq('id', 1)
+          .single();
+
+        if (statsData) {
+          updateStatsUI(projectCountRef.current, statsData.views, statsData.cheer_ups);
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+
+    fetchDashboardStats();
+
+    // 🟢 เปิดระบบดักฟัง (Realtime Subscription)
+    const subscription = supabase
+      .channel('site_stats_channel')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'site_stats', filter: 'id=eq.1' },
+        (payload) => {
+          // ทันทีที่มีใครกดปุ่ม หรือมีคนเข้าเว็บใหม่ ข้อมูลก้อนใหม่ (payload.new) จะเด้งเข้ามาที่นี่
+          const newData = payload.new;
+          updateStatsUI(projectCountRef.current, newData.views, newData.cheer_ups);
+        }
+      )
+      .subscribe();
+
+    // ล้างการเชื่อมต่อเมื่อเปลี่ยนหน้าเว็บ
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
+
   return (
     <div style={{ paddingTop: 64 }}>
       {/* 1. Hero Section */}
@@ -41,7 +108,7 @@ export default function HomePage({ setPage }) {
         </motion.div>
       </section>
 
-      {/* 2. About Me Section (Resume Style) */}
+      {/* 2. About Me Section */}
       <section style={{ padding: "40px 48px", maxWidth: 1440, margin: "0 auto" }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ background: "white", borderRadius: 24, padding: "48px", boxShadow: "0 8px 32px rgba(13,110,253,0.06)", display: "flex", flexDirection: "column", gap: 32 }}>
           
@@ -122,7 +189,7 @@ export default function HomePage({ setPage }) {
         </motion.div>
       </section>
 
-      {/* 4. Mini Dashboard */}
+      {/* 4. Mini Dashboard (Real-time) */}
       <section style={{ padding: "40px 48px 100px", maxWidth: 1440, margin: "0 auto" }}>
         <motion.div 
           initial={{ opacity: 0, y: 30 }} 
@@ -142,7 +209,7 @@ export default function HomePage({ setPage }) {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-            {STATS?.map((s, i) => (
+            {realStats.map((s) => (
               <motion.div 
                 key={s.label} 
                 whileHover={{ y: -5, boxShadow: "0 12px 24px rgba(13,110,253,0.12)" }} 
