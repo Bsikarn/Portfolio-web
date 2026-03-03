@@ -4,7 +4,7 @@ import { styles } from "../styles/ContactPage.styles";
 
 export default function ContactPage() {
   const CONTACTS = [
-    { icon: <Mail size={28} />, label: "Email", handle: "sikarn.pat@gmail.com", href: "mailto:siakrn.pat@gmail.com", color: "#ffc8d5", accent: "#ff6b6b" },
+    { icon: <Mail size={28} />, label: "Email", handle: "sikarn.pat@gmail.com", href: "https://mailto:sikarn.pat@gmail.com", color: "#ffc8d5", accent: "#ff6b6b" },
     { icon: <Github size={28} />, label: "GitHub", handle: "Bsikarn", href: "https://github.com/Bsikarn", color: "#A3D8F4", accent: "#0D6EFD" },
     { icon: <Linkedin size={28} />, label: "LinkedIn", handle: "Sikarn Pattarasirimongkol", href: "https://linkedin.com/in/sbeaut", color: "#c4f0e0", accent: "#0077b5" },
   ];

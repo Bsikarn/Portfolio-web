@@ -22,4 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-RULES.md
+
+# Local env files
+.env.local
+.env.*.local
+
+# อย่าลืมกันเหนี่ยว
+.env
