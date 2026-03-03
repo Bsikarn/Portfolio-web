@@ -1,0 +1,46 @@
+.meshContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-color: #A3D8F4;
+  overflow: hidden;
+}
+
+.meshGradient {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, #ffc8d5 0%, transparent 60%),
+    radial-gradient(circle at 80% 20%, #A3D8F4 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, #ffc8d5 0%, transparent 50%);
+  animation: moveMesh 25s linear infinite;
+  filter: blur(80px);
+  opacity: 0.8;
+}
+
+@keyframes moveMesh {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: translate(10%, 15%) rotate(90deg) scale(1.1);
+  }
+
+  50% {
+    transform: translate(-10%, 20%) rotate(180deg) scale(1.2);
+  }
+
+  75% {
+    transform: translate(-15%, -10%) rotate(270deg) scale(1.1);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(360deg) scale(1);
+  }
+}

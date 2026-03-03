@@ -37,11 +37,11 @@ export default function ChatBot({ isOpen, onClose }) {
       }));
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": "YOUR_API_KEY", "anthropic-version": "2023-06-01" }, // Note: Added basic headers required by Anthropic normally, replace properly
+        headers: { "Content-Type": "application/json", "x-api-key": "YOUR_API_KEY", "anthropic-version": "2023-06-01" },
         body: JSON.stringify({
-          model: "claude-3-sonnet-20240229", // Adjusted model name to a valid one
+          model: "claude-3-sonnet-20240229",
           max_tokens: 1000,
-          system: "You are a helpful AI assistant for Alex Chen's developer portfolio. Alex is a Full-Stack Developer with 4 years of experience specializing in React, Next.js, Node.js, PostgreSQL, and cloud infrastructure. He has built 42+ projects. Be concise, friendly, and highlight his skills when relevant.",
+          system: "You are a helpful AI assistant...",
           messages: history,
         }),
       });
@@ -60,68 +60,26 @@ export default function ChatBot({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const chatCard = (
-    <div
-      style={{
-        width: 340,
-        height: 480,
-        background: "white",
-        borderRadius: 20,
-        boxShadow: "0 20px 60px rgba(13,110,253,0.18)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        border: "1px solid rgba(163,216,244,0.3)",
-      }}
-    >
+    <div style={styles.cardContainer}>
       <div
         onPointerDown={!isMobile ? (e) => dragControls.start(e) : undefined}
-        style={{
-          background: "linear-gradient(135deg, #A3D8F4 0%, #ffc8d5 100%)",
-          padding: "14px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: isMobile ? "default" : "grab",
-        }}
+        style={{ ...styles.cardHeader, cursor: isMobile ? "default" : "grab" }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              background: "rgba(255,255,255,0.7)",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+        <div style={styles.headerInfo}>
+          <div style={styles.botIconWrapper}>
             <Bot size={18} color="#0D6EFD" />
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 14, color: "#1a2a4a" }}>Alex's AI Assistant</div>
-            <div style={{ fontSize: 11, color: "#4a6a8a" }}>● Online</div>
+            <div style={styles.botName}>Alex's AI Assistant</div>
+            <div style={styles.botStatus}>● Online</div>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: "rgba(255,255,255,0.5)",
-            border: "none",
-            borderRadius: "50%",
-            width: 28,
-            height: 28,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <button onClick={onClose} style={styles.closeButton}>
           <X size={14} />
         </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={styles.chatArea}>
         {messages.map((m, i) => (
           <motion.div
             key={i}
@@ -131,13 +89,10 @@ export default function ChatBot({ isOpen, onClose }) {
           >
             <div
               style={{
-                maxWidth: "80%",
-                padding: "9px 13px",
+                ...styles.messageBubble,
                 borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                 background: m.role === "user" ? "linear-gradient(135deg, #0D6EFD, #4d9fff)" : "#f0f6ff",
                 color: m.role === "user" ? "white" : "#1a2a4a",
-                fontSize: 13,
-                lineHeight: 1.5,
               }}
             >
               {m.content}
@@ -145,13 +100,13 @@ export default function ChatBot({ isOpen, onClose }) {
           </motion.div>
         ))}
         {loading && (
-          <div style={{ display: "flex", gap: 5, padding: "8px 14px" }}>
+          <div style={styles.loadingWrapper}>
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
                 animate={{ y: [0, -6, 0] }}
                 transition={{ repeat: Infinity, delay: i * 0.15, duration: 0.6 }}
-                style={{ width: 7, height: 7, borderRadius: "50%", background: "#A3D8F4" }}
+                style={styles.loadingDot}
               />
             ))}
           </div>
@@ -159,37 +114,21 @@ export default function ChatBot({ isOpen, onClose }) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div style={{ padding: "12px 14px", borderTop: "1px solid #eef3ff", display: "flex", gap: 8 }}>
+      <div style={styles.inputArea}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Ask me anything..."
-          style={{
-            flex: 1,
-            padding: "9px 14px",
-            borderRadius: 50,
-            border: "1.5px solid #d0e8ff",
-            outline: "none",
-            fontSize: 13,
-            background: "#f8fbff",
-            color: "#1a2a4a",
-            fontFamily: "inherit",
-          }}
+          style={styles.inputField}
         />
         <button
           onClick={sendMessage}
           disabled={loading}
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: "50%",
+            ...styles.sendButton,
             background: loading ? "#ccc" : "linear-gradient(135deg,#0D6EFD,#4d9fff)",
-            border: "none",
             cursor: loading ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
           }}
         >
           <Send size={15} color="white" />
@@ -200,7 +139,7 @@ export default function ChatBot({ isOpen, onClose }) {
 
   if (isMobile) {
     return (
-      <div style={{ position: "fixed", inset: 0, zIndex: 9000, background: "rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={styles.mobileOverlay}>
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
           {chatCard}
         </motion.div>
@@ -216,9 +155,50 @@ export default function ChatBot({ isOpen, onClose }) {
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: 20 }}
-      style={{ position: "fixed", bottom: 90, right: 24, zIndex: 9000, cursor: "default" }}
+      style={styles.desktopFloatingCard}
     >
       {chatCard}
     </motion.div>
   );
 }
+
+const styles = {
+  cardContainer: {
+    width: 340, height: 480, background: "white", borderRadius: 20,
+    boxShadow: "0 20px 60px rgba(13,110,253,0.18)", display: "flex", flexDirection: "column",
+    overflow: "hidden", border: "1px solid rgba(163,216,244,0.3)"
+  },
+  cardHeader: {
+    background: "linear-gradient(135deg, #A3D8F4 0%, #ffc8d5 100%)", padding: "14px 16px",
+    display: "flex", alignItems: "center", justifyContent: "space-between"
+  },
+  headerInfo: { display: "flex", alignItems: "center", gap: 10 },
+  botIconWrapper: {
+    width: 36, height: 36, background: "rgba(255,255,255,0.7)", borderRadius: "50%",
+    display: "flex", alignItems: "center", justifyContent: "center"
+  },
+  botName: { fontWeight: 700, fontSize: 14, color: "#1a2a4a" },
+  botStatus: { fontSize: 11, color: "#4a6a8a" },
+  closeButton: {
+    background: "rgba(255,255,255,0.5)", border: "none", borderRadius: "50%",
+    width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center"
+  },
+  chatArea: { flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 },
+  messageBubble: { maxWidth: "80%", padding: "9px 13px", fontSize: 13, lineHeight: 1.5 },
+  loadingWrapper: { display: "flex", gap: 5, padding: "8px 14px" },
+  loadingDot: { width: 7, height: 7, borderRadius: "50%", background: "#A3D8F4" },
+  inputArea: { padding: "12px 14px", borderTop: "1px solid #eef3ff", display: "flex", gap: 8 },
+  inputField: {
+    flex: 1, padding: "9px 14px", borderRadius: 50, border: "1.5px solid #d0e8ff",
+    outline: "none", fontSize: 13, background: "#f8fbff", color: "#1a2a4a", fontFamily: "inherit"
+  },
+  sendButton: {
+    width: 38, height: 38, borderRadius: "50%", border: "none",
+    display: "flex", alignItems: "center", justifyContent: "center"
+  },
+  mobileOverlay: {
+    position: "fixed", inset: 0, zIndex: 9000, background: "rgba(0,0,0,0.3)",
+    display: "flex", alignItems: "center", justifyContent: "center"
+  },
+  desktopFloatingCard: { position: "fixed", bottom: 90, right: 24, zIndex: 9000, cursor: "default" }
+};

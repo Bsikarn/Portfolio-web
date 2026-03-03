@@ -1,5 +1,5 @@
 import { supabase } from "./lib/supabase";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar";
 import ChatBot from "./components/ChatBot";
@@ -8,12 +8,17 @@ import HomePage from "./pages/HomePage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ContactPage from "./pages/ContactPage";
 import AdminPage from "./pages/AdminPage"; // เพิ่มบรรทัดนี้ด้านบน
+import MeshGradientBackground from "./components/MeshGradientBackground";
 import { EMOJIS } from "./data/constants";
 
 export default function App() {
   const [page, setPage] = useState("Home");
   const [chatOpen, setChatOpen] = useState(false);
   const [emojis, setEmojis] = useState([]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [page]);
 
   const handleCheerUp = useCallback(async () => {
     // โค้ดสร้างแอนิเมชันร่วงหล่น (เหมือนเดิมที่คุณมีอยู่แล้ว)
@@ -39,6 +44,7 @@ export default function App() {
 
   return (
     <>
+      <MeshGradientBackground />
       {emojis.map((e) => (
         <FallingEmoji key={e.id} emoji={e.emoji} x={`${e.x}vw`} delay={e.delay} onDone={() => removeEmoji(e.id)} />
       ))}

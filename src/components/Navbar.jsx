@@ -1,77 +1,36 @@
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import { styles } from "../styles/Navbar.styles";
 
 export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen }) {
   return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        padding: "0 32px",
-        height: 64,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: "rgba(255,255,255,0.6)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(163,216,244,0.25)",
-        boxShadow: "0 2px 20px rgba(13,110,253,0.07)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <div
-          style={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 800,
-            fontSize: 20,
-            background: "linear-gradient(135deg,#0D6EFD,#A3D8F4)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          Beaut.dev
-        </div>
+    <nav style={styles.nav}>
+      <div style={styles.leftContainer}>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onCheerUp}
-          style={{
-            padding: "6px 14px",
-            borderRadius: 50,
-            background: "linear-gradient(135deg,#ffc8d5,#A3D8F4)",
-            border: "none",
-            cursor: "pointer",
-            fontFamily: "'Poppins',sans-serif",
-            fontWeight: 600,
-            fontSize: 12,
-            color: "#1a2a4a",
-            boxShadow: "0 2px 8px rgba(163,216,244,0.4)",
-          }}
+          style={styles.cheerButton}
         >
           Cheer up! 🎉
         </motion.button>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={styles.logoContainer}>
+        <div style={styles.logoText}>
+          Beaut.dev
+        </div>
+      </div>
+
+      <div style={styles.navLinksContainer}>
         {["Home", "Projects", "Contact"].map((p) => (
           <button
             key={p}
             onClick={() => setPage(p)}
             style={{
-              padding: "7px 16px",
-              borderRadius: 50,
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "'Poppins',sans-serif",
-              fontWeight: 600,
-              fontSize: 13,
+              ...styles.navLink,
               background: page === p ? "#0D6EFD" : "transparent",
               color: page === p ? "white" : "#4a6a8a",
-              transition: "all 0.2s",
             }}
             onMouseEnter={(e) => {
               if (page !== p) e.currentTarget.style.color = "#0D6EFD";
@@ -89,17 +48,10 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
           whileTap={{ scale: 0.9 }}
           onClick={() => setChatOpen((v) => !v)}
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: "50%",
-            border: "none",
-            cursor: "pointer",
+            ...styles.chatButton,
             background: chatOpen
               ? "linear-gradient(135deg,#0D6EFD,#4d9fff)"
               : "rgba(163,216,244,0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             boxShadow: chatOpen ? "0 4px 14px rgba(13,110,253,0.35)" : "none",
           }}
         >
@@ -109,3 +61,4 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
     </nav>
   );
 }
+
