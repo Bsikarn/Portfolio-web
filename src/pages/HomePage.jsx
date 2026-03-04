@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { Canvas } from "@react-three/fiber";
+import { motion, AnimatePresence } from "framer-motion";
 import { Code2, GraduationCap, Languages, Award, User, Heart, Users } from "lucide-react";
-import AnimatedBlob from "../components/AnimatedBlob";
 import StackedCard from "../components/StackedCard";
-import { TOOLS_TAGS, ABOUT_ME } from "../data/constants";
+import { TECHNOLOGIES_TAGS, TOOLS_TAGS, ABOUT_ME } from "../data/constants";
 import { supabase } from "../lib/supabase";
 import { styles } from "../styles/HomePage.styles";
 
@@ -14,6 +12,17 @@ export default function HomePage({ setPage }) {
     { icon: <Users size={24} />, label: "Profile Views", value: "..." },
     { icon: <Heart size={24} />, label: "Cheer Ups", value: "..." },
   ]);
+
+  const [techCounts, setTechCounts] = useState({});
+  const [activeTag, setActiveTag] = useState(null);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const projectCountRef = useRef(0);
 
@@ -44,6 +53,19 @@ export default function HomePage({ setPage }) {
 
         if (statsData) {
           updateStatsUI(projectCountRef.current, statsData.views, statsData.cheer_ups);
+        }
+
+        // Fetch all projects to count tech/tools
+        const { data: allProjectsData } = await supabase.from("projects").select("tags, tools");
+        if (allProjectsData) {
+          const counts = {};
+          allProjectsData.forEach(p => {
+            const items = [...(p.tags || []), ...(p.tools || [])];
+            items.forEach(item => {
+              counts[item] = (counts[item] || 0) + 1;
+            });
+          });
+          setTechCounts(counts);
         }
       } catch (error) {
         console.error("Error fetching stats:", error);
@@ -77,16 +99,6 @@ export default function HomePage({ setPage }) {
             <div style={styles.hireBadge}>👋 Available for hire</div>
           </div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.2 }} style={styles.canvasContainer}>
-            <div style={styles.canvasGlow} />
-            <Canvas camera={{ position: [0, 0, 3.5] }} style={styles.fullSize}>
-              <ambientLight intensity={0.6} />
-              <directionalLight position={[5, 5, 5]} intensity={1} />
-              <pointLight position={[-5, -5, -5]} color="#ffc8d5" intensity={0.5} />
-              <AnimatedBlob />
-            </Canvas>
-          </motion.div>
-
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} style={styles.heroBottomRow}>
             <div style={styles.heroActionBtnsContainer}>
               <motion.button whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(13,110,253,0.35)" }} whileTap={{ scale: 0.95 }} onClick={() => setPage("Projects")} style={styles.heroPrimaryBtn}>
@@ -111,7 +123,13 @@ export default function HomePage({ setPage }) {
       <div style={{ position: "relative", zIndex: 2 }}>
         <div style={styles.groupedCardsWrapper}>
           <section style={styles.sectionPadding}>
-            <div style={styles.aboutCard}>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+              style={styles.aboutCard}
+            >
               <div style={styles.aboutHeaderRow}>
                 <div style={styles.aboutAvatar}>
                   <User size={56} color="#A3D8F4" />
@@ -152,38 +170,73 @@ export default function HomePage({ setPage }) {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </section>
 
           <section style={styles.sectionPadding}>
-            <div style={styles.toolsCard}>
-              <h2 style={styles.toolsHeading}>Tools & Technologies</h2>
-              <div style={styles.toolsWrapContainer}>
-                {TOOLS_TAGS?.map((tag, i) => (
-                  <motion.span
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+              style={styles.toolsCard}
+            >
+              <h2 style={styles.toolsHeading}>Technologies</h2>
+              <div style={{ ...styles.toolsWrapContainer, marginBottom: "32px", position: "relative" }}>
+                {TECHNOLOGIES_TAGS?.map((tag, i) => (
+                  <motion.button
                     key={tag}
+                    onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                    onMouseLeave={() => setActiveTag(null)}
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ delay: i * 0.05 }}
                     whileHover={{ scale: 1.05, background: "#0D6EFD", color: "white" }}
+                    animate={activeTag === tag ? { scale: 1.05, background: "#0D6EFD", color: "white" } : { background: "rgba(255, 255, 255, 0.9)", color: "#4a6a8a" }}
                     style={styles.toolTag}
                   >
-                    {tag}
-                  </motion.span>
+                    {activeTag === tag ? `${techCounts[tag] || 0} projects` : tag}
+                  </motion.button>
                 ))}
               </div>
-            </div>
+
+              <h2 style={{ ...styles.toolsHeading, marginTop: "16px" }}>Tools</h2>
+              <div style={styles.toolsWrapContainer}>
+                {TOOLS_TAGS?.map((tag, i) => (
+                  <motion.button
+                    key={tag}
+                    onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                    onMouseLeave={() => setActiveTag(null)}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: false }}
+                    transition={{ delay: i * 0.05 }}
+                    whileHover={{ scale: 1.05, background: "#0D6EFD", color: "white" }}
+                    animate={activeTag === tag ? { scale: 1.05, background: "#0D6EFD", color: "white" } : { background: "rgba(255, 255, 255, 0.9)", color: "#4a6a8a" }}
+                    style={styles.toolTag}
+                  >
+                    {activeTag === tag ? `${techCounts[tag] || 0} projects` : tag}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
           </section>
 
           <section style={styles.dashboardSection}>
-            <div style={styles.dashboardContainer}>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+              style={styles.dashboardContainer}
+            >
               <div style={styles.dashboardHeader}>
                 <h2 style={styles.dashboardTitle}>Dashboard Overview</h2>
                 <p style={styles.dashboardSubtitle}>Real-time statistics of my portfolio</p>
               </div>
 
-              <div style={styles.statsGrid}>
+              <div style={isMobile ? { ...styles.statsGrid, gridTemplateColumns: "1fr" } : styles.statsGrid}>
                 {realStats.map((s) => (
                   <motion.div
                     key={s.label}
@@ -198,7 +251,7 @@ export default function HomePage({ setPage }) {
                   </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </section>
         </div>
       </div>

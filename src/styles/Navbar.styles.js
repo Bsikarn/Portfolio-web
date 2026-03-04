@@ -35,7 +35,7 @@ export const styles = {
         cursor: "pointer",
         fontFamily: "'Poppins',sans-serif",
         fontWeight: 600,
-        fontSize: 12,
+        fontSize: 20,
         color: "#1a2a4a",
         boxShadow: "0 2px 8px rgba(163,216,244,0.4)",
     },

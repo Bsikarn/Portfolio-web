@@ -1,17 +1,20 @@
 import { Code2, Heart, Users, Zap, Coffee, Star } from "lucide-react";
 
 export const ABOUT_ME = {
-  name: "Alex Chen", 
+  name: "Sikarn Pattarasirimongkol",
   role: "Data Engineer & Full-Stack Developer",
   intro: "I am a passionate computer engineering student focusing on data engineering and full-stack development. I enjoy building robust data pipelines, interactive web applications, and game development.",
-  gpa: "3.85",
-  education: "B.Eng. in Computer Engineering, University Name (2020 - 2024)",
+  gpa: "3.00",
+  education: "B.Eng. in Computer Engineering, KING MONGKUT'S UNIVERSITY OF TECHNOLOGY NORTH BANGKOK (2024 - 2028)",
   languages: ["Thai (Native)", "English (Professional)"]
 };
 
+export const TECHNOLOGIES_TAGS = [
+  "React.js", "Vite", "Supabase", "PostgreSQL", "Clerk"
+];
+
 export const TOOLS_TAGS = [
-  "Python", "TypeScript", "JavaScript", "React", "Next.js", "Node.js", "C++", "C#", 
-  "PostgreSQL", "MongoDB", "Docker", "Airflow", "TailwindCSS", "Unity", "Git"
+  "Framer Motion", "Three.js", "React Three Fiber", "Lucide React", "Git"
 ];
 
 export const STATS = [

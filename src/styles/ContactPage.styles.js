@@ -6,9 +6,18 @@ export const styles = {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "radial-gradient(ellipse at 20% 40%, rgba(163,216,244,0.18) 0%, transparent 60%), radial-gradient(ellipse at 80% 60%, rgba(255,200,213,0.18) 0%, transparent 60%)"
+        position: "relative"
     },
-    header: { textAlign: "center", marginBottom: 48 },
+    headerWrapper: {
+        background: "rgba(255, 255, 255, 0.6)",
+        backdropFilter: "blur(24px)",
+        borderRadius: 24,
+        padding: "48px 64px",
+        boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)",
+        textAlign: "center",
+        marginBottom: 48,
+        border: "1px solid rgba(255,255,255,0.6)"
+    },
     title: {
         fontFamily: "'Poppins',sans-serif",
         fontWeight: 800,
@@ -22,10 +31,10 @@ export const styles = {
         WebkitTextFillColor: "transparent"
     },
     subtitle: { fontFamily: "'Poppins',sans-serif", color: "#8aabcc", fontSize: 15 },
-    cardsContainer: { display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center" },
+    cardsContainer: { display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center", zIndex: 1 },
     card: {
-        background: "rgba(255, 255, 255, 0.9)",
-        backdropFilter: "blur(16px)",
+        background: "rgba(255, 255, 255, 0.6)",
+        backdropFilter: "blur(24px)",
         borderRadius: 24,
         padding: "36px 32px",
         textDecoration: "none",
@@ -46,8 +55,9 @@ export const styles = {
     cardHandle: { fontFamily: "'Poppins',sans-serif", fontSize: 12, color: "#8aabcc", marginTop: 4, fontWeight: 500 },
     connectBtn: { padding: "7px 18px", borderRadius: 50, fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 12 },
     footerInfo: {
-        marginTop: 60, padding: "24px 40px", background: "rgba(255, 255, 255, 0.9)", backdropFilter: "blur(16px)", borderRadius: 20,
-        boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", textAlign: "center"
+        marginTop: 60, padding: "24px 40px", background: "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(24px)", borderRadius: 20,
+        boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", textAlign: "center",
+        border: "1px solid rgba(255,255,255,0.6)"
     },
     footerLocation: { fontFamily: "'Poppins',sans-serif", fontSize: 13, color: "#8aabcc", marginBottom: 6, fontWeight: 600 },
     footerResponse: { fontFamily: "'Poppins',sans-serif", fontSize: 15, color: "#0d1b2a", fontWeight: 700 }

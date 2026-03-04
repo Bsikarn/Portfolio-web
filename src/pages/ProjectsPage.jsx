@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Github, ExternalLink, Play, CheckCircle2, Code2, Trophy, Image as ImageIcon, Loader2, X, Target, Lightbulb, UserCog, Wrench, TrendingUp, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, Github, ExternalLink, Play, CheckCircle2, Code2, Trophy, Image as ImageIcon, Loader2, X, Target, Lightbulb, UserCog, Wrench, TrendingUp, BookOpen, ArrowLeftRight } from "lucide-react";
 import StackedCard from "../components/StackedCard";
 import { supabase } from "../lib/supabase";
 import { styles } from "../styles/ProjectsPage.styles";
@@ -135,7 +135,13 @@ export default function ProjectsPage() {
 
         <div style={styles.mainContentWrapper}>
           <div style={styles.selectionSection}>
-            <div style={styles.selectionCardOuter}>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+              style={styles.selectionCardOuter}
+            >
               <div style={styles.selectionHeading}>Select Project</div>
               {filtered.length === 0 ? (
                 <div style={styles.noProjectsText}>No projects found.</div>
@@ -179,7 +185,18 @@ export default function ProjectsPage() {
                   </AnimatePresence>
                 </div>
               )}
-            </div>
+              {filtered.length > 0 && (
+                <div style={styles.scrollHintWrap}>
+                  <motion.div
+                    animate={{ x: [-4, 4, -4] }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                  >
+                    <ArrowLeftRight size={14} />
+                  </motion.div>
+                  <span>drag left-right to see other projects</span>
+                </div>
+              )}
+            </motion.div>
           </div>
         </div>
       </StackedCard>
@@ -190,9 +207,10 @@ export default function ProjectsPage() {
             {selected && (
               <motion.div
                 key={selected.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                exit={{ opacity: 0, y: -40 }}
+                transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
                 style={styles.detailsMainCard}
               >
 
@@ -285,13 +303,13 @@ export default function ProjectsPage() {
                   {(selected.results_impact || selected.key_learnings) && (
                     <div style={styles.resultLearningGrid}>
                       {selected.results_impact && (
-                        <div style={{ ...styles.infoBlock, background: "#f0fdf4", borderColor: "#bbf7d0" }}>
+                        <div style={{ ...styles.infoBlock, background: "rgba(240, 253, 244, 0.15)", backdropFilter: "blur(16px)", borderColor: "rgba(187, 247, 208, 0.4)" }}>
                           <h3 style={styles.subHeadingStyle}><TrendingUp size={20} color="#16a34a" /> Results & Impact</h3>
                           <p style={styles.textStyle}>{selected.results_impact}</p>
                         </div>
                       )}
                       {selected.key_learnings && (
-                        <div style={{ ...styles.infoBlock, background: "#fffbeb", borderColor: "#fde68a" }}>
+                        <div style={{ ...styles.infoBlock, background: "rgba(255, 251, 235, 0.15)", backdropFilter: "blur(16px)", borderColor: "rgba(253, 230, 138, 0.4)" }}>
                           <h3 style={styles.subHeadingStyle}><BookOpen size={20} color="#d97706" /> Key Learnings</h3>
                           <p style={styles.textStyle}>{selected.key_learnings}</p>
                         </div>

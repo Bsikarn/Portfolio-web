@@ -11,11 +11,18 @@ export default function ContactPage() {
 
   return (
     <div style={styles.container}>
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={styles.header}>
-        <h1 style={styles.title}>
-          Let's work <span style={styles.highlightText}>together</span>
-        </h1>
-        <p style={styles.subtitle}>I'm always open to exciting opportunities and collaborations.</p>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+        style={styles.headerWrapper}
+      >
+        <div style={styles.header}>
+          <h1 style={styles.title}>
+            Let's work <span style={styles.highlightText}>together</span>
+          </h1>
+          <p style={styles.subtitle}>I'm always open to exciting opportunities and collaborations.</p>
+        </div>
       </motion.div>
 
       <div style={styles.cardsContainer}>
@@ -25,9 +32,9 @@ export default function ContactPage() {
             href={c.href}
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.12 }}
+            transition={{ type: "spring", bounce: 0.5, duration: 0.6, delay: i * 0.1 }}
             whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(13,110,253,0.18)" }}
             style={styles.card}
           >
@@ -43,7 +50,13 @@ export default function ContactPage() {
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={styles.footerInfo}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ type: "spring", bounce: 0.5, duration: 0.8, delay: 0.2 }}
+        style={styles.footerInfo}
+      >
         <div style={styles.footerLocation}>Based in Bangkok, TH</div>
         <div style={styles.footerResponse}>⏱️ Usually responds within 24 hours</div>
       </motion.div>
