@@ -33,6 +33,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onCheerUp}
+            aria-label="Cheer up!"
             style={styles.cheerButton}
           >
             🎉
@@ -74,6 +75,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setChatOpen((v) => !v)}
+            aria-label="Open AI Assistant"
             style={{
               ...styles.chatButton,
               background: chatOpen
@@ -88,6 +90,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
           {isMobile && (
             <button
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle Menu"
               style={{ background: "transparent", border: "none", cursor: "pointer", marginLeft: "12px", color: "#0D6EFD", display: "flex", justifyContent: "center", alignItems: "center", width: 32, height: 32 }}
             >
               <div style={{ position: "relative", width: 24, height: 24 }}>

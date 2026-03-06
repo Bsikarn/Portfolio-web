@@ -9,10 +9,7 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar";
 import FallingEmoji from "./components/FallingEmoji";
-import HomePage from "./pages/HomePage";
-import ProjectsPage from "./pages/ProjectsPage";
-import ContactPage from "./pages/ContactPage";
-import AdminPage from "./pages/AdminPage";
+// Pages will be lazy loaded
 import MeshGradientBackground from "./components/MeshGradientBackground";
 import { EMOJIS } from "./data/constants";
 
@@ -21,6 +18,10 @@ import { lazy, Suspense } from "react";
 
 const AnimatedBlob = lazy(() => import("./components/AnimatedBlob"));
 const ChatBot = lazy(() => import("./components/ChatBot"));
+const HomePage = lazy(() => import("./pages/HomePage"));
+const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
 
 const PAGE_INDEX = {
   Home: 0,
@@ -153,71 +154,73 @@ export default function App() {
           transition={{ duration: 0.4, ease: "easeInOut" }}
           style={{ position: "relative", zIndex: 1 }}
         >
-          {page === "Home" ? <HomePage setPage={handleSetPage} /> : null}
-          {page === "Projects" ? <ProjectsPage /> : null}
-          {page === "Contact" ? <ContactPage /> : null}
-          {page === "Admin" ? (
-            <>
-              {/* 1. ถ้า Login แล้ว -> โชว์หน้า Admin และปุ่ม Profile */}
-              <SignedIn>
-                <div
-                  style={{
-                    position: "fixed",
-                    top: 80,
-                    right: 20,
-                    zIndex: 1000,
-                  }}
-                >
-                  <UserButton afterSignOutUrl="/" />
-                </div>
-                <AdminPage />
-              </SignedIn>
-
-              {/* 2. ถ้ายังไม่ได้ Login -> โชว์หน้าแจ้งเตือนให้ Login */}
-              <SignedOut>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "80vh",
-                    zIndex: 2,
-                    position: "relative",
-                  }}
-                >
-                  <h2
+          <Suspense fallback={null}>
+            {page === "Home" ? <HomePage setPage={handleSetPage} /> : null}
+            {page === "Projects" ? <ProjectsPage /> : null}
+            {page === "Contact" ? <ContactPage /> : null}
+            {page === "Admin" ? (
+              <>
+                {/* 1. ถ้า Login แล้ว -> โชว์หน้า Admin และปุ่ม Profile */}
+                <SignedIn>
+                  <div
                     style={{
-                      fontFamily: "Poppins",
-                      color: "#000",
-                      fontSize: "2rem",
-                      marginBottom: "8px",
+                      position: "fixed",
+                      top: 80,
+                      right: 20,
+                      zIndex: 1000,
                     }}
                   >
-                    🔒 Restricted Area
-                  </h2>
-                  <p style={{ color: "#4a6a8a", marginBottom: 20 }}>
-                    กรุณาเข้าสู่ระบบเพื่อจัดการหลังบ้าน
-                  </p>
-                  <SignInButton mode="modal">
-                    <button
+                    <UserButton afterSignOutUrl="/" />
+                  </div>
+                  <AdminPage />
+                </SignedIn>
+
+                {/* 2. ถ้ายังไม่ได้ Login -> โชว์หน้าแจ้งเตือนให้ Login */}
+                <SignedOut>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "80vh",
+                      zIndex: 2,
+                      position: "relative",
+                    }}
+                  >
+                    <h2
                       style={{
-                        padding: "12px 24px",
-                        background: "#0D6EFD",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 8,
-                        cursor: "pointer",
-                        fontWeight: "bold",
+                        fontFamily: "Poppins",
+                        color: "#000",
+                        fontSize: "2rem",
+                        marginBottom: "8px",
                       }}
                     >
-                      Log In as Admin
-                    </button>
-                  </SignInButton>
-                </div>
-              </SignedOut>
-            </>
-          ) : null}
+                      🔒 Restricted Area
+                    </h2>
+                    <p style={{ color: "#4a6a8a", marginBottom: 20 }}>
+                      กรุณาเข้าสู่ระบบเพื่อจัดการหลังบ้าน
+                    </p>
+                    <SignInButton mode="modal">
+                      <button
+                        style={{
+                          padding: "12px 24px",
+                          background: "#0D6EFD",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Log In as Admin
+                      </button>
+                    </SignInButton>
+                  </div>
+                </SignedOut>
+              </>
+            ) : null}
+          </Suspense>
         </motion.div>
       </AnimatePresence>
 
