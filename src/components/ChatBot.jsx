@@ -3,52 +3,80 @@ import { motion, useDragControls } from "framer-motion";
 import { Bot, X, Send } from "lucide-react";
 
 export default function ChatBot({ isOpen, onClose }) {
+  // State to store conversation history
   const [messages, setMessages] = useState([
     {
       role: "assistant",
       content: "Hey! 👋 I'm Alex's AI assistant. Ask me anything about his work, skills, or projects!",
     },
   ]);
+
+  // State for the user's current input text
   const [input, setInput] = useState("");
+
+  // State to track if the bot is currently processing a response
   const [loading, setLoading] = useState(false);
+
+  // Ref used to auto-scroll to the bottom of the chat window
   const messagesEndRef = useRef(null);
+
+  // Controls for dragging the chat window (Framer Motion)
   const dragControls = useDragControls();
+
+  // State to determine if the device is mobile for responsive layout
   const [isMobile, setIsMobile] = useState(false);
 
+  // Check window width on mount to set mobile state
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
   }, []);
 
+  // Automatically scroll to the latest message whenever the messages array updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Function to handle sending a message and getting a response from the AI
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
+
+    // 1. Add user message to UI immediately
     const userMsg = { role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
     try {
+      // 2. Prepare conversation history for the API
       const history = [...messages, userMsg].map((m) => ({
         role: m.role,
         content: m.content,
       }));
+
+      // 3. Make API call to Anthropic's Claude 3 API
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": "YOUR_API_KEY", "anthropic-version": "2023-06-01" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "YOUR_API_KEY", // Note: Need actual API key here
+          "anthropic-version": "2023-06-01"
+        },
         body: JSON.stringify({
           model: "claude-3-sonnet-20240229",
           max_tokens: 1000,
-          system: "You are a helpful AI assistant...",
+          system: "You are a helpful AI assistant...", // Note: Expand system prompt as needed
           messages: history,
         }),
       });
+
       const data = await res.json();
+
+      // 4. Extract and handle the response
       const reply = data.content?.map((c) => c.text).join("") || "Sorry, I couldn't respond right now.";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+
     } catch {
+      // Handle network or API errors gracefully
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "Oops! Something went wrong. Try again?" },
@@ -57,10 +85,14 @@ export default function ChatBot({ isOpen, onClose }) {
     setLoading(false);
   };
 
+  // If chat is not toggled open, do not render anything
   if (!isOpen) return null;
 
+  // Reusable core UI for the chat interface
   const chatCard = (
     <div style={styles.cardContainer}>
+
+      {/* Draggable Chat Header */}
       <div
         onPointerDown={!isMobile ? (e) => dragControls.start(e) : undefined}
         style={{ ...styles.cardHeader, cursor: isMobile ? "default" : "grab" }}
@@ -79,14 +111,19 @@ export default function ChatBot({ isOpen, onClose }) {
         </button>
       </div>
 
+      {/* Main Chat Display Area */}
       <div style={styles.chatArea}>
         {messages.map((m, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}
+            style={{
+              display: "flex",
+              justifyContent: m.role === "user" ? "flex-end" : "flex-start"
+            }}
           >
+            {/* Visual styling distinguishing user vs assistant messages */}
             <div
               style={{
                 ...styles.messageBubble,
@@ -99,6 +136,8 @@ export default function ChatBot({ isOpen, onClose }) {
             </div>
           </motion.div>
         ))}
+
+        {/* Loading Indicator Animation */}
         {loading && (
           <div style={styles.loadingWrapper}>
             {[0, 1, 2].map((i) => (
@@ -111,9 +150,11 @@ export default function ChatBot({ isOpen, onClose }) {
             ))}
           </div>
         )}
+        {/* Invisible div used as anchor for auto-scroll */}
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input Field Area */}
       <div style={styles.inputArea}>
         <input
           value={input}
@@ -137,6 +178,9 @@ export default function ChatBot({ isOpen, onClose }) {
     </div>
   );
 
+  // Return specific layout behavior based on screen size:
+  // Mobile layout: Fixed transparent overlay covering the whole screen
+  // Desktop layout: Draggable floating panel
   if (isMobile) {
     return (
       <div style={styles.mobileOverlay}>
@@ -151,7 +195,7 @@ export default function ChatBot({ isOpen, onClose }) {
     <motion.div
       drag
       dragControls={dragControls}
-      dragMomentum={false}
+      dragMomentum={false} // Prevents drift after releasing the drag
       initial={{ opacity: 0, scale: 0.8, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -162,6 +206,7 @@ export default function ChatBot({ isOpen, onClose }) {
   );
 }
 
+// Inline CSS Styles for the ChatBot Component
 const styles = {
   cardContainer: {
     width: 340, height: 480, background: "white", borderRadius: 20,

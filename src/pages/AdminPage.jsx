@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { styles } from "../styles/AdminPage.styles";
 
 export default function AdminPage() {
+  // Initial state for the project form
   const initialFormState = {
     title: "", category: "Frontend", description: "", image_icon: "💻", year: "2026",
     gradient_from: "#f0f6ff", gradient_to: "#e0f2fe",
@@ -16,26 +17,34 @@ export default function AdminPage() {
   const [formData, setFormData] = useState(initialFormState);
   const [projectsList, setProjectsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // State to track if we are editing an existing project or adding a new one
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
 
+  // Fetch all projects from Supabase to populate the list
   const fetchProjects = async () => {
     setIsLoading(true);
     const { data, error } = await supabase.from("projects").select("*").order("id", { ascending: false });
     if (data) setProjectsList(data);
-    if (error) console.error("Error fetching:", error);
+    if (error) console.error("Error fetching projects:", error);
     setIsLoading(false);
   };
 
+  // Fetch projects on component mount
   useEffect(() => { fetchProjects(); }, []);
 
+  // Generic handler for form inputs, including checkboxes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
+  // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Transform comma-separated and newline-separated strings into arrays for Supabase
     const payload = {
       title: formData.title, category: formData.category, description: formData.description,
       image_icon: formData.image_icon, year: formData.year, gradient_from: formData.gradient_from, gradient_to: formData.gradient_to,
@@ -57,11 +66,13 @@ export default function AdminPage() {
       } : null
     };
 
-    console.log("เตรียมบันทึกข้อมูล:", payload);
-    alert(isEditing ? "จำลองการอัปเดตสำเร็จ!" : "จำลองการเพิ่มสำเร็จ!");
+    console.log("Preparing to save data:", payload);
+    // Note: Currently simulates success instead of saving to Supabase directly
+    alert(isEditing ? "Mock update successful!" : "Mock insert successful!");
     resetForm();
   };
 
+  // Populate form with existing project data for editing
   const handleEdit = (project) => {
     setIsEditing(true);
     setEditId(project.id);
@@ -71,6 +82,7 @@ export default function AdminPage() {
       link_url: project.link_url || "", github_url: project.github_url || "",
       my_role: project.my_role || "", problem: project.problem || "", solution: project.solution || "",
       results_impact: project.results_impact || "", key_learnings: project.key_learnings || "",
+      // Convert arrays back to strings for textarea/input inputs
       tags: project.tags ? project.tags.join(", ") : "", tools: project.tools ? project.tools.join(", ") : "",
       features: project.features ? project.features.join("\n") : "",
       languages: project.languages ? project.languages.map(l => `${l.name}:${l.percent}:${l.color}`).join(", ") : "",
@@ -78,15 +90,20 @@ export default function AdminPage() {
       has_award: !!project.award, award_title: project.award?.title || "", award_description: project.award?.description || "",
       award_competition: project.award?.competition || "", award_image_url: project.award?.image_url || ""
     });
+    // Scroll to top to ensure form is in view
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Delete project handler
   const handleDelete = async (id, title) => {
-    if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบโปรเจกต์ "${title}" ?`)) {
-      alert(`จำลองการลบโปรเจกต์ "${title}" สำเร็จ!`);
+    // Confirm before deletion
+    if (window.confirm(`Are you sure you want to delete the project "${title}"?`)) {
+      // Note: Currently simulates deletion
+      alert(`Mock deletion of project "${title}" successful!`);
     }
   };
 
+  // Reset form to initial state
   const resetForm = () => {
     setFormData(initialFormState);
     setIsEditing(false);
@@ -97,6 +114,8 @@ export default function AdminPage() {
     <div style={styles.pageContainer}>
       <div style={{ position: "relative", zIndex: 1, marginBottom: 40 }}>
         <div style={styles.cardContainer}>
+
+          {/* Form Header */}
           <div style={styles.headerRow}>
             <h1 style={styles.pageTitle}>
               {isEditing ? "✏️ Edit Project" : "🛠️ Add New Project"}
@@ -104,7 +123,10 @@ export default function AdminPage() {
             {isEditing && <button onClick={resetForm} style={styles.cancelBtn}>Cancel Edit</button>}
           </div>
 
+          {/* Project Form */}
           <form onSubmit={handleSubmit} style={styles.formContainer}>
+
+            {/* Basic Information Section */}
             <div style={styles.sectionStyle}>
               <h3 style={styles.sectionHeading}>📌 Basic Info</h3>
               <div style={styles.gridContainer}>
@@ -122,41 +144,47 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* Problem & Solution Section */}
             <div style={styles.sectionStyle}>
               <h3 style={{ ...styles.sectionHeading, color: "#ef4444" }}>⚠️ The Problem & Solution</h3>
               <div style={styles.gridContainer}>
-                <div><label style={styles.labelStyle}>The Problem</label><textarea name="problem" value={formData.problem} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="ปัญหาที่เจอ..." /></div>
-                <div><label style={styles.labelStyle}>The Solution</label><textarea name="solution" value={formData.solution} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="วิธีแก้ปัญหา..." /></div>
+                <div><label style={styles.labelStyle}>The Problem</label><textarea name="problem" value={formData.problem} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Problem encountered..." /></div>
+                <div><label style={styles.labelStyle}>The Solution</label><textarea name="solution" value={formData.solution} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Solution implemented..." /></div>
               </div>
             </div>
 
+            {/* Role, Tech Stack & Tools Section */}
             <div style={styles.sectionStyle}>
               <h3 style={{ ...styles.sectionHeading, color: "#3b82f6" }}>⚙️ Role, Tech Stack & Tools</h3>
               <div style={styles.gridContainer}>
-                <div><label style={styles.labelStyle}>My Role</label><input type="text" name="my_role" value={formData.my_role} onChange={handleChange} style={styles.inputStyle} placeholder="เช่น Lead Developer, Data Engineer" /></div>
-                <div><label style={styles.labelStyle}>Tech Stack (คั่นด้วยลูกน้ำ)</label><input type="text" name="tags" value={formData.tags} onChange={handleChange} style={styles.inputStyle} placeholder="React, Node.js" /></div>
-                <div><label style={styles.labelStyle}>Tools (คั่นด้วยลูกน้ำ)</label><input type="text" name="tools" value={formData.tools} onChange={handleChange} style={styles.inputStyle} placeholder="Figma, Docker, Postman" /></div>
+                <div><label style={styles.labelStyle}>My Role</label><input type="text" name="my_role" value={formData.my_role} onChange={handleChange} style={styles.inputStyle} placeholder="e.g. Lead Developer, Data Engineer" /></div>
+                <div><label style={styles.labelStyle}>Tech Stack (Comma-separated)</label><input type="text" name="tags" value={formData.tags} onChange={handleChange} style={styles.inputStyle} placeholder="React, Node.js" /></div>
+                <div><label style={styles.labelStyle}>Tools (Comma-separated)</label><input type="text" name="tools" value={formData.tools} onChange={handleChange} style={styles.inputStyle} placeholder="Figma, Docker, Postman" /></div>
               </div>
             </div>
 
+            {/* Key Features Section */}
             <div style={styles.sectionStyle}>
               <h3 style={{ ...styles.sectionHeading, color: "#10b981" }}>✨ Key Features</h3>
-              <div><label style={styles.labelStyle}>Features (ขึ้นบรรทัดใหม่ตามรายการ)</label><textarea name="features" value={formData.features} onChange={handleChange} rows="4" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
+              <div><label style={styles.labelStyle}>Features (Each feature on a new line)</label><textarea name="features" value={formData.features} onChange={handleChange} rows="4" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
             </div>
 
+            {/* Results & Learnings Section */}
             <div style={styles.sectionStyle}>
               <h3 style={{ ...styles.sectionHeading, color: "#f59e0b" }}>📈 Results & Learnings</h3>
               <div style={styles.gridContainer}>
-                <div><label style={styles.labelStyle}>Results & Impact</label><textarea name="results_impact" value={formData.results_impact} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="ผลลัพธ์ที่ได้..." /></div>
-                <div><label style={styles.labelStyle}>Key Learnings</label><textarea name="key_learnings" value={formData.key_learnings} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="สิ่งที่เรียนรู้..." /></div>
+                <div><label style={styles.labelStyle}>Results & Impact</label><textarea name="results_impact" value={formData.results_impact} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Achieved results..." /></div>
+                <div><label style={styles.labelStyle}>Key Learnings</label><textarea name="key_learnings" value={formData.key_learnings} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Lessons learned..." /></div>
               </div>
             </div>
 
+            {/* Languages Section */}
             <div style={styles.sectionStyle}>
               <h3 style={{ ...styles.sectionHeading, color: "#8b5cf6" }}>📊 Languages Used</h3>
-              <div><label style={styles.labelStyle}>Languages (รูปแบบ Name:Percent:Color คั่นด้วยลูกน้ำ)</label><input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" /></div>
+              <div><label style={styles.labelStyle}>Languages (Format Name:Percent:Color, comma-separated)</label><input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" /></div>
             </div>
 
+            {/* Media & Links Section */}
             <div style={styles.sectionStyle}>
               <h3 style={{ ...styles.sectionHeading, color: "#6366f1" }}>🌍 Media & Links</h3>
               <div style={styles.gridContainer}>
@@ -165,15 +193,18 @@ export default function AdminPage() {
                   <div style={styles.flex1}><label style={styles.labelStyle}>GitHub</label><input type="url" name="github_url" value={formData.github_url} onChange={handleChange} style={styles.inputStyle} /></div>
                 </div>
                 <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>
-                <div><label style={styles.labelStyle}>Gallery URLs (คั่นด้วยลูกน้ำ)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
+                <div><label style={styles.labelStyle}>Gallery URLs (Comma-separated)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
               </div>
             </div>
 
+            {/* Awards Section (Conditional Fields) */}
             <div style={{ ...styles.sectionStyle, background: formData.has_award ? "#fffcf0" : "#f9fafb" }}>
               <label style={{ ...styles.awardCheckboxLabel, color: formData.has_award ? "#874d00" : "#333" }}>
                 <input type="checkbox" name="has_award" checked={formData.has_award} onChange={handleChange} style={styles.checkbox} />
-                🏆 โปรเจกต์นี้ได้รับรางวัล
+                🏆 This project received an award
               </label>
+
+              {/* Show award details fields only if has_award is true */}
               {formData.has_award && (
                 <div style={styles.awardFields}>
                   <div><label style={styles.labelStyle}>Award Title</label><input type="text" name="award_title" value={formData.award_title} onChange={handleChange} style={styles.inputStyle} /></div>
@@ -191,6 +222,7 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Existing Projects List View */}
       <div style={{ position: "relative", zIndex: 2 }}>
         <div style={styles.cardContainer}>
           <h2 style={styles.existingProjectsTitle}>📋 Existing Projects</h2>

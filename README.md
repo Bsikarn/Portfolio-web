@@ -3,17 +3,17 @@
 A Minimalist Full-Stack Portfolio.
 
 ## Tech Stack
-- **Languages**: JavaScript, SQL
+- **Languages**: JavaScript, SQL, HTML, CSS
 - **Frontend**: React.js, Vite
 - **Backend**: Supabase (PostgreSQL)
 - **Libraries/Tools**: Clerk (Authentication), Framer Motion, React Three Fiber, Three.js, Lucide React
 
 ## Active Features
 - Minimalist Card-based Layout with Glassmorphism
-- 3D Interactive Elements & Background Animations
+- 3D Interactive Elements (Animated Blob) & Background Animations (Falling Emojis, Floating Stars)
 - Realtime Admin Panel for Project Management (Secured by Clerk)
+- AI Chatbot Assistant for visitor inquiries (Claude 3 powered)
 - Media Gallery & Full-screen Lightbox
-- Secret Trigger to access Admin Dashboard (Double click Logo)
 
 ## Setup & Installation Guide
 
@@ -50,7 +50,7 @@ A Minimalist Full-Stack Portfolio.
 Here is the breakdown of the project layout:
 
 - `src/` (Safe to modify)
-  - `components/`: UI components such as Navbar, ChatBot, FallingEmoji, AnimatedBlob, etc.
+  - `components/`: UI components such as Navbar, ChatBot, FallingEmoji, AnimatedBlob, StackedCard.
   - `pages/`: Main application views like HomePage, ProjectsPage, ContactPage, AdminPage.
   - `data/`: Contains `constants.jsx` with static site text, arrays, and configurations.
   - `lib/`: API integrations, like `supabase.js`.

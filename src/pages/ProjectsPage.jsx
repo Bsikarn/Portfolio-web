@@ -6,19 +6,26 @@ import { supabase } from "../lib/supabase";
 import { styles } from "../styles/ProjectsPage.styles";
 
 export default function ProjectsPage() {
+  // State for filtering projects by category ("All", "Database", etc.)
   const [activeFilter, setActiveFilter] = useState("All");
+  // ID of the currently selected project to display details for
   const [selectedId, setSelectedId] = useState(null);
+  // Ref for the horizontal scrolling container of project mini-cards
   const scrollContainerRef = useRef(null);
 
+  // State to store the full list of projects fetched from Supabase
   const [projectsData, setProjectsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Lightbox state for viewing images, videos, or awards in full screen
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxItems, setLightboxItems] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // Predefined filter categories
   const FILTERS = ["All", "Database", "Full-Stack", "Game Dev"];
 
+  // Fetch projects from the database on component mount
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -33,6 +40,7 @@ export default function ProjectsPage() {
             return a.title.localeCompare(b.title);
           });
           setProjectsData(sortedData);
+          // Auto-select the first project in the sorted list
           if (sortedData.length > 0) setSelectedId(sortedData[0].id);
         }
       } catch (error) {
@@ -44,32 +52,41 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
+  // Filter projects based on the active category tab
   const filtered = activeFilter === "All" ? projectsData : projectsData.filter((p) => p.category === activeFilter);
+  // Find the selected project object based on selectedId
   const selected = filtered.find((p) => p.id === selectedId) || filtered[0] || null;
 
+  // Navigate through projects (left or right)
   const nav = (dir) => {
     const idx = filtered.findIndex((p) => p.id === selectedId);
     const next = (idx + dir + filtered.length) % filtered.length;
     setSelectedId(filtered[next].id);
   };
 
+  // Reset selection if the currently selected project is filtered out
   useEffect(() => {
     if (filtered.length > 0 && !filtered.find((p) => p.id === selectedId)) {
       setSelectedId(filtered[0].id);
     }
   }, [activeFilter, filtered, selectedId]);
 
+  // Mouse drag-to-scroll logic variables
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const dragDistance = useRef(0);
 
+  // Mouse event handlers for the horizontal draggable project list
   const handleMouseDown = (e) => { setIsDragging(true); setStartX(e.pageX - scrollContainerRef.current.offsetLeft); setScrollLeft(scrollContainerRef.current.scrollLeft); dragDistance.current = 0; };
   const handleMouseLeave = () => setIsDragging(false);
   const handleMouseUp = () => setIsDragging(false);
   const handleMouseMove = (e) => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - scrollContainerRef.current.offsetLeft; const walk = (x - startX) * 2; scrollContainerRef.current.scrollLeft = scrollLeft - walk; dragDistance.current = Math.abs(walk); };
+
+  // Prevent card click if the user was dragging the list instead of clicking
   const handleCardClick = (id) => { if (dragDistance.current > 10) return; setSelectedId(id); };
 
+  // Determine media to show in full-screen lightbox
   const openGalleryLightbox = (startIndex) => {
     if (!selected.gallery || selected.gallery.length === 0) return;
     setLightboxItems(selected.gallery.map(url => ({ type: 'image', url })));
@@ -91,16 +108,20 @@ export default function ProjectsPage() {
     setLightboxOpen(true);
   };
 
+  // Lightbox navigation functions
   const nextLightboxMedia = (e) => { e.stopPropagation(); setLightboxIndex((prev) => (prev + 1) % lightboxItems.length); };
   const prevLightboxMedia = (e) => { e.stopPropagation(); setLightboxIndex((prev) => (prev - 1 + lightboxItems.length) % lightboxItems.length); };
 
+  // Handle external links safely, notify user if no link exists
   const handleLinkClick = (e, targetUrl) => {
     if (!targetUrl || targetUrl === "#" || targetUrl === "") {
       e.preventDefault();
-      alert("ยังไม่ได้เชื่อมต่อลิ้งก์ โปรเจกต์นี้กำลังอยู่ในระหว่างการพัฒนาช่องทางดังกล่าว");
+      // "Link not connected yet. This project is still under development for this channel."
+      alert("Link not connected yet. This project is still under development for this channel.");
     }
   };
 
+  // Show loading spinner while fetching data
   if (isLoading) {
     return (
       <div style={styles.loadingContainer}>
@@ -113,7 +134,9 @@ export default function ProjectsPage() {
   return (
     <div style={styles.pageContainer}>
 
+      {/* Top filter and unselected projects card */}
       <StackedCard stickyTop="64px" zIndex={1}>
+        {/* Category Filters */}
         <div style={styles.filterContainer}>
           {FILTERS.map((f) => (
             <motion.button
@@ -133,6 +156,7 @@ export default function ProjectsPage() {
           ))}
         </div>
 
+        {/* Project Selection Scroll Menu */}
         <div style={styles.mainContentWrapper}>
           <div style={styles.selectionSection}>
             <motion.div
@@ -174,6 +198,7 @@ export default function ProjectsPage() {
                           boxShadow: selectedId === p.id ? "0 8px 24px rgba(13,110,253,0.15)" : "0 4px 16px rgba(13,110,253,0.05)"
                         }}
                       >
+                        {/* Render Award Badge if the project has one */}
                         {p.award && <div style={styles.awardBadge}><Trophy size={12} /> AWARD</div>}
                         <div style={{ ...styles.projectIconBadge, background: `linear-gradient(135deg, ${p.gradient_from || '#f0f6ff'}, ${p.gradient_to || '#e0f2fe'})` }}>{p.image_icon}</div>
                         <div style={styles.overflowHidden}>
@@ -201,6 +226,7 @@ export default function ProjectsPage() {
         </div>
       </StackedCard>
 
+      {/* Main detail card for the currently selected project */}
       <div style={{ ...styles.mainContentWrapper, position: "relative", zIndex: 2 }}>
         <div style={styles.detailsOuterContainer}>
           <AnimatePresence mode="wait">
@@ -214,6 +240,7 @@ export default function ProjectsPage() {
                 style={styles.detailsMainCard}
               >
 
+                {/* Header Banner representing the Project */}
                 <div style={{ ...styles.coverHeader, background: `linear-gradient(135deg, ${selected.gradient_from || '#f0f6ff'}, ${selected.gradient_to || '#e0f2fe'})` }}>
                   <motion.div
                     whileHover={{ scale: 1.1 }}
@@ -222,18 +249,21 @@ export default function ProjectsPage() {
                   >
                     <Play size={32} style={styles.playIconMargin} />
                   </motion.div>
+                  {/* Left and Right quick navigation buttons */}
                   <button onClick={() => nav(-1)} style={styles.navLeftArrow}><ChevronLeft size={24} /></button>
                   <button onClick={() => nav(1)} style={styles.navRightArrow}><ChevronRight size={24} /></button>
                 </div>
 
                 <div style={styles.detailsPadding}>
 
+                  {/* Title and Short Description */}
                   <div style={styles.titleSection}>
                     <h2 style={styles.mainTitle}>{selected.title}</h2>
                     <div style={styles.metaData}>{selected.category} · {selected.year}</div>
                     <p style={styles.mainDesc}>{selected.description}</p>
                   </div>
 
+                  {/* Problem & Solution block */}
                   {(selected.problem || selected.solution) && (
                     <div style={{ ...styles.infoBlock, marginBottom: 24 }}>
                       <div style={styles.flexColGap24}>
@@ -253,6 +283,7 @@ export default function ProjectsPage() {
                     </div>
                   )}
 
+                  {/* Tech, Role, Tools, and Features Grid */}
                   <div style={styles.techFeatureGrid}>
 
                     <div style={{ ...styles.infoBlock, ...styles.flexColGap24 }}>
@@ -300,6 +331,7 @@ export default function ProjectsPage() {
 
                   </div>
 
+                  {/* Results & Key Learnings section */}
                   {(selected.results_impact || selected.key_learnings) && (
                     <div style={styles.resultLearningGrid}>
                       {selected.results_impact && (
@@ -317,6 +349,7 @@ export default function ProjectsPage() {
                     </div>
                   )}
 
+                  {/* Gallery section (Facebook-Style Grid per rules) */}
                   {selected.gallery && selected.gallery.length > 0 && (
                     <div style={styles.gallerySection}>
                       <h3 style={styles.subHeadingStyle}><ImageIcon size={20} color="#0D6EFD" /> Project Gallery</h3>
@@ -336,6 +369,7 @@ export default function ProjectsPage() {
                     </div>
                   )}
 
+                  {/* Awards & Recognition section */}
                   {selected.award && (
                     <div style={styles.awardSection}>
                       <div style={styles.awardTextSide}>
@@ -354,17 +388,20 @@ export default function ProjectsPage() {
                     </div>
                   )}
 
+                  {/* Footer contains language stats and external links */}
                   <div style={{ ...styles.infoBlock, ...styles.footerRow }}>
 
                     <div style={styles.langBarWrap}>
                       <h3 style={styles.langTitle}>Languages</h3>
                       {selected.languages && selected.languages.length > 0 ? (
                         <>
+                          {/* GitHub-style language composition bar */}
                           <div style={styles.langBarTrack}>
                             {selected.languages.map((lang) => (
                               <div key={lang.name} style={{ width: `${lang.percent}%`, background: lang.color }} title={`${lang.name} ${lang.percent}%`} />
                             ))}
                           </div>
+                          {/* Language percent legends */}
                           <div style={styles.langLegendWrap}>
                             {selected.languages.map((lang) => (
                               <div key={lang.name} style={styles.langLegendItem}>
@@ -393,10 +430,12 @@ export default function ProjectsPage() {
         </div>
       </div>
 
+      {/* Reusable Lightbox Element for Media */}
       <AnimatePresence>
         {lightboxOpen && lightboxItems.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setLightboxOpen(false)} style={styles.lightboxOverlay}>
             <X onClick={() => setLightboxOpen(false)} style={styles.lightboxClose} size={36} />
+            {/* Navigators only if there are more than 1 image/video */}
             {lightboxItems.length > 1 && (
               <>
                 <button onClick={prevLightboxMedia} style={styles.lightboxLeftBtn}><ChevronLeft size={32} /></button>

@@ -9,13 +9,13 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar";
 import FallingEmoji from "./components/FallingEmoji";
-// Pages will be lazy loaded
 import MeshGradientBackground from "./components/MeshGradientBackground";
 import { EMOJIS } from "./data/constants";
 
 import { Canvas } from "@react-three/fiber";
 import { lazy, Suspense } from "react";
 
+// Lazy loading pages to improve performance by loading them only when needed
 const AnimatedBlob = lazy(() => import("./components/AnimatedBlob"));
 const ChatBot = lazy(() => import("./components/ChatBot"));
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -23,6 +23,7 @@ const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 
+// Index mapping for page transitions (used to determine slide direction)
 const PAGE_INDEX = {
   Home: 0,
   Projects: 1,
@@ -30,6 +31,7 @@ const PAGE_INDEX = {
   Admin: 3,
 };
 
+// Animation variants for Framer Motion to handle page sliding
 const slideVariants = {
   initial: (direction) => ({ opacity: 0, x: direction > 0 ? 50 : -50 }),
   animate: { opacity: 1, x: 0 },
@@ -42,18 +44,21 @@ export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [emojis, setEmojis] = useState([]);
 
+  // Handles page navigation and determines animation direction
   const handleSetPage = (newPage) => {
     if (newPage === page) return;
     setDirection(PAGE_INDEX[newPage] > PAGE_INDEX[page] ? 1 : -1);
     setPage(newPage);
   };
 
+  // Resets scroll position to top when changing pages
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [page]);
 
+  // Handles the "Cheer Up" interactive feature
   const handleCheerUp = useCallback(async () => {
-    // โค้ดสร้างแอนิเมชันร่วงหล่น (เหมือนเดิมที่คุณมีอยู่แล้ว)
+    // Generate falling emoji animation objects
     const newEmojis = Array.from({ length: 20 }, (_, i) => ({
       id: Date.now() + i,
       emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
@@ -62,7 +67,7 @@ export default function App() {
     }));
     setEmojis((prev) => [...prev, ...newEmojis]);
 
-    // ✨ โค้ดอัปเดตยอดลง Database (ส่วนที่เพิ่มเข้ามา)
+    // Update the cheer up count in the database using a Supabase RPC
     try {
       await supabase.rpc("increment_cheer_ups");
     } catch (error) {
@@ -70,6 +75,7 @@ export default function App() {
     }
   }, []);
 
+  // Removes emojis from state once their animation completes
   const removeEmoji = useCallback((id) => {
     setEmojis((prev) => prev.filter((e) => e.id !== id));
   }, []);
@@ -90,6 +96,7 @@ export default function App() {
           pointerEvents: "none",
         }}
       >
+        {/* Soft glowing orb effect */}
         <div
           style={{
             position: "absolute",
@@ -106,6 +113,7 @@ export default function App() {
             filter: "blur(40px)",
           }}
         />
+        {/* React Three Fiber canvas for 3D animated background */}
         <Canvas
           camera={{ position: [0, 0, 3.5] }}
           style={{
@@ -125,6 +133,7 @@ export default function App() {
         </Canvas>
       </div>
 
+      {/* Render the falling emojis */}
       {emojis.map((e) => (
         <FallingEmoji
           key={e.id}
@@ -143,6 +152,7 @@ export default function App() {
         setChatOpen={setChatOpen}
       />
 
+      {/* AnimatePresence handles mounting/unmounting animations using slideVariants */}
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={page}
@@ -160,7 +170,7 @@ export default function App() {
             {page === "Contact" ? <ContactPage /> : null}
             {page === "Admin" ? (
               <>
-                {/* 1. ถ้า Login แล้ว -> โชว์หน้า Admin และปุ่ม Profile */}
+                {/* 1. If signed in, show Admin Page and Profile button */}
                 <SignedIn>
                   <div
                     style={{
@@ -175,7 +185,7 @@ export default function App() {
                   <AdminPage />
                 </SignedIn>
 
-                {/* 2. ถ้ายังไม่ได้ Login -> โชว์หน้าแจ้งเตือนให้ Login */}
+                {/* 2. If signed out, display a restricted access message prompting login */}
                 <SignedOut>
                   <div
                     style={{
@@ -199,7 +209,7 @@ export default function App() {
                       🔒 Restricted Area
                     </h2>
                     <p style={{ color: "#4a6a8a", marginBottom: 20 }}>
-                      กรุณาเข้าสู่ระบบเพื่อจัดการหลังบ้าน
+                      Please log in to access the administration panel.
                     </p>
                     <SignInButton mode="modal">
                       <button
@@ -224,6 +234,7 @@ export default function App() {
         </motion.div>
       </AnimatePresence>
 
+      {/* Render AI Chatbot overlay if chat is open */}
       <AnimatePresence>
         {chatOpen ? (
           <Suspense fallback={null}>
