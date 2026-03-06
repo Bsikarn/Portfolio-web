@@ -41,16 +41,16 @@ A Minimalist Full-Stack Portfolio.
    npm run dev
    ```
 
-5. **Database Setup (Supabase):**
-   - Execute the SQL commands listed in `docs/private/database-schema-update.md` to create the necessary tables.
-   - Run the functions listed in `docs/private/supabase-rpc-setup.md` in the SQL Editor to enable RPC tasks like tracking views.
+4. **Database Setup (Supabase):**
+   - Execute the SQL commands listed in `docs/private/supabase-knowledge.md` to create the necessary tables.
+   - Run the functions listed in `docs/private/supabase-knowledge.md` in the SQL Editor to enable RPC tasks like tracking views and managing projects.
 
 ## Directory Structure
 
 Here is the breakdown of the project layout:
 
 - `src/` (Safe to modify)
-  - `components/`: UI components such as Navbar, ChatBot, FallingEmoji, AnimatedBlob, StackedCard.
+  - `components/`: UI components such as Navbar, ChatBot, ProjectMiniCard, ProjectDetailsCard, StackedCard.
   - `pages/`: Main application views like HomePage, ProjectsPage, ContactPage, AdminPage.
   - `data/`: Contains `constants.jsx` with static site text, arrays, and configurations.
   - `lib/`: API integrations, like `supabase.js`.

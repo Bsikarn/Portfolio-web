@@ -6,17 +6,20 @@ export default function AdminPage() {
   // Initial state for the project form
   const initialFormState = {
     title: "", category: "Frontend", description: "", image_icon: "💻", year: "2026",
-    gradient_from: "#f0f6ff", gradient_to: "#e0f2fe",
     link_url: "", github_url: "", tags: "", tools: "", features: "",
     my_role: "", problem: "", solution: "", results_impact: "", key_learnings: "",
     languages: "",
     video_url: "", gallery_urls: "",
-    has_award: false, award_title: "", award_description: "", award_competition: "", award_image_url: ""
+    has_award: false, award_title: "", award_description: "", award_competition: "", award_image_url: "",
+    is_recommended: false
   };
 
   const [formData, setFormData] = useState(initialFormState);
   const [projectsList, setProjectsList] = useState([]);
+  const [categoriesList, setCategoriesList] = useState([]);
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncingGithub, setIsSyncingGithub] = useState(false);
 
   // State to track if we are editing an existing project or adding a new one
   const [isEditing, setIsEditing] = useState(false);
@@ -31,13 +34,122 @@ export default function AdminPage() {
     setIsLoading(false);
   };
 
-  // Fetch projects on component mount
-  useEffect(() => { fetchProjects(); }, []);
+  // Fetch categories from Supabase
+  const fetchCategories = async () => {
+    const { data, error } = await supabase.from("categories").select("*").order("name");
+    if (data) {
+      setCategoriesList(data);
+      if (data.length > 0 && formData.category === "Frontend") {
+        // Set default to first category if not already set by edit
+        setFormData(prev => ({ ...prev, category: data[0].name }));
+      }
+    }
+    if (error) console.error("Error fetching categories:", error);
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchProjects();
+    fetchCategories();
+  }, []);
 
   // Generic handler for form inputs, including checkboxes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+
+    if (type === "checkbox") {
+      if (name === "has_award" && checked) {
+        setFormData((prev) => ({ ...prev, has_award: true, is_recommended: false }));
+      } else if (name === "is_recommended" && checked) {
+        setFormData((prev) => ({ ...prev, is_recommended: true, has_award: false }));
+      } else {
+        setFormData((prev) => ({ ...prev, [name]: checked }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Add new category handler
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    const { error } = await supabase.rpc("admin_insert_category", { p_name: newCategoryName.trim() });
+    if (error) {
+      alert("Error adding category: " + error.message);
+    } else {
+      setNewCategoryName("");
+      fetchCategories();
+    }
+  };
+
+  // Delete category handler
+  const handleDeleteCategory = async (id, name) => {
+    if (window.confirm(`Are you sure you want to delete category "${name}"?`)) {
+      const { error } = await supabase.rpc("admin_delete_category", { p_id: id });
+      if (error) {
+        alert("Error deleting category: " + error.message);
+      } else {
+        fetchCategories();
+      }
+    }
+  };
+
+  // GitHub Language Sync handler
+  const handleSyncGithub = async () => {
+    if (!formData.github_url) {
+      alert("Please enter a GitHub URL first.");
+      return;
+    }
+
+    // Extract owner and repo from URL (e.g., https://github.com/owner/repo)
+    const match = formData.github_url.match(/github\.com\/([^/]+)\/([^/]+)/);
+    if (!match) {
+      alert("Invalid GitHub URL format. Should be https://github.com/owner/repo");
+      return;
+    }
+
+    setIsSyncingGithub(true);
+    const owner = match[1];
+    const repo = match[2];
+
+    try {
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/languages`);
+      if (!response.ok) throw new Error("Failed to fetch language data from GitHub.");
+
+      const data = await response.json();
+      let totalBytes = 0;
+      for (const bytes of Object.values(data)) {
+        totalBytes += bytes;
+      }
+
+      if (totalBytes === 0) {
+        alert("No language data found for this repository.");
+        setIsSyncingGithub(false);
+        return;
+      }
+
+      // Define some generic colors for common languages
+      const languageColors = {
+        "JavaScript": "#f1e05a", "TypeScript": "#3178c6", "HTML": "#e34c26",
+        "CSS": "#563d7c", "Python": "#3572A5", "Go": "#00ADD8",
+        "Rust": "#dea584", "C++": "#f34b7d", "Java": "#b07219",
+        "C#": "#178600", "PHP": "#4F5D95", "Ruby": "#701516", "Shell": "#89e051"
+      };
+
+      const formattedLanguages = Object.entries(data).map(([lang, bytes]) => {
+        const percent = ((bytes / totalBytes) * 100).toFixed(1);
+        const color = languageColors[lang] || "#888888";
+        return `${lang}:${percent}:${color}`;
+      }).join(", ");
+
+      setFormData(prev => ({ ...prev, languages: formattedLanguages }));
+      alert("Languages synced successfully!");
+
+    } catch (error) {
+      alert("Error syncing languages: " + error.message);
+    } finally {
+      setIsSyncingGithub(false);
+    }
   };
 
   // Form submission handler
@@ -47,7 +159,7 @@ export default function AdminPage() {
     // Transform comma-separated and newline-separated strings into arrays for Supabase
     const payload = {
       title: formData.title, category: formData.category, description: formData.description,
-      image_icon: formData.image_icon, year: formData.year, gradient_from: formData.gradient_from, gradient_to: formData.gradient_to,
+      image_icon: formData.image_icon, year: formData.year,
       link_url: formData.link_url, github_url: formData.github_url,
       my_role: formData.my_role, problem: formData.problem, solution: formData.solution,
       results_impact: formData.results_impact, key_learnings: formData.key_learnings,
@@ -63,13 +175,29 @@ export default function AdminPage() {
       award: formData.has_award ? {
         title: formData.award_title, description: formData.award_description,
         competition: formData.award_competition, image_url: formData.award_image_url
-      } : null
+      } : null,
+      is_recommended: formData.is_recommended
     };
 
-    console.log("Preparing to save data:", payload);
-    // Note: Currently simulates success instead of saving to Supabase directly
-    alert(isEditing ? "Mock update successful!" : "Mock insert successful!");
-    resetForm();
+    if (isEditing) {
+      const { error } = await supabase.rpc("admin_update_project", { p_id: editId, payload });
+      if (error) {
+        alert("Error updating project via RPC: " + error.message);
+      } else {
+        alert("Project updated successfully!");
+        resetForm();
+        fetchProjects();
+      }
+    } else {
+      const { error } = await supabase.rpc("admin_insert_project", { payload });
+      if (error) {
+        alert("Error adding project via RPC: " + error.message);
+      } else {
+        alert("Project added successfully!");
+        resetForm();
+        fetchProjects();
+      }
+    }
   };
 
   // Populate form with existing project data for editing
@@ -77,8 +205,8 @@ export default function AdminPage() {
     setIsEditing(true);
     setEditId(project.id);
     setFormData({
-      title: project.title || "", category: project.category || "Frontend", description: project.description || "",
-      image_icon: project.image_icon || "💻", year: project.year || "", gradient_from: project.gradient_from || "#f0f6ff", gradient_to: project.gradient_to || "#e0f2fe",
+      title: project.title || "", category: project.category || (categoriesList.length > 0 ? categoriesList[0].name : "Frontend"), description: project.description || "",
+      image_icon: project.image_icon || "💻", year: project.year || "",
       link_url: project.link_url || "", github_url: project.github_url || "",
       my_role: project.my_role || "", problem: project.problem || "", solution: project.solution || "",
       results_impact: project.results_impact || "", key_learnings: project.key_learnings || "",
@@ -88,7 +216,8 @@ export default function AdminPage() {
       languages: project.languages ? project.languages.map(l => `${l.name}:${l.percent}:${l.color}`).join(", ") : "",
       video_url: project.video_url || "", gallery_urls: project.gallery ? project.gallery.join(", ") : "",
       has_award: !!project.award, award_title: project.award?.title || "", award_description: project.award?.description || "",
-      award_competition: project.award?.competition || "", award_image_url: project.award?.image_url || ""
+      award_competition: project.award?.competition || "", award_image_url: project.award?.image_url || "",
+      is_recommended: project.is_recommended || false
     });
     // Scroll to top to ensure form is in view
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -98,14 +227,22 @@ export default function AdminPage() {
   const handleDelete = async (id, title) => {
     // Confirm before deletion
     if (window.confirm(`Are you sure you want to delete the project "${title}"?`)) {
-      // Note: Currently simulates deletion
-      alert(`Mock deletion of project "${title}" successful!`);
+      const { error } = await supabase.rpc("admin_delete_project", { p_id: id });
+      if (error) {
+        alert("Error deleting project: " + error.message);
+      } else {
+        alert(`Project "${title}" deleted successfully!`);
+        fetchProjects();
+      }
     }
   };
 
   // Reset form to initial state
   const resetForm = () => {
-    setFormData(initialFormState);
+    setFormData({
+      ...initialFormState,
+      category: categoriesList.length > 0 ? categoriesList[0].name : "Frontend"
+    });
     setIsEditing(false);
     setEditId(null);
   };
@@ -113,6 +250,30 @@ export default function AdminPage() {
   return (
     <div style={styles.pageContainer}>
       <div style={{ position: "relative", zIndex: 1, marginBottom: 40 }}>
+
+        {/* Category Management */}
+        <div style={{ ...styles.cardContainer, marginBottom: "20px" }}>
+          <h2 style={styles.existingProjectsTitle}>🏷️ Manage Categories</h2>
+          <div style={{ ...styles.flexRow, marginBottom: "16px" }}>
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="New Category Name"
+              style={{ ...styles.inputStyle, flex: 2 }}
+            />
+            <button onClick={handleAddCategory} style={{ ...styles.submitBtn, padding: "10px", flex: 1 }}>Add Category</button>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {categoriesList.map(cat => (
+              <div key={cat.id} style={{ display: "flex", alignItems: "center", background: "#e0f2fe", padding: "6px 12px", borderRadius: "20px", fontSize: "14px", color: "#0369a1" }}>
+                {cat.name}
+                <button onClick={() => handleDeleteCategory(cat.id, cat.name)} style={{ background: "transparent", border: "none", color: "#ef4444", marginLeft: "6px", cursor: "pointer", fontWeight: "bold" }}>×</button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div style={styles.cardContainer}>
 
           {/* Form Header */}
@@ -132,13 +293,16 @@ export default function AdminPage() {
               <div style={styles.gridContainer}>
                 <div><label style={styles.labelStyle}>Project Title</label><input type="text" name="title" value={formData.title} onChange={handleChange} required style={styles.inputStyle} /></div>
                 <div style={styles.flexRow}>
-                  <div style={styles.flex1}><label style={styles.labelStyle}>Category</label><select name="category" value={formData.category} onChange={handleChange} style={styles.inputStyle}><option value="Frontend">Frontend</option><option value="Backend">Backend</option><option value="Database">Database</option><option value="Full-Stack">Full-Stack</option><option value="Game Dev">Game Dev</option></select></div>
+                  <div style={styles.flex1}>
+                    <label style={styles.labelStyle}>Category</label>
+                    <select name="category" value={formData.category} onChange={handleChange} style={styles.inputStyle}>
+                      {categoriesList.map(cat => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
                   <div style={styles.flex1}><label style={styles.labelStyle}>Year</label><input type="text" name="year" value={formData.year} onChange={handleChange} style={styles.inputStyle} /></div>
                   <div style={styles.flex1}><label style={styles.labelStyle}>Icon</label><input type="text" name="image_icon" value={formData.image_icon} onChange={handleChange} style={styles.inputStyle} /></div>
-                </div>
-                <div style={styles.flexRow}>
-                  <div style={styles.flex1}><label style={styles.labelStyle}>Gradient From</label><input type="text" name="gradient_from" value={formData.gradient_from} onChange={handleChange} style={styles.inputStyle} placeholder="#f0f6ff" /></div>
-                  <div style={styles.flex1}><label style={styles.labelStyle}>Gradient To</label><input type="text" name="gradient_to" value={formData.gradient_to} onChange={handleChange} style={styles.inputStyle} placeholder="#e0f2fe" /></div>
                 </div>
                 <div><label style={styles.labelStyle}>Short Description</label><textarea name="description" value={formData.description} onChange={handleChange} rows="2" required style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
               </div>
@@ -178,12 +342,6 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Languages Section */}
-            <div style={styles.sectionStyle}>
-              <h3 style={{ ...styles.sectionHeading, color: "#8b5cf6" }}>📊 Languages Used</h3>
-              <div><label style={styles.labelStyle}>Languages (Format Name:Percent:Color, comma-separated)</label><input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" /></div>
-            </div>
-
             {/* Media & Links Section */}
             <div style={styles.sectionStyle}>
               <h3 style={{ ...styles.sectionHeading, color: "#6366f1" }}>🌍 Media & Links</h3>
@@ -194,6 +352,20 @@ export default function AdminPage() {
                 </div>
                 <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>
                 <div><label style={styles.labelStyle}>Gallery URLs (Comma-separated)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
+              </div>
+            </div>
+
+            {/* Languages Section */}
+            <div style={styles.sectionStyle}>
+              <h3 style={{ ...styles.sectionHeading, color: "#8b5cf6" }}>📊 Languages Used</h3>
+              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={styles.labelStyle}>Languages (Format Name:Percent:Color, comma-separated)</label>
+                  <input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" />
+                </div>
+                <button type="button" onClick={handleSyncGithub} disabled={isSyncingGithub} style={{ ...styles.submitBtn, padding: "10px", marginTop: "25px", backgroundColor: isSyncingGithub ? "#ccc" : "#0f172a", whiteSpace: "nowrap" }}>
+                  {isSyncingGithub ? "Syncing..." : "🔄 Sync from GitHub"}
+                </button>
               </div>
             </div>
 
@@ -215,6 +387,14 @@ export default function AdminPage() {
               )}
             </div>
 
+            {/* Recommended Section */}
+            <div style={{ ...styles.sectionStyle, background: formData.is_recommended ? "#f0fdfa" : "#f9fafb", marginTop: "16px" }}>
+              <label style={{ ...styles.awardCheckboxLabel, color: formData.is_recommended ? "#0f766e" : "#333" }}>
+                <input type="checkbox" name="is_recommended" checked={formData.is_recommended} onChange={handleChange} style={styles.checkbox} />
+                ⭐ Recommend this project
+              </label>
+            </div>
+
             <button type="submit" style={{ ...styles.submitBtn, backgroundColor: isEditing ? "#10b981" : "#0D6EFD" }}>
               {isEditing ? "✅ Update Project" : "💾 Save Project"}
             </button>
@@ -230,9 +410,13 @@ export default function AdminPage() {
             {projectsList.map((project) => (
               <div key={project.id} style={styles.projectListItem}>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={styles.projectIcon}>{project.image_icon}</div>
+                  <div style={{ ...styles.projectIcon, background: "linear-gradient(135deg, #f0f6ff, #e0f2fe)", borderRadius: "12px", padding: "8px", width: "40px", height: "40px", display: "flex", justifyContent: "center", alignItems: "center" }}>{project.image_icon}</div>
                   <div>
-                    <div style={styles.projectTitleText}>{project.title}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div style={styles.projectTitleText}>{project.title}</div>
+                      {project.award && <span style={{ fontSize: "12px", background: "#fef08a", color: "#854d0e", padding: "2px 6px", borderRadius: "12px" }}>🏆 Award</span>}
+                      {project.is_recommended && <span style={{ fontSize: "12px", background: "#ccfbf1", color: "#0f766e", padding: "2px 6px", borderRadius: "12px" }}>⭐ Recommend</span>}
+                    </div>
                     <div style={styles.projectCategoryText}>{project.category}</div>
                   </div>
                 </div>
