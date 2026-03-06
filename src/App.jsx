@@ -1,30 +1,38 @@
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 import { supabase } from "./lib/supabase";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar";
-import ChatBot from "./components/ChatBot";
 import FallingEmoji from "./components/FallingEmoji";
 import HomePage from "./pages/HomePage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ContactPage from "./pages/ContactPage";
-import AdminPage from "./pages/AdminPage"; // เพิ่มบรรทัดนี้ด้านบน
+import AdminPage from "./pages/AdminPage";
 import MeshGradientBackground from "./components/MeshGradientBackground";
 import { EMOJIS } from "./data/constants";
 
 import { Canvas } from "@react-three/fiber";
-import AnimatedBlob from "./components/AnimatedBlob";
+import { lazy, Suspense } from "react";
+
+const AnimatedBlob = lazy(() => import("./components/AnimatedBlob"));
+const ChatBot = lazy(() => import("./components/ChatBot"));
 
 const PAGE_INDEX = {
   Home: 0,
   Projects: 1,
   Contact: 2,
-  Admin: 3
+  Admin: 3,
 };
 
 const slideVariants = {
   initial: (direction) => ({ opacity: 0, x: direction > 0 ? 50 : -50 }),
   animate: { opacity: 1, x: 0 },
-  exit: (direction) => ({ opacity: 0, x: direction > 0 ? -50 : 50 })
+  exit: (direction) => ({ opacity: 0, x: direction > 0 ? -50 : 50 }),
 };
 
 export default function App() {
@@ -55,7 +63,7 @@ export default function App() {
 
     // ✨ โค้ดอัปเดตยอดลง Database (ส่วนที่เพิ่มเข้ามา)
     try {
-      await supabase.rpc('increment_cheer_ups');
+      await supabase.rpc("increment_cheer_ups");
     } catch (error) {
       console.error("Error cheering up:", error);
     }
@@ -70,18 +78,60 @@ export default function App() {
       <MeshGradientBackground />
 
       {/* Global 3D Background placed behind page contents */}
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 0, pointerEvents: "none" }}>
-        <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: "50vw", height: "50vw", maxHeight: 600, maxWidth: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(163,216,244,0.2) 0%, rgba(255,200,213,0.15) 50%, transparent 70%)", filter: "blur(40px)" }} />
-        <Canvas camera={{ position: [0, 0, 3.5] }} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}>
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "50vw",
+            height: "50vw",
+            maxHeight: 600,
+            maxWidth: 600,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(163,216,244,0.2) 0%, rgba(255,200,213,0.15) 50%, transparent 70%)",
+            filter: "blur(40px)",
+          }}
+        />
+        <Canvas
+          camera={{ position: [0, 0, 3.5] }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        >
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
           <pointLight position={[-5, -5, -5]} color="#ffc8d5" intensity={0.5} />
-          <AnimatedBlob />
+          <Suspense fallback={null}>
+            <AnimatedBlob />
+          </Suspense>
         </Canvas>
       </div>
 
       {emojis.map((e) => (
-        <FallingEmoji key={e.id} emoji={e.emoji} x={`${e.x}vw`} delay={e.delay} onDone={() => removeEmoji(e.id)} />
+        <FallingEmoji
+          key={e.id}
+          emoji={e.emoji}
+          x={`${e.x}vw`}
+          delay={e.delay}
+          onDone={() => removeEmoji(e.id)}
+        />
       ))}
 
       <Navbar
@@ -103,15 +153,80 @@ export default function App() {
           transition={{ duration: 0.4, ease: "easeInOut" }}
           style={{ position: "relative", zIndex: 1 }}
         >
-          {page === "Home" && <HomePage setPage={handleSetPage} />}
-          {page === "Projects" && <ProjectsPage />}
-          {page === "Contact" && <ContactPage />}
-          {page === "Admin" && <AdminPage />}
+          {page === "Home" ? <HomePage setPage={handleSetPage} /> : null}
+          {page === "Projects" ? <ProjectsPage /> : null}
+          {page === "Contact" ? <ContactPage /> : null}
+          {page === "Admin" ? (
+            <>
+              {/* 1. ถ้า Login แล้ว -> โชว์หน้า Admin และปุ่ม Profile */}
+              <SignedIn>
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 80,
+                    right: 20,
+                    zIndex: 1000,
+                  }}
+                >
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+                <AdminPage />
+              </SignedIn>
+
+              {/* 2. ถ้ายังไม่ได้ Login -> โชว์หน้าแจ้งเตือนให้ Login */}
+              <SignedOut>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "80vh",
+                    zIndex: 2,
+                    position: "relative",
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: "Poppins",
+                      color: "#000",
+                      fontSize: "2rem",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    🔒 Restricted Area
+                  </h2>
+                  <p style={{ color: "#4a6a8a", marginBottom: 20 }}>
+                    กรุณาเข้าสู่ระบบเพื่อจัดการหลังบ้าน
+                  </p>
+                  <SignInButton mode="modal">
+                    <button
+                      style={{
+                        padding: "12px 24px",
+                        background: "#0D6EFD",
+                        color: "white",
+                        border: "none",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Log In as Admin
+                    </button>
+                  </SignInButton>
+                </div>
+              </SignedOut>
+            </>
+          ) : null}
         </motion.div>
       </AnimatePresence>
 
       <AnimatePresence>
-        {chatOpen && <ChatBot isOpen={chatOpen} onClose={() => setChatOpen(false)} />}
+        {chatOpen ? (
+          <Suspense fallback={null}>
+            <ChatBot isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+          </Suspense>
+        ) : null}
       </AnimatePresence>
     </>
   );

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Menu, X } from "lucide-react";
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
 import { styles } from "../styles/Navbar.styles";
 
 export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen }) {
@@ -14,7 +16,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
         setMenuOpen(false);
       }
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -38,7 +40,11 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
         </div>
 
         <div style={styles.logoContainer}>
-          <div style={styles.logoText}>
+          <div
+            style={{ ...styles.logoText, cursor: "pointer" }}
+            onDoubleClick={() => handleNavClick("Admin")}
+            title="Beaut.Portfolio"
+          >
             Beaut.Portfolio
           </div>
         </div>
@@ -82,9 +88,24 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
           {isMobile && (
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              style={{ background: "transparent", border: "none", cursor: "pointer", marginLeft: "12px", color: "#0D6EFD", display: "flex" }}
+              style={{ background: "transparent", border: "none", cursor: "pointer", marginLeft: "12px", color: "#0D6EFD", display: "flex", justifyContent: "center", alignItems: "center", width: 32, height: 32 }}
             >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              <div style={{ position: "relative", width: 24, height: 24 }}>
+                <motion.div
+                  animate={{ rotate: menuOpen ? 180 : 0, opacity: menuOpen ? 1 : 0, scale: menuOpen ? 1 : 0.5 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ position: "absolute", top: 0, left: 0 }}
+                >
+                  <X size={24} />
+                </motion.div>
+                <motion.div
+                  animate={{ rotate: menuOpen ? -180 : 0, opacity: menuOpen ? 0 : 1, scale: menuOpen ? 0.5 : 1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ position: "absolute", top: 0, left: 0 }}
+                >
+                  <Menu size={24} />
+                </motion.div>
+              </div>
             </button>
           )}
         </div>

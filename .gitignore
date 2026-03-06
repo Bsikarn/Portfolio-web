@@ -29,3 +29,4 @@ dist-ssr
 
 # อย่าลืมกันเหนี่ยว
 .env
+.agents

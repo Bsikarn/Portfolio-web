@@ -3,11 +3,10 @@
 A Minimalist Full-Stack Portfolio.
 
 ## Tech Stack
-- React.js (Vite)
-- Supabase (PostgreSQL with Realtime)
-- Clerk (Authentication)
-- Framer Motion (Animations)
-- React Three Fiber / Three.js (3D Graphics)
+- **Languages**: JavaScript
+- **Frontend**: React.js, Vite
+- **Backend**: Supabase (PostgreSQL)
+- **Libraries/Tools**: Clerk (Authentication), Framer Motion, React Three Fiber, Three.js
 
 ## Active Features
 - Minimalist Card-based Layout with Glassmorphism

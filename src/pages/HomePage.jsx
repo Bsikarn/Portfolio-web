@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, GraduationCap, Languages, Award, User, Heart, Users } from "lucide-react";
+import Code2 from "lucide-react/dist/esm/icons/code-2";
+import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+import Languages from "lucide-react/dist/esm/icons/languages";
+import Award from "lucide-react/dist/esm/icons/award";
+import User from "lucide-react/dist/esm/icons/user";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Users from "lucide-react/dist/esm/icons/users";
 import StackedCard from "../components/StackedCard";
 import { TECHNOLOGIES_TAGS, TOOLS_TAGS, ABOUT_ME } from "../data/constants";
 import { supabase } from "../lib/supabase";
@@ -20,7 +26,7 @@ export default function HomePage({ setPage }) {
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -62,7 +68,9 @@ export default function HomePage({ setPage }) {
           allProjectsData.forEach(p => {
             const items = [...(p.tags || []), ...(p.tools || [])];
             items.forEach(item => {
-              counts[item] = (counts[item] || 0) + 1;
+              let normalizedItem = item;
+              if (item === "React") normalizedItem = "React.js";
+              counts[normalizedItem] = (counts[normalizedItem] || 0) + 1;
             });
           });
           setTechCounts(counts);

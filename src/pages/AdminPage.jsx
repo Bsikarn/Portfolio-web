@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { styles } from "../styles/AdminPage.styles";
 
