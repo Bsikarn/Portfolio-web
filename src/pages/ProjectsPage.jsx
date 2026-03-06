@@ -5,6 +5,7 @@ import StackedCard from "../components/StackedCard";
 import ProjectMiniCard from "../components/ProjectMiniCard";
 import ProjectDetailsCard from "../components/ProjectDetailsCard";
 import { supabase } from "../lib/supabase";
+import { styles } from "../styles/ProjectsPage.styles";
 
 export default function ProjectsPage() {
   // State for filtering projects by category ("All", "Database", etc.)
