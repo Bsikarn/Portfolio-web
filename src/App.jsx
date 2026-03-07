@@ -45,11 +45,11 @@ export default function App() {
   const [emojis, setEmojis] = useState([]);
 
   // Handles page navigation and determines animation direction
-  const handleSetPage = (newPage) => {
+  const handleSetPage = useCallback((newPage) => {
     if (newPage === page) return;
     setDirection(PAGE_INDEX[newPage] > PAGE_INDEX[page] ? 1 : -1);
     setPage(newPage);
-  };
+  }, [page]);
 
   // Resets scroll position to top when changing pages
   useEffect(() => {

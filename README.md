@@ -53,8 +53,6 @@ A Minimalist Full-Stack Portfolio.
 
 ## Directory Structure
 
-Explain what each key file and folder does. Explicitly state which folders/files are safe to modify and which ones are strictly "DO NOT TOUCH".
-
 - `src/` (✔️ **Safe to modify**): Core logic and UI.
   - `components/`: Isolated UI elements (Navbar, StackedCard, Cards).
   - `pages/`: Main application views (`HomePage`, `AdminPage`).

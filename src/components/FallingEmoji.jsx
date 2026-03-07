@@ -7,12 +7,20 @@ export default function FallingEmoji({ emoji, x, delay, onDone }) {
       style={{ ...styles.container, left: x }}
 
       // Animation sequence: Start slightly above screen, full opacity, no rotation
-      initial={{ y: -50, opacity: 1, rotate: 0 }}
-      // End point: Fall past bottom of screen (110vh), fade out, rotate 360 degrees
-      animate={{ y: "110vh", opacity: 0, rotate: 360 }}
-
-      // Duration of fall, delay based on stagger, and ease-in acceleration
-      transition={{ duration: 2.5, delay, ease: "easeIn" }}
+      initial={{ y: "-10vh", opacity: 1, rotate: 0 }}
+      // End point: Fall to bottom, bounce up, fall past bottom, fade out
+      animate={{
+        y: ["-10vh", "90vh", "75vh", "110vh"],
+        opacity: [1, 1, 1, 0],
+        rotate: [0, 180, 270, 360]
+      }}
+      // Duration of fall, keyframe timing, delay based on stagger
+      transition={{
+        duration: 2.5,
+        delay,
+        times: [0, 0.7, 0.85, 1],
+        ease: ["easeIn", "easeOut", "easeIn"]
+      }}
 
       // Callback to parent when animation finishes (usually removes from state)
       onAnimationComplete={onDone}
