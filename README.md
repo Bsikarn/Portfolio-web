@@ -48,18 +48,17 @@ A Minimalist Full-Stack Portfolio.
 
 ## Directory Structure
 
-Here is the breakdown of the project layout:
+Explain what each key file and folder does. Explicitly state which folders/files are safe to modify and which ones are strictly "DO NOT TOUCH".
 
-- `src/` (Safe to modify)
-  - `components/`: UI components such as Navbar, ChatBot, ProjectMiniCard, ProjectDetailsCard, StackedCard.
-  - `pages/`: Main application views like HomePage, ProjectsPage, ContactPage, AdminPage.
-  - `data/`: Contains `constants.jsx` with static site text, arrays, and configurations.
-  - `lib/`: API integrations, like `supabase.js`.
-  - `styles/`: Shared specific inline-styles extraction (`Navbar.styles.js`, `HomePage.styles.js`).
-  - `App.jsx`: Root router and layout wrapper with Clerk Authentication boundaries.
-  - `main.jsx`: Initialization script.
-- `docs/private/` (DO NOT TOUCH randomly. Keep synced manually for private AI logs):
-  - Contains all the agent logs, knowledge bases (`*-knowledge.md`), and debugging records (`*-trouble.md`).
-- `public/` (Safe to modify):
-  - Static assets like images and fonts.
-- `package.json` / `vite.config.js` / `.env.local`: Application configuration files. (Modify with caution)
+- `src/` (✔️ **Safe to modify**): Core logic and UI.
+  - `components/`: Isolated UI elements (Navbar, StackedCard, Cards).
+  - `pages/`: Main application views (`HomePage`, `AdminPage`).
+  - `data/`: Constant static data mapping.
+  - `lib/`: Configuration API (`supabase.js`).
+  - `styles/`: JS Styling Dictionaries (`HomePage.styles.js`).
+- `docs/private/` (❌ **DO NOT TOUCH**):
+  - Retained for private AI Master Rule logs (`*-knowledge.md`, `*-trouble.md`).
+- `NEW_setup.md` (✔️ **Safe to modify**):
+  - Step-by-Step recreation guide without using git clone.
+- `public/` (✔️ **Safe to modify**): Static media.
+- `package.json` / `vite.config.js` / `.env.local`: Application configuration files.

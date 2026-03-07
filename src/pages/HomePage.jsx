@@ -7,6 +7,7 @@ import Award from "lucide-react/dist/esm/icons/award";
 import User from "lucide-react/dist/esm/icons/user";
 import Heart from "lucide-react/dist/esm/icons/heart";
 import Users from "lucide-react/dist/esm/icons/users";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import StackedCard from "../components/StackedCard";
 import { TECHNOLOGIES_TAGS, TOOLS_TAGS, ABOUT_ME } from "../data/constants";
 import { supabase } from "../lib/supabase";
@@ -22,8 +23,14 @@ export default function HomePage({ setPage }) {
 
   // State mapping of tools and their respective usage count
   const [techCounts, setTechCounts] = useState({});
+  // Track dynamically extracted languages
+  const [portfolioLanguages, setPortfolioLanguages] = useState([]);
+
   // Track currently hovered/clicked tech tag
   const [activeTag, setActiveTag] = useState(null);
+
+  // PDF Dropdown open state
+  const [isPdfOpen, setIsPdfOpen] = useState(false);
 
   // Responsive layout tracking
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -72,11 +79,21 @@ export default function HomePage({ setPage }) {
         }
 
         // Fetch all projects to count occurrences of technologies/tools locally
-        const { data: allProjectsData } = await supabase.from("projects").select("tags, tools");
+        const { data: allProjectsData } = await supabase.from("projects").select("tags, tools, languages");
         if (allProjectsData) {
           const counts = {};
+          const langSet = new Set();
+
           allProjectsData.forEach(p => {
             const items = [...(p.tags || []), ...(p.tools || [])];
+
+            if (p.languages) {
+              p.languages.forEach(l => {
+                langSet.add(l.name);
+                counts[l.name] = (counts[l.name] || 0) + 1;
+              });
+            }
+
             items.forEach(item => {
               // Normalize the string "React" to "React.js" to merge tag counts
               let normalizedItem = item;
@@ -85,6 +102,7 @@ export default function HomePage({ setPage }) {
             });
           });
           setTechCounts(counts);
+          setPortfolioLanguages(Array.from(langSet));
         }
       } catch (error) {
         console.error("Error fetching stats:", error);
@@ -130,6 +148,32 @@ export default function HomePage({ setPage }) {
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setPage("Contact")} style={styles.heroSecondaryBtn}>
                 Contact Me
               </motion.button>
+
+              <div style={styles.dropdownContainer} onMouseLeave={() => setIsPdfOpen(false)}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsPdfOpen(!isPdfOpen)}
+                  onMouseEnter={() => setIsPdfOpen(true)}
+                  style={styles.dropdownButton}
+                >
+                  <FileText size={18} /> PDF ▼
+                </motion.button>
+                <AnimatePresence>
+                  {isPdfOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      style={styles.dropdownMenu}
+                    >
+                      <a href="#" style={styles.dropdownItem}>Resume / CV</a>
+                      <a href="#" style={styles.dropdownItem}>Portfolio</a>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Scroll Indicator Icon */}
@@ -194,10 +238,26 @@ export default function HomePage({ setPage }) {
                   <div style={{ ...styles.aboutIconBox, background: "#f0fdf4", color: "#22c55e" }}><Languages size={20} /></div>
                   <div>
                     <div style={styles.aboutItemTitle}>Languages</div>
-                    <div style={styles.aboutItemDesc}>{ABOUT_ME?.languages?.join(" • ")}</div>
+                    <div style={styles.aboutLanguageTagsWrap}>
+                      {ABOUT_ME?.languages?.map(lang => (
+                        <span key={lang} style={styles.aboutLanguageTag}>{lang}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
+            </motion.div>
+
+            {/* Empty Experience Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }}
+              transition={{ type: "spring", bounce: 0.5, duration: 0.8, delay: 0.2 }}
+              style={styles.experienceCardWrap}
+            >
+              <h2 style={styles.aboutName}>Experience</h2>
+              <p style={styles.experienceEmptyText}>Waiting for you to add experience... ✨</p>
             </motion.div>
           </section>
 
@@ -210,6 +270,30 @@ export default function HomePage({ setPage }) {
               transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
               style={styles.toolsCard}
             >
+              {portfolioLanguages.length > 0 && (
+                <>
+                  <h2 style={styles.toolsHeading}>LANGUAGES</h2>
+                  <div style={{ ...styles.toolsWrapContainer, marginBottom: "32px", position: "relative" }}>
+                    {portfolioLanguages.map((tag, i) => (
+                      <motion.button
+                        key={tag}
+                        onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                        onMouseLeave={() => setActiveTag(null)}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: false }}
+                        transition={{ delay: i * 0.05 }}
+                        whileHover={{ scale: 1.05, background: "#0D6EFD", color: "white" }}
+                        animate={activeTag === tag ? { scale: 1.05, background: "#0D6EFD", color: "white" } : { background: "rgba(255, 255, 255, 0.9)", color: "#4a6a8a" }}
+                        style={styles.toolTag}
+                      >
+                        {activeTag === tag ? `${techCounts[tag] || 0} projects` : tag}
+                      </motion.button>
+                    ))}
+                  </div>
+                </>
+              )}
+
               <h2 style={styles.toolsHeading}>Technologies</h2>
               <div style={{ ...styles.toolsWrapContainer, marginBottom: "32px", position: "relative" }}>
                 {/* Dynamically render tags defined in data/constants */}

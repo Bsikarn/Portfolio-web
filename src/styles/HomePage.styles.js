@@ -40,5 +40,13 @@ export const styles = {
     statIconWrap: { width: 64, height: 64, borderRadius: "50%", background: "#f0f6ff", color: "#0D6EFD", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
     statValue: { fontFamily: "'Poppins',sans-serif", fontWeight: 800, fontSize: 36, color: "#0d1b2a", lineHeight: 1 },
     statLabel: { fontFamily: "'Poppins',sans-serif", fontSize: 13, color: "#8aabcc", fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginTop: 12 },
-    groupedCardsWrapper: { display: "flex", flexDirection: "column", gap: 0 }
+    groupedCardsWrapper: { display: "flex", flexDirection: "column", gap: 0 },
+    dropdownContainer: { position: "relative", display: "inline-block" },
+    dropdownButton: { padding: "14px 20px", borderRadius: 50, background: "rgba(255,255,255,0.8)", backdropFilter: "blur(10px)", border: "2px solid #eef3ff", color: "#0D6EFD", fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", gap: 8 },
+    dropdownMenu: { position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)", marginTop: "8px", background: "rgba(255, 255, 255, 0.95)", backdropFilter: "blur(16px)", borderRadius: 16, padding: "8px", boxShadow: "0 12px 32px rgba(13,110,253,0.15)", border: "1px solid #eef3ff", display: "flex", flexDirection: "column", minWidth: "160px", zIndex: 20 },
+    dropdownItem: { padding: "12px 16px", borderRadius: 8, color: "#4a6a8a", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 14, textDecoration: "none", transition: "all 0.2s", cursor: "pointer", textAlign: "center", display: "block" },
+    aboutLanguageTagsWrap: { display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 },
+    aboutLanguageTag: { display: "inline-block", padding: "4px 12px", borderRadius: 50, background: "rgba(240, 253, 244, 0.6)", border: "1px solid #bbf7d0", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 12, color: "#16a34a" },
+    experienceCardWrap: { background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", borderRadius: 24, padding: "48px", boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", minHeight: "300px", marginTop: "24px" },
+    experienceEmptyText: { fontFamily: "'Poppins',sans-serif", fontSize: 18, fontWeight: 600, color: "#8aabcc", marginTop: 16 }
 };
