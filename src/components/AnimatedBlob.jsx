@@ -1,9 +1,13 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+// import { useGLTF } from "@react-three/drei"; // Uncomment this when you want to use your own 3D model
 import { Sphere, MeshDistortMaterial, Float, Stars } from "@react-three/drei";
 
 export default function AnimatedBlob() {
   const meshRef = useRef();
+
+  // ⚠️ TODO: If you have your own 3D model (.glb/.gltf file), uncomment the line below to load it:
+  // const { scene } = useGLTF('/ชื่อไฟล์ของคุณ.glb');
 
   // useFrame executes every frame, rotating the blob to give it a spinning effect
   useFrame((state) => {
@@ -14,8 +18,14 @@ export default function AnimatedBlob() {
   });
 
   return (
-    // Float component adds a gentle up-and-down hovering motion
     <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+      {/* 
+        ⚠️ IF YOU USE YOUR OWN 3D MODEL (useGLTF):
+        1. Remove this entire <Sphere> ... </Sphere> block (including MeshDistortMaterial).
+        2. Replace it with your 3D model object like this: 
+           <primitive object={scene} ref={meshRef} scale={1.5} />
+      */}
+
       {/* 
         Sphere creates the base 3D shape.
         Args: [radius, widthSegments, heightSegments]

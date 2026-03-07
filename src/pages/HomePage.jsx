@@ -270,7 +270,8 @@ export default function HomePage({ setPage }) {
               </div>
             </motion.div>
 
-            {/* Empty Experience Card */}
+            {/* Empty Experience Card - Hidden until experience data is implemented */}
+            {/*
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -281,6 +282,7 @@ export default function HomePage({ setPage }) {
               <h2 style={styles.aboutName}>Experience</h2>
               <p style={styles.experienceEmptyText}>Waiting for you to add experience... ✨</p>
             </motion.div>
+            */}
           </section>
 
           <section style={{ ...styles.sectionPadding, padding: isMobile ? "40px 24px" : "40px 48px" }}>
