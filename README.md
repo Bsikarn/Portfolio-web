@@ -1,4 +1,5 @@
 # Portfolio Web
+> **⚠️ Copyright Notice:** This is a proprietary project. All rights reserved. You may view the code for reference, but copying, modification, or distribution is strictly prohibited. See the [LICENSE](./LICENSE) file for more details.
 
 A Minimalist Full-Stack Portfolio.
 
