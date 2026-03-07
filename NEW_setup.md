@@ -22,6 +22,8 @@ npm install
 npm install lucide-react framer-motion three @react-three/fiber @react-three/drei
 npm install @supabase/supabase-js @clerk/clerk-react
 npm install react-router-dom
+npm install -D @playwright/test
+npx playwright install chromium
 ```
 
 ---

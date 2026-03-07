@@ -7,7 +7,7 @@ A Minimalist Full-Stack Portfolio.
 - **Languages**: JavaScript, SQL, HTML, CSS
 - **Frontend**: React.js, Vite
 - **Backend**: Supabase (PostgreSQL)
-- **Libraries/Tools**: Clerk (Authentication), Framer Motion, React Three Fiber, Three.js, Lucide React
+- **Libraries/Tools:** Clerk (Auth), Framer Motion, Three.js, Lucide React, Supabase-js, Playwright (E2E Testing)
 
 ## Active Features
 - Minimalist Card-based Layout with Glassmorphism

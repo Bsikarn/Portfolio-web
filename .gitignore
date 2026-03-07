@@ -33,3 +33,10 @@ dist-ssr
 
 robots.txt
 skills-lock.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
