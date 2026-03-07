@@ -35,7 +35,8 @@ export default function ProjectsPage() {
         const { data: catData, error: catError } = await supabase.from("categories").select("*").order("name");
         if (catError) throw catError;
         if (catData) {
-          setCategoriesData(["All", ...catData.map(c => c.name)]);
+          const sortedCats = catData.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+          setCategoriesData(["All", ...sortedCats.map(c => c.name)]);
         }
 
         // Fetch Projects

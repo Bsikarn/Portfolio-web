@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useDragControls } from "framer-motion";
 import { Bot, X, Send } from "lucide-react";
+import { supabase } from "../lib/supabase";
 
 export default function ChatBot({ isOpen, onClose }) {
   // State to store conversation history
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hey! 👋 I'm Alex's AI assistant. Ask me anything about his work, skills, or projects!",
+      content: "Hey! 👋 I'm Sikarn's AI assistant. Ask me anything about his work, skills, or projects!",
     },
   ]);
 
@@ -47,35 +48,20 @@ export default function ChatBot({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      // 2. Prepare conversation history for the API
-      const history = [...messages, userMsg].map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
-      // 3. Make API call to Anthropic's Claude 3 API
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": "YOUR_API_KEY", // Note: Need actual API key here
-          "anthropic-version": "2023-06-01"
-        },
-        body: JSON.stringify({
-          model: "claude-3-sonnet-20240229",
-          max_tokens: 1000,
-          system: "You are a helpful AI assistant...", // Note: Expand system prompt as needed
-          messages: history,
-        }),
+      // Call Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('chat-with-qwen', {
+        body: { message: input },
       });
 
-      const data = await res.json();
+      if (error) {
+        throw new Error(error.message);
+      }
 
-      // 4. Extract and handle the response
-      const reply = data.content?.map((c) => c.text).join("") || "Sorry, I couldn't respond right now.";
+      // Handle the generated response
+      const reply = data.reply || "Sorry, I couldn't respond right now.";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
-    } catch {
+    } catch (err) {
       // Handle network or API errors gracefully
       setMessages((prev) => [
         ...prev,
@@ -102,7 +88,7 @@ export default function ChatBot({ isOpen, onClose }) {
             <Bot size={18} color="#0D6EFD" />
           </div>
           <div>
-            <div style={styles.botName}>Alex's AI Assistant</div>
+            <div style={styles.botName}>Sikarn's AI Assistant</div>
             <div style={styles.botStatus}>● Online</div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 export const styles = {
     container: {
-        paddingTop: 64,
+        paddingTop: 120,
+        paddingBottom: 60,
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -55,7 +56,7 @@ export const styles = {
     cardHandle: { fontFamily: "'Poppins',sans-serif", fontSize: 12, color: "#8aabcc", marginTop: 4, fontWeight: 500 },
     connectBtn: { padding: "7px 18px", borderRadius: 50, fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 12 },
     footerInfo: {
-        marginTop: 60, padding: "24px 40px", background: "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(24px)", borderRadius: 20,
+        marginTop: 60, marginBottom: 40, padding: "24px 40px", background: "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(24px)", borderRadius: 20,
         boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", textAlign: "center",
         border: "1px solid rgba(255,255,255,0.6)"
     },

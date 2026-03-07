@@ -1,8 +1,17 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Github, Linkedin } from "lucide-react";
 import { styles } from "../styles/ContactPage.styles";
 
 export default function ContactPage() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Predefined contact links and their visual properties
   const CONTACTS = [
     { icon: <Mail size={28} />, label: "Email", handle: "sikarn.pat@gmail.com", href: "mailto:sikarn.pat@gmail.com", color: "#ffc8d5", accent: "#ff6b6b" },
@@ -17,10 +26,10 @@ export default function ContactPage() {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-        style={styles.headerWrapper}
+        style={{ ...styles.headerWrapper, padding: isMobile ? "32px 24px" : "48px 64px" }}
       >
         <div style={styles.header}>
-          <h1 style={styles.title}>
+          <h1 style={{ ...styles.title, fontSize: isMobile ? 32 : 40 }}>
             Let's work <span style={styles.highlightText}>together</span>
           </h1>
           <p style={styles.subtitle}>I'm always open to exciting opportunities and collaborations.</p>

@@ -38,10 +38,11 @@ export default function AdminPage() {
   const fetchCategories = async () => {
     const { data, error } = await supabase.from("categories").select("*").order("name");
     if (data) {
-      setCategoriesList(data);
-      if (data.length > 0 && formData.category === "Frontend") {
+      const sortedCats = data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      setCategoriesList(sortedCats);
+      if (sortedCats.length > 0 && formData.category === "Frontend") {
         // Set default to first category if not already set by edit
-        setFormData(prev => ({ ...prev, category: data[0].name }));
+        setFormData(prev => ({ ...prev, category: sortedCats[0].name }));
       }
     }
     if (error) console.error("Error fetching categories:", error);
@@ -91,6 +92,20 @@ export default function AdminPage() {
       } else {
         fetchCategories();
       }
+    }
+  };
+
+  // Update category sort order
+  const handleUpdateCategoryOrder = async (id, newOrder) => {
+    const parsedOrder = parseInt(newOrder) || 0;
+    // Optimistically update UI
+    setCategoriesList(prev => prev.map(c => c.id === id ? { ...c, sort_order: parsedOrder } : c).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)));
+
+    // Attempt RPC call
+    const { error } = await supabase.rpc("admin_update_category_order", { p_id: id, p_sort_order: parsedOrder });
+    if (error) {
+      console.error("Order update failed (SQL missing?). Reverting.", error);
+      fetchCategories(); // Revert on failure
     }
   };
 
@@ -264,11 +279,19 @@ export default function AdminPage() {
             />
             <button onClick={handleAddCategory} style={{ ...styles.submitBtn, padding: "10px", flex: 1 }}>Add Category</button>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", flexDirection: "column" }}>
             {categoriesList.map(cat => (
-              <div key={cat.id} style={{ display: "flex", alignItems: "center", background: "#e0f2fe", padding: "6px 12px", borderRadius: "20px", fontSize: "14px", color: "#0369a1" }}>
-                {cat.name}
-                <button onClick={() => handleDeleteCategory(cat.id, cat.name)} style={{ background: "transparent", border: "none", color: "#ef4444", marginLeft: "6px", cursor: "pointer", fontWeight: "bold" }}>×</button>
+              <div key={cat.id} style={{ display: "flex", alignItems: "center", background: "#f4f4f5", padding: "8px 12px", border: "1px solid #e4e4e7", fontSize: "14px", color: "#18181b" }}>
+                <span style={{ flex: 1, fontWeight: "bold" }}>{cat.name}</span>
+                <span style={{ fontSize: "12px", color: "#71717a", marginRight: "8px" }}>Order:</span>
+                <input
+                  type="number"
+                  value={cat.sort_order || 0}
+                  onChange={(e) => handleUpdateCategoryOrder(cat.id, e.target.value)}
+                  style={{ width: "60px", padding: "4px", marginRight: "16px", border: "1px solid #d4d4d8", fontSize: "14px" }}
+                  title="Sort Order (Lower is first)"
+                />
+                <button onClick={() => handleDeleteCategory(cat.id, cat.name)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: "bold" }}>Delete</button>
               </div>
             ))}
           </div>

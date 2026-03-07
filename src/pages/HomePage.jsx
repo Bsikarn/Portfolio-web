@@ -32,6 +32,14 @@ export default function HomePage({ setPage }) {
   // PDF Dropdown open state
   const [isPdfOpen, setIsPdfOpen] = useState(false);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isPdfOpen) setIsPdfOpen(false);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isPdfOpen]);
+
   // Responsive layout tracking
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -141,39 +149,53 @@ export default function HomePage({ setPage }) {
 
           {/* Hero Section Call to Action controls */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} style={styles.heroBottomRow}>
-            <div style={styles.heroActionBtnsContainer}>
-              <motion.button whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(13,110,253,0.35)" }} whileTap={{ scale: 0.95 }} onClick={() => setPage("Projects")} style={styles.heroPrimaryBtn}>
-                View My Work →
-              </motion.button>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setPage("Contact")} style={styles.heroSecondaryBtn}>
-                Contact Me
-              </motion.button>
-
-              <div style={styles.dropdownContainer} onMouseLeave={() => setIsPdfOpen(false)}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsPdfOpen(!isPdfOpen)}
-                  onMouseEnter={() => setIsPdfOpen(true)}
-                  style={styles.dropdownButton}
-                >
-                  <FileText size={18} /> PDF ▼
-                </motion.button>
-                <AnimatePresence>
-                  {isPdfOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      style={styles.dropdownMenu}
+            <div style={{ ...styles.heroActionBtnsContainer, position: "relative" }}>
+              <AnimatePresence mode="wait">
+                {!isPdfOpen ? (
+                  <motion.div
+                    key="main-btns"
+                    style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.button whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(13,110,253,0.35)" }} whileTap={{ scale: 0.95 }} onClick={() => setPage("Projects")} style={styles.heroPrimaryBtn}>
+                      View My Work →
+                    </motion.button>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setPage("Contact")} style={styles.heroSecondaryBtn}>
+                      Contact Me
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsPdfOpen(true)}
+                      style={styles.dropdownButton}
                     >
-                      <a href="#" style={styles.dropdownItem}>Resume / CV</a>
-                      <a href="#" style={styles.dropdownItem}>Portfolio</a>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                      <FileText size={18} /> PDF
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="pdf-btns"
+                    style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setIsPdfOpen(false)} style={styles.heroSecondaryBtn}>
+                      ← Back
+                    </motion.button>
+                    <motion.a href="#" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(13,110,253,0.35)" }} whileTap={{ scale: 0.95 }} style={{ ...styles.heroPrimaryBtn, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+                      Resume / CV
+                    </motion.a>
+                    <motion.a href="#" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.05, boxShadow: "0 8px 24px rgba(13,110,253,0.35)" }} whileTap={{ scale: 0.95 }} style={{ ...styles.heroPrimaryBtn, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+                      Portfolio
+                    </motion.a>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Scroll Indicator Icon */}
@@ -193,15 +215,15 @@ export default function HomePage({ setPage }) {
         <div style={styles.groupedCardsWrapper}>
 
           {/* "About Me" Resume Card */}
-          <section style={styles.sectionPadding}>
+          <section style={{ ...styles.sectionPadding, padding: isMobile ? "40px 24px" : "40px 48px" }}>
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.1 }}
               transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-              style={styles.aboutCard}
+              style={{ ...styles.aboutCard, padding: isMobile ? "32px 24px" : "48px", gap: isMobile ? 24 : 32 }}
             >
-              <div style={styles.aboutHeaderRow}>
+              <div style={{ ...styles.aboutHeaderRow, flexDirection: isMobile ? "column" : "row", textAlign: isMobile ? "center" : "left", gap: isMobile ? 16 : 32 }}>
                 <div style={styles.aboutAvatar}>
                   <User size={56} color="#A3D8F4" />
                 </div>
@@ -254,21 +276,20 @@ export default function HomePage({ setPage }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.1 }}
               transition={{ type: "spring", bounce: 0.5, duration: 0.8, delay: 0.2 }}
-              style={styles.experienceCardWrap}
+              style={{ ...styles.experienceCardWrap, padding: isMobile ? "32px 24px" : "48px" }}
             >
               <h2 style={styles.aboutName}>Experience</h2>
               <p style={styles.experienceEmptyText}>Waiting for you to add experience... ✨</p>
             </motion.div>
           </section>
 
-          {/* Tools and Technologies Used Section */}
-          <section style={styles.sectionPadding}>
+          <section style={{ ...styles.sectionPadding, padding: isMobile ? "40px 24px" : "40px 48px" }}>
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.1 }}
               transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-              style={styles.toolsCard}
+              style={{ ...styles.toolsCard, padding: isMobile ? "32px 24px" : "48px" }}
             >
               {portfolioLanguages.length > 0 && (
                 <>
@@ -339,13 +360,13 @@ export default function HomePage({ setPage }) {
           </section>
 
           {/* Real-Time Dashboard Details using Supabase */}
-          <section style={styles.dashboardSection}>
+          <section style={{ ...styles.dashboardSection, padding: isMobile ? "40px 24px 80px" : "40px 48px 100px" }}>
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.1 }}
               transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-              style={styles.dashboardContainer}
+              style={{ ...styles.dashboardContainer, padding: isMobile ? "32px 24px" : "48px" }}
             >
               <div style={styles.dashboardHeader}>
                 <h2 style={styles.dashboardTitle}>Dashboard Overview</h2>

@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Github, ExternalLink, Play, CheckCircle2, Code2, Trophy, Image as ImageIcon, Target, Lightbulb, UserCog, Wrench, TrendingUp, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, Github, ExternalLink, Play, CheckCircle2, Code2, Trophy, Image as ImageIcon, Target, Lightbulb, UserCog, Wrench, TrendingUp, BookOpen, Languages } from "lucide-react";
 import { styles } from "../styles/ProjectsPage.styles";
 
 export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, openAwardLightbox, openGalleryLightbox, handleLinkClick }) {
@@ -69,14 +69,27 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
                             </div>
                         )}
 
-                        <div>
-                            <h3 style={styles.subHeadingStyle}><Code2 size={20} color="#0D6EFD" /> Tech Stack</h3>
-                            <div style={styles.tagWrap}>
-                                {selected.tags && selected.tags.map((t) => (
-                                    <span key={t} style={styles.techTag}>{t}</span>
-                                ))}
+                        {selected.languages && selected.languages.length > 0 && (
+                            <div>
+                                <h3 style={styles.subHeadingStyle}><Languages size={20} color="#10b981" /> LANGUAGES</h3>
+                                <div style={styles.tagWrap}>
+                                    {selected.languages.map((lang) => (
+                                        <span key={lang.name} style={styles.techTag}>{lang.name}</span>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {selected.tags && selected.tags.length > 0 && (
+                            <div>
+                                <h3 style={styles.subHeadingStyle}><Code2 size={20} color="#0D6EFD" /> Technologies</h3>
+                                <div style={styles.tagWrap}>
+                                    {selected.tags.map((t) => (
+                                        <span key={t} style={styles.techTag}>{t}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {selected.tools && selected.tools.length > 0 && (
                             <div>

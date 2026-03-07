@@ -37,6 +37,10 @@ VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
 # Supabase Keys
 VITE_SUPABASE_URL=your_supabase_url_here
 VITE_SUPABASE_ANON_KEY=your_supabase_anonymous_key_here
+
+# OpenRouter (RAG Chatbot Backend) 
+# Note: For local Edge Function testing only - in production, store on Supabase Dashboard Secrets
+OPENROUTER_API_KEY=your_open_router_key_here
 ```
 
 ---
@@ -113,7 +117,24 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ---
 
-## 4. โครงสร้างและเนื้อหาไฟล์ (SRC)
+## 4. Supabase Edge Functions (AI Chatbot)
+โปรเจคนี้ใช้งาน **Edge Function** เพื่อทำระบบหน้าต่างพูดคุยคู่กับ AI (RAG Backend) คุณสามารถเอาโค้ดในไดเรกทอรี `supabase/functions/chat-with-qwen` อัปเกรดเข้าไปในโปรเจค Supabase ของตนเองได้ดังนี้:
+
+```bash
+# พิมพ์ใน Terminal เพื่อล็อกอินตัวเองเข้า Supabase CLI (หากยังไม่เคยติดตั้ง ต้องติดตั้งก่อนด้วย npm: npx supabase)
+npx supabase login
+
+# ดึงลิงก์โปรเจค (Link) จาก Dashboard ของคุณมาใช้พัฒนาต่อ
+npx supabase link --project-ref your_project_unique_id
+
+# ฝากกุญแจ API Key เข้าไปในระบบ Secrets ป้องกันการถูกขโมย (ห้ามฝังไว้ในโค้ดดิบ)
+npx supabase secrets set OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxx
+
+# อัปโหลดฟังก์ชันแชทขึ้นไปบนโปรดักชัน
+npx supabase functions deploy chat-with-qwen --no-verify-jwt
+```
+
+## 5. โครงสร้างและเนื้อหาไฟล์ (SRC)
 หลังจากนี้คุณสามารถนำเนื้อหาไฟล์ Component ที่เขียนทั้งหมด มาวางลงโครงสร้างนี้:
 
 - `/src/components` (รวม `StackedCard`, `Navbar`, และ `ProjectMiniCard`)
@@ -122,10 +143,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - `/src/lib/supabase.js`
 - `/src/App.jsx` (รวมโค้ดสร้าง React Router Browser และ Clerk Provider)
 - `/src/index.css` (ปรับแต่ง Global Reset เป็นหลัก)
+- `/supabase/functions` (รวมซอร์ซโค้ด Backend Deno)
 
 ---
 
-## 5. เริ่มต้นใช้งานได้เลย!
+## 6. เริ่มต้นใช้งานได้เลย!
 เมื่อวางไฟล์ซอร์จโค้ดทั้งหมดเรียบร้อยแล้ว พิมพ์เปิดทดสอบได้เลยด้วย:
 ```bash
 npm run dev
