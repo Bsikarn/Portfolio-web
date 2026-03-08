@@ -1,9 +1,4 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/clerk-react";
+
 import { supabase } from "./lib/supabase";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +16,7 @@ const ChatBot = lazy(() => import("./components/ChatBot"));
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 
 // Index mapping for page transitions (used to determine slide direction)
@@ -28,7 +24,8 @@ const PAGE_INDEX = {
   Home: 0,
   Projects: 1,
   Contact: 2,
-  Admin: 3,
+  Login: 3,
+  Admin: 4,
 };
 
 // Animation variants for Framer Motion to handle page sliding
@@ -43,13 +40,33 @@ export default function App() {
   const [direction, setDirection] = useState(1);
   const [chatOpen, setChatOpen] = useState(false);
   const [emojis, setEmojis] = useState([]);
+  const [session, setSession] = useState(null);
+
+  // Monitor Supabase Auth State
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Handles page navigation and determines animation direction
   const handleSetPage = useCallback((newPage) => {
     if (newPage === page) return;
+
+    // Protect Admin Route: Redirect to Login if no session
+    if (newPage === "Admin" && !session) {
+      newPage = "Login";
+    }
+
     setDirection(PAGE_INDEX[newPage] > PAGE_INDEX[page] ? 1 : -1);
     setPage(newPage);
-  }, [page]);
+  }, [page, session]);
 
   // Resets scroll position to top when changing pages
   useEffect(() => {
@@ -168,67 +185,10 @@ export default function App() {
             {page === "Home" ? <HomePage setPage={handleSetPage} /> : null}
             {page === "Projects" ? <ProjectsPage /> : null}
             {page === "Contact" ? <ContactPage /> : null}
+            {page === "Login" ? <LoginPage setPage={handleSetPage} /> : null}
             {page === "Admin" ? (
-              <>
-                {/* 1. If signed in, show Admin Page and Profile button */}
-                <SignedIn>
-                  <div
-                    style={{
-                      position: "fixed",
-                      top: 80,
-                      right: 20,
-                      zIndex: 1000,
-                    }}
-                  >
-                    <UserButton afterSignOutUrl="/" />
-                  </div>
-                  <AdminPage />
-                </SignedIn>
-
-                {/* 2. If signed out, display a restricted access message prompting login */}
-                <SignedOut>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      height: "80vh",
-                      zIndex: 2,
-                      position: "relative",
-                    }}
-                  >
-                    <h2
-                      style={{
-                        fontFamily: "Poppins",
-                        color: "#000",
-                        fontSize: "2rem",
-                        marginBottom: "8px",
-                      }}
-                    >
-                      🔒 Restricted Area
-                    </h2>
-                    <p style={{ color: "#4a6a8a", marginBottom: 20 }}>
-                      Please log in to access the administration panel.
-                    </p>
-                    <SignInButton mode="modal">
-                      <button
-                        style={{
-                          padding: "12px 24px",
-                          background: "#0D6EFD",
-                          color: "white",
-                          border: "none",
-                          borderRadius: 8,
-                          cursor: "pointer",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Log In as Admin
-                      </button>
-                    </SignInButton>
-                  </div>
-                </SignedOut>
-              </>
+              // If signed in, show Admin Page (Protected Route)
+              session ? <AdminPage /> : null
             ) : null}
           </Suspense>
         </motion.div>

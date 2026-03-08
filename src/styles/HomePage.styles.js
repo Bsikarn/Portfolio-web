@@ -23,7 +23,7 @@ export const styles = {
     dividerStyle: { border: "none", borderTop: "1px dashed #eef3ff" },
     aboutGridRow: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 24 },
     aboutGridItem: { display: "flex", gap: 16 },
-    aboutIconBox: { width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" },
+    aboutIconBox: { width: 44, height: 44, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
     aboutItemTitle: { fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 14, color: "#0d1b2a" },
     aboutItemDesc: { fontFamily: "'Poppins',sans-serif", fontSize: 13, color: "#5a7a9a", marginTop: 4 },
     toolsCard: { background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", borderRadius: 24, padding: "48px", boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)" },

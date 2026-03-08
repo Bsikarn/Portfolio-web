@@ -1,68 +1,30 @@
-# Portfolio Web
-> **⚠️ Copyright Notice:** This is a proprietary project. All rights reserved. You may view the code for reference, but copying, modification, or distribution is strictly prohibited. See the [LICENSE](./LICENSE) file for more details.
+# พอร์ตโฟลิโอเว็บไซต์ (Portfolio Web)
+> **⚠️ นโยบายลิขสิทธิ์ (Copyright Notice):** โปรเจคนี้เป็นโปรเจคส่วนบุคคลที่มีลิขสิทธิ์ ห้ามคัดลอก ดัดแปลง หรือนำไปเผยแพร่โดยไม่ได้รับอนุญาต กรุณาอ่านรายละเอียดเพิ่มเติมในไฟล์ [LICENSE](./LICENSE)
 
-A Minimalist Full-Stack Portfolio.
+เว็บไซต์พอร์ตโฟลิโอส่วนตัวแบบ Full-Stack สไตล์ Minimalist
 
-## Tech Stack
+## 🛠️ เทคโนโลยีที่ใช้งาน (Tech Stack)
 - **Languages**: JavaScript, SQL, HTML, CSS
 - **Frontend**: React.js, Vite
 - **Backend**: Supabase (PostgreSQL)
-- **Libraries/Tools:** Clerk (Auth), Framer Motion, Three.js, Lucide React, Supabase-js, Playwright (E2E Testing)
+- **Libraries/Tools**: Supabase Auth (ยืนยันตัวตน), Framer Motion, Three.js, Lucide React, Playwright (E2E Testing)
 
-## Active Features
-- Minimalist Card-based Layout with Glassmorphism
-- 3D Interactive Elements (Animated Blob) & Background Animations (Falling Emojis, Floating Stars)
-- Realtime Admin Panel for Project Management (Secured by Clerk)
-- AI Chatbot Assistant for visitor inquiries (OpenRouter / Qwen powered)
-- Media Gallery & Full-screen Lightbox
+## ✨ ฟีเจอร์ที่ใช้งานอยู่ในปัจจุบัน (Active Features)
+- ดีไซน์สวยงามสไตล์ Minimalist รูปแบบการ์ด (Card-based Layout) พร้อมเอฟเฟกต์ Glassmorphism
+- องค์ประกอบแอนิเมชัน 3 มิติ (Animated Blob) และพื้นหลังเคลื่อนไหว (Falling Emojis)
+- ระบบจัดการผลงานและอัปเดตข้อมูลบนหน้า Admin Panel แบบเรียลไทม์ (ป้องกันความปลอดภัยด้วยระบบ Log in จาก Supabase)
+- แชทบอท AI แจ้งตอบข้อมูลเบื้องต้นเกี่ยวกับเจ้าของโปรเจค (ผูกการทำงานกับ OpenRouter / Qwen)
+- ระบบแกลเลอรีรูปภาพและวิดีโอแบบเต็มจอ (Full-screen Lightbox)
 
-## Setup & Installation Guide
-
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd portfolio-web
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables:**
-   Create a `.env.local` file in the root directory and add the following keys:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   ```
-   *(For Supabase Edge Functions and local testing, ensure `OPENROUTER_API_KEY` is loaded in Supabase Secrets)*
-
-4. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Database Setup (Supabase):**
-   - Execute the SQL commands listed in `docs/private/supabase-knowledge.md` to create the necessary tables.
-   - Run the functions listed in `docs/private/supabase-knowledge.md` in the SQL Editor to enable RPC tasks like tracking views and managing projects.
-
-6. **Edge Function Deployments (Supabase RAG):**
-   - Setup your `OPENROUTER_API_KEY` as a secret via `npx supabase secrets set OPENROUTER_API_KEY=your_key`.
-   - Deploy via `npx supabase functions deploy chat-with-qwen --no-verify-jwt`.
-
-## Directory Structure
-
-- `src/` (✔️ **Safe to modify**): Core logic and UI.
-  - `components/`: Isolated UI elements (Navbar, StackedCard, Cards).
-  - `pages/`: Main application views (`HomePage`, `AdminPage`).
-  - `data/`: Constant static data mapping.
-  - `lib/`: Configuration API (`supabase.js`).
-  - `styles/`: JS Styling Dictionaries (`HomePage.styles.js`).
-- `supabase/functions/` (✔️ **Safe to modify**): Deno Edge Functions logic.
-- `docs/private/` (❌ **DO NOT TOUCH**):
-  - Retained for private AI Master Rule logs (`*-knowledge.md`, `*-trouble.md`).
-- `NEW_setup.md` (✔️ **Safe to modify**):
-  - Step-by-Step recreation guide without using git clone.
-- `public/` (✔️ **Safe to modify**): Static media.
-- `package.json` / `vite.config.js` / `.env.local`: Application configuration files.
+## 📁 โครงสร้างโปรเจค (Directory Structure)
+- `src/` (✔️ **ปลอดภัย สามารถแก้ไขได้**): โค้ดสำหรับหน้าบ้านและฟังก์ชันการทำงานหลักของโปรเจค
+  - `components/`: ส่วนประกอบย่อยหน้าเว็บ (Navbar, StackedCard, UI Cards ต่างๆ)
+  - `pages/`: หน้าแสดงเนื้อหาหลักทิศทางต่างๆ (`HomePage`, `ProjectsPage`, `AdminPage`)
+  - `data/`: ข้อมูลคงที่ (Static config/constants) สำหรับหน้าบ้าน
+  - `lib/`: ข้อมูลการเชื่อมต่อ API (`supabase.js`)
+  - `styles/`: โค้ดสไตล์ (JS Styling Dictionaries) ควบคุมรูปลักษณ์ของ Component
+- `supabase/functions/` (✔️ **ปลอดภัย สามารถแก้ไขได้**): ส่วนโค้ดหลังบ้านสำหรับ Edge Functions
+- `docs/private/` (❌ **ห้ามแก้ไขเด็ดขาด**): ถังความรู้ส่วนตัวสำหรับ AI Master Rules ห้ามยุ่งเพื่อป้องกัน Agent สับสน (`*-knowledge.md`, `*-trouble.md`)
+- `NEW_setup.md` (✔️ **ปลอดภัย สามารถแก้ไขได้**): คู่มือวิธีการสร้างโปรเจคนี้กลับมาตั้งแต่ 0
+- `public/` (✔️ **ปลอดภัย สามารถแก้ไขได้**): สื่อรูปภาพและ Assets คงที่
+- `package.json` / `vite.config.js` / `.env.local`: ไฟล์ตั้งค่าและ Library ของโปรเจค

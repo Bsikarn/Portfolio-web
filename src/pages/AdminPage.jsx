@@ -21,9 +21,12 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncingGithub, setIsSyncingGithub] = useState(false);
 
-  // State to track if we are editing an existing project or adding a new one
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   // Fetch all projects from Supabase to populate the list
   const fetchProjects = async () => {
@@ -264,6 +267,11 @@ export default function AdminPage() {
 
   return (
     <div style={styles.pageContainer}>
+      <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "flex-end", paddingBottom: 20 }}>
+        <button onClick={handleSignOut} style={{ padding: "10px 20px", background: "#ef4444", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: "bold", boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)" }}>
+          🚪 Sign Out
+        </button>
+      </div>
       <div style={{ position: "relative", zIndex: 1, marginBottom: 40 }}>
 
         {/* Category Management */}

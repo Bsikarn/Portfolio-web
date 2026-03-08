@@ -20,7 +20,7 @@ cd portfolio-web
 # 3. ติดตั้ง Dependencies (ไลบรารี) หลักทั้งหมดตามโปรเจคเดิม
 npm install
 npm install lucide-react framer-motion three @react-three/fiber @react-three/drei
-npm install @supabase/supabase-js @clerk/clerk-react
+npm install @supabase/supabase-js
 npm install react-router-dom
 npm install -D @playwright/test
 npx playwright install chromium
@@ -33,8 +33,7 @@ npx playwright install chromium
 
 สร้างไฟล์ชื่อ `.env.local` ไว้ที่โฟลเดอร์นอกสุดสุดระดับเดียวกับ `package.json` จากนั้นใส่ค่าคอนฟิก 4 ตัวนี้:
 ```env
-# Clerk Authentication Keys
-VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+
 
 # Supabase Keys
 VITE_SUPABASE_URL=your_supabase_url_here
@@ -143,7 +142,7 @@ npx supabase functions deploy chat-with-qwen --no-verify-jwt
 - `/src/pages` (รวม `HomePage`, `ProjectsPage`, `AdminPage`, `ContactPage`)
 - `/src/data/constants.jsx` (รวมข้อมูลพื้นฐาน About Me / Tag)
 - `/src/lib/supabase.js`
-- `/src/App.jsx` (รวมโค้ดสร้าง React Router Browser และ Clerk Provider)
+- `/src/App.jsx` (รวมโค้ดพรีเซนเทชันและระบบจัดการ Session (Auth) ของ Supabase)
 - `/src/index.css` (ปรับแต่ง Global Reset เป็นหลัก)
 - `/supabase/functions` (รวมซอร์ซโค้ด Backend Deno)
 

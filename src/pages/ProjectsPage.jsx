@@ -17,6 +17,13 @@ export default function ProjectsPage() {
   // Ref for the horizontal scrolling container of project mini-cards
   const scrollContainerRef = useRef(null);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // State to store the full list of projects fetched from Supabase
   const [projectsData, setProjectsData] = useState([]);
   const [categoriesData, setCategoriesData] = useState(["All"]); // Start with "All"
@@ -248,7 +255,7 @@ export default function ProjectsPage() {
 
       {/* Main detail card for the currently selected project */}
       <div style={{ ...styles.mainContentWrapper, position: "relative", zIndex: 2 }}>
-        <div style={styles.detailsOuterContainer}>
+        <div style={{ ...styles.detailsOuterContainer, padding: isMobile ? "0 16px" : styles.detailsOuterContainer.padding }}>
           <AnimatePresence mode="wait">
             {selected && (
               <ProjectDetailsCard
@@ -258,6 +265,7 @@ export default function ProjectsPage() {
                 openAwardLightbox={openAwardLightbox}
                 openGalleryLightbox={openGalleryLightbox}
                 handleLinkClick={handleLinkClick}
+                isMobile={isMobile}
               />
             )}
           </AnimatePresence>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Github, ExternalLink, Play, CheckCircle2, Code2, Trophy, Image as ImageIcon, Target, Lightbulb, UserCog, Wrench, TrendingUp, BookOpen, Languages } from "lucide-react";
 import { styles } from "../styles/ProjectsPage.styles";
 
-export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, openAwardLightbox, openGalleryLightbox, handleLinkClick }) {
+export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, openAwardLightbox, openGalleryLightbox, handleLinkClick, isMobile }) {
     if (!selected) return null;
 
     return (
@@ -29,7 +29,7 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
                 <button onClick={() => nav(1)} style={styles.navRightArrow}><ChevronRight size={24} /></button>
             </div>
 
-            <div style={styles.detailsPadding}>
+            <div style={{ ...styles.detailsPadding, padding: isMobile ? "32px 24px" : "40px 48px" }}>
                 {/* Title and Short Description */}
                 <div style={styles.titleSection}>
                     <h2 style={styles.mainTitle}>
