@@ -7,11 +7,11 @@ import FallingEmoji from "./components/FallingEmoji";
 import MeshGradientBackground from "./components/MeshGradientBackground";
 import { EMOJIS } from "./data/constants";
 
-import { Canvas } from "@react-three/fiber";
 import { lazy, Suspense } from "react";
+import ThreeDPreloader from "./components/ThreeDPreloader";
 
 // Lazy loading pages to improve performance by loading them only when needed
-const AnimatedBlob = lazy(() => import("./components/AnimatedBlob"));
+const Background3DScene = lazy(() => import("./components/Background3DScene"));
 const ChatBot = lazy(() => import("./components/ChatBot"));
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
@@ -130,24 +130,10 @@ export default function App() {
             filter: "blur(40px)",
           }}
         />
-        {/* React Three Fiber canvas for 3D animated background */}
-        <Canvas
-          camera={{ position: [0, 0, 3.5] }}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[5, 5, 5]} intensity={1} />
-          <pointLight position={[-5, -5, -5]} color="#ffc8d5" intensity={0.5} />
-          <Suspense fallback={null}>
-            <AnimatedBlob />
-          </Suspense>
-        </Canvas>
+        {/* Code-split and lazy-loaded 3D background with Glassmorphism preloader */}
+        <Suspense fallback={<ThreeDPreloader />}>
+          <Background3DScene />
+        </Suspense>
       </div>
 
       {/* Render the falling emojis */}
