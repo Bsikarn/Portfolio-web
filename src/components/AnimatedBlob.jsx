@@ -7,7 +7,7 @@ export default function AnimatedBlob() {
   const meshRef = useRef();
 
   // ⚠️ TODO: If you have your own 3D model (.glb/.gltf file), uncomment the line below to load it:
-  // const { scene } = useGLTF('/ชื่อไฟล์ของคุณ.glb');
+  // const { scene } = useGLTF('/your-model-file.glb');
 
   // useFrame executes every frame, rotating the blob to give it a spinning effect
   useFrame((state) => {

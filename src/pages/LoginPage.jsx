@@ -11,21 +11,36 @@ export default function LoginPage({ setPage }) {
     const [errorMsg, setErrorMsg] = useState("");
 
     const handleLogin = async (e) => {
+        // Prevent default form submission behavior
         e.preventDefault();
+
+        // Explicitly set loading state to true to show spinning indicator
         setLoading(true);
+        // Reset any previous error messages before attempting new login
         setErrorMsg("");
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+        try {
+            // Attempt to authenticate the user using Supabase auth API
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-        if (error) {
-            setErrorMsg(error.message);
-            setLoading(false);
-        } else {
-            // Login successful, redirect to admin
+            // If Supabase returns an error, explicitly throw it to be caught by the catch block
+            if (error) throw error;
+
+            // If authentication is successful, immediately redirect to the Admin panel
+            // Note: We use the custom `setPage` navigator prop instead of react-router's useNavigate
+            // to conform to the project's existing custom routing architecture.
             setPage("Admin");
+
+        } catch (error) {
+            // Catch and display any errors that occur during the authentication process
+            setErrorMsg(error.message);
+        } finally {
+            // Explicitly set loading state to false regardless of success or failure
+            // This ensures the button stops spinning even if an error occurs
+            setLoading(false);
         }
     };
 

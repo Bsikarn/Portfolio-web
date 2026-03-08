@@ -1,5 +1,5 @@
 export const styles = {
-    pageContainer: { padding: "40px 20px", minHeight: "100vh", backgroundColor: "#f4f4f5", fontFamily: "sans-serif" },
+    pageContainer: { padding: "120px 20px 40px", minHeight: "100vh", backgroundColor: "#f4f4f5", fontFamily: "sans-serif" },
     cardContainer: { maxWidth: 900, margin: "0 auto 30px", backgroundColor: "#ffffff", padding: "24px", border: "1px solid #d4d4d8" },
     headerRow: { display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e4e4e7", paddingBottom: 16, marginBottom: 24 },
     pageTitle: { fontSize: 24, margin: 0, color: "#18181b", fontWeight: "bold" },

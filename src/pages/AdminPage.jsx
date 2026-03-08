@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { styles } from "../styles/AdminPage.styles";
 
-export default function AdminPage() {
+export default function AdminPage({ setPage }) {
   // Initial state for the project form
   const initialFormState = {
     title: "", category: "Frontend", description: "", image_icon: "💻", year: "2026",
@@ -26,6 +26,7 @@ export default function AdminPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    if (setPage) setPage("Home");
   };
 
   // Fetch all projects from Supabase to populate the list

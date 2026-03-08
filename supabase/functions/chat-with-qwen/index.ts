@@ -10,13 +10,13 @@
  * a context-aware response.
  */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0";
 
 // CORS headers to ensure the API can be called from the frontend web apps
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
@@ -31,10 +31,10 @@ const initModel = async () => {
     }
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
     // 1. Handle preflight CORS requests implicitly
     if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders });
+        return new Response(null, { headers: corsHeaders, status: 204 });
     }
 
     try {

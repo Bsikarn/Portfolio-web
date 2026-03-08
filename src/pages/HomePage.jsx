@@ -1,13 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Code2 from "lucide-react/dist/esm/icons/code-2";
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
-import Languages from "lucide-react/dist/esm/icons/languages";
-import Award from "lucide-react/dist/esm/icons/award";
-import User from "lucide-react/dist/esm/icons/user";
-import Heart from "lucide-react/dist/esm/icons/heart";
-import Users from "lucide-react/dist/esm/icons/users";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+import { Code2, GraduationCap, Languages, Award, User, Heart, Users, FileText } from "lucide-react";
 import StackedCard from "../components/StackedCard";
 import { TECHNOLOGIES_TAGS, TOOLS_TAGS, ABOUT_ME } from "../data/constants";
 import { supabase } from "../lib/supabase";

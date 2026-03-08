@@ -49,7 +49,7 @@ export default function App() {
     });
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
     });
     return () => subscription.unsubscribe();
@@ -188,7 +188,7 @@ export default function App() {
             {page === "Login" ? <LoginPage setPage={handleSetPage} /> : null}
             {page === "Admin" ? (
               // If signed in, show Admin Page (Protected Route)
-              session ? <AdminPage /> : null
+              session ? <AdminPage setPage={handleSetPage} /> : null
             ) : null}
           </Suspense>
         </motion.div>
