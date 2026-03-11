@@ -1,31 +1,33 @@
-# พอร์ตโฟลิโอเว็บไซต์ (Portfolio Web)
-> **⚠️ นโยบายลิขสิทธิ์ (Copyright Notice):** โปรเจคนี้เป็นโปรเจคส่วนบุคคลที่มีลิขสิทธิ์ ห้ามคัดลอก ดัดแปลง หรือนำไปเผยแพร่โดยไม่ได้รับอนุญาต กรุณาอ่านรายละเอียดเพิ่มเติมในไฟล์ [LICENSE](./LICENSE)
+# Portfolio Web
 
-เว็บไซต์พอร์ตโฟลิโอส่วนตัวแบบ Full-Stack สไตล์ Minimalist
+A Minimalist Full-Stack Personal Portfolio Website focusing on premium aesthetics and smooth user experiences.
 
-## 🛠️ เทคโนโลยีที่ใช้งาน (Tech Stack)
-- **Languages**: JavaScript, SQL, HTML, CSS
-- **Frontend**: React.js, Vite
-- **Backend**: Supabase (PostgreSQL)
-- **Libraries/Tools**: Supabase Auth (ยืนยันตัวตน), Framer Motion, Three.js, Lucide React, Playwright (E2E Testing)
+## 🛠️ Tech Stack
 
-## ✨ ฟีเจอร์ที่ใช้งานอยู่ในปัจจุบัน (Active Features)
-- ดีไซน์สวยงามสไตล์ Minimalist รูปแบบการ์ด (Card-based Layout) พร้อมเอฟเฟกต์ Glassmorphism
-- องค์ประกอบแอนิเมชัน 3 มิติ (Animated Blob) และพื้นหลังเคลื่อนไหว (Falling Emojis)
-- ระบบจัดการผลงานและอัปเดตข้อมูลบนหน้า Admin Panel แบบเรียลไทม์ (ป้องกันความปลอดภัยด้วยระบบ Log in จาก Supabase)
-- แชทบอท AI แจ้งตอบข้อมูลเบื้องต้นเกี่ยวกับเจ้าของโปรเจค (ผูกการทำงานกับ OpenRouter / Qwen)
-- ระบบแกลเลอรีรูปภาพและวิดีโอแบบเต็มจอ (Full-screen Lightbox)
-- การปรับปรุงประสิทธิภาพด้วยระบบ Lazy Loading และ Code-Splitting สำหรับแอนิเมชัน 3 มิติ พร้อมหน้าจอโหลดแบบ Glassmorphism (Preloader) ช่วยให้หน้าเว็บโหลดไวขึ้น (LCP)
+- **Languages:** JavaScript, HTML, CSS
+- **Frontend:** React.js, Vite
+- **Backend:** Supabase (PostgreSQL, Realtime, Auth)
+- **Libraries/Tools:** `framer-motion` (Animations), `three.js` & `@react-three/fiber` & `@react-three/drei` (3D Graphics), `lucide-react` (Icons), `@supabase/supabase-js` (Database/Auth Client)
 
-## 📁 โครงสร้างโปรเจค (Directory Structure)
-- `src/` (✔️ **ปลอดภัย สามารถแก้ไขได้**): โค้ดสำหรับหน้าบ้านและฟังก์ชันการทำงานหลักของโปรเจค
-  - `components/`: ส่วนประกอบย่อยหน้าเว็บ (Navbar, StackedCard, UI Cards ต่างๆ)
-  - `pages/`: หน้าแสดงเนื้อหาหลักทิศทางต่างๆ (`HomePage`, `ProjectsPage`, `AdminPage`)
-  - `data/`: ข้อมูลคงที่ (Static config/constants) สำหรับหน้าบ้าน
-  - `lib/`: ข้อมูลการเชื่อมต่อ API (`supabase.js`)
-  - `styles/`: โค้ดสไตล์ (JS Styling Dictionaries) ควบคุมรูปลักษณ์ของ Component
-- `supabase/functions/` (✔️ **ปลอดภัย สามารถแก้ไขได้**): ส่วนโค้ดหลังบ้านสำหรับ Edge Functions
-- `docs/private/` (❌ **ห้ามแก้ไขเด็ดขาด**): ถังความรู้ส่วนตัวสำหรับ AI Master Rules ห้ามยุ่งเพื่อป้องกัน Agent สับสน (`*-knowledge.md`, `*-trouble.md`)
-- `NEW_setup.md` (✔️ **ปลอดภัย สามารถแก้ไขได้**): คู่มือวิธีการสร้างโปรเจคนี้กลับมาตั้งแต่ 0
-- `public/` (✔️ **ปลอดภัย สามารถแก้ไขได้**): สื่อรูปภาพและ Assets คงที่
-- `package.json` / `vite.config.js` / `.env.local`: ไฟล์ตั้งค่าและ Library ของโปรเจค
+## ✨ Active Features
+
+- **Minimalist Design:** Card-based Layout with glassmorphism effects and a soft color palette.
+- **3D & Animations:** Interactive 3D Background, Animated Blobs, and falling emoji reactions.
+- **Custom Routing Transition:** Framer Motion based slide transitions between pages without using React Router.
+- **Realtime Dashboard:** An Admin Panel to manage projects that updates live via Supabase Realtime subscriptions.
+- **Authentication:** Protected Admin routes using Supabase Auth.
+- **AI ChatBot:** An integrated chatbot interface powered by an AI backend (Edge Functions/OpenRouter).
+- **Performance Optimized:** Lazy loading for 3D components and nested pages with a Glassmorphism Preloader.
+
+## 📁 Directory Structure
+
+- `src/` (✔️ **SAFE TO MODIFY**): The main application source code.
+  - `components/`: UI components such as Navbar, Cards, Background3D, and ChatBot.
+  - `pages/`: Main content views including HomePage, ProjectsPage, ContactPage, LoginPage, and AdminPage.
+  - `data/`: Static configuration and constant strings.
+  - `lib/`: Configuration files and service initializations (e.g., `supabase.js`).
+  - `styles/`: Additional styling definitions.
+- `docs/private/` (❌ **DO NOT TOUCH**): The private knowledge repository and troubleshooting guidelines for the AI Agent. Includes `*-knowledge.md` and `*-trouble.md`.
+- `NEW_setup.md` (✔️ **SAFE TO MODIFY**): Step-by-step from-scratch setup guide and granular code structure logic explanation.
+- `public/` (✔️ **SAFE TO MODIFY**): Static assets such as images and fonts.
+- `package.json` / `vite.config.js` (✔️ **SAFE TO MODIFY**): Project configuration and package dependencies.
