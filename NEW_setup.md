@@ -117,6 +117,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - **Section 1 (Chat Flow):** จัดการข้อความฝั่งผู้ใช้ (User) และฝั่งระบบ (Bot) แสดงเป็น Bubble
 - **Section 2 (API Integration):** ผูก logic การเรียกใช้ Edge Function `chat-with-qwen` เพื่อหาคำตอบและพ่นกลับมา
 
+### `src/components/AnimatedBlob.jsx`
+- **Purpose:** โหลดและแสดงผล 3D Model (`base_basic_pbr.glb`) ที่ตกแต่งพื้นหลังของเว็บไซต์
+- **Section 1 (Model Loading):** ใช้ `useGLTF` จาก `@react-three/drei` เพื่อโหลดไฟล์ .glb จาก public folder (พร้อม `preload` ไว้กันกระตุก)
+- **Section 2 (Animation Loop):** ใช้ `useFrame` ร่วมกับ `Math.sin()` เพื่อสั่งให้โมเดลหมุนไปมา (sway) ในแกน x และ y อย่างนุ่มนวล สร้างความรู้สึกมีชีวิตชีวา
+
 ### `src/pages/HomePage.jsx`
 - **Purpose:** หน้าแรก (Landing Page) แสดงข้อมูลแนะนำตัวเบื้องต้น
 - **Section 1 (Hero Section):** แสดงข้อความต้อนรับ, แนะนำตัวสั้นๆ พร้อมแอนิเมชันข้อความเด้ง
@@ -129,11 +134,29 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - **Section 2 (Grid Display):** นำข้อมูลมาวนลูปแสดงผลเป็นการ์ดเรียงต่อกัน
 - **Section 3 (Lightbox Gallery):** หากผู้ใช้คลิกดูรูปเพิ่ม จะมี Modal หรือ Lightbox แบบเต็มหน้าจอโผล่ขึ้นมาเพื่อให้เลื่อนดูแกลเลอรีรูปอื่น ๆ แบบ "Facebook-style"
 
+### `src/components/ProjectDetailsCard.jsx`
+- **Purpose:** คอมโพเนนต์การ์ดแสดงรายละเอียดของโปรเจคแต่ละชิ้นแบบเจาะลึก
+- **Section 1 (Header & Navigation):** แบนเนอร์ด้านบนที่มีปุ่มเล่นวิดีโอ (ถ้ามี) และปุ่มกดเลื่อนดูโปรเจคถัดไป/ก่อนหน้า
+- **Section 2 (Content Sections):** แสดงรายละเอียดแบ่งเป็นหมวดหมู่ (ปัญหา, บทสรุป, หน้าที่, เทคโนโลยีที่ใช้, บทเรียนที่ได้รับ) พร้อมไอคอนกำกับ
+- **Section 3 (Interactive Elements):** แกลเลอรีรูปภาพแบบกริด (จิ้มเพื่อขยายหน้าจอ), แถบสีแสดงสถิติภาษาโปรแกรมที่ใช้, และปุ่มลิงก์ไปยัง GitHub หรือเว็บจริง
+
+### `src/pages/ContactPage.jsx`
+- **Purpose:** หน้าสำหรับช่องทางการติดต่อและโซเชียลมีเดีย
+- **Section 1 (Header Animation):** ข้อความทักทายที่มีการทำแอนิเมชันเด้งขึ้นมา
+- **Section 2 (Contact Grid):** วนลูปข้อมูลในอาร์เรย์ `CONTACTS` สร้างการ์ดแสดงช่องทางติดต่อ (Email, GitHub, LinkedIn) ซึ่งกดแล้วเปิดแท็บใหม่ได้
+- **Section 3 (Footer Status):** ข้อความอธิบายตำแหน่งที่ตั้งและเวลาในการตอบกลับเมื่อเลื่อนจอลงมาถึงส่วนล่าง
+
+### `src/pages/LoginPage.jsx`
+- **Purpose:** หน้าสำหรับล็อคอินเข้าสู่ระบบ เพื่อจัดการข้อมูลหลังบ้าน
+- **Section 1 (Form State):** จัดการ State รอรับค่า อีเมลและรหัสผ่านจากผู้ใช้
+- **Section 2 (Authentication Logic):** เมื่อกดยืนยัน จะเรียกใช้ฟังก์ชัน `signInWithPassword` ของ Supabase ถ้าระบบตอบรับว่าสำเร็จ ก็จะเปลี่ยนหน้าไปที่ `Admin`
+- **Section 3 (UI Feedback):** แสดงสถานะ Loading (ปุ่มหมุน) ขณะกำลังตรวจสอบ และแสดง Error แบบสีแดงชัดเจนหากล็อกอินผิดพลาด
+
 ### `src/pages/AdminPage.jsx`
 - **Purpose:** หน้าหลังบ้านสำหรับเพิ่มและแก้ไขโปรเจค
-- **Section 1 (Auth Protection):** ใช้ Session ตรวจสอบ หากไม่มีสิทธิ์จะถูกเด้งกลับไปหน้าจอ Login
-- **Section 2 (Data Table/List):** ดึงข้อมูล `projects` มาแสดงเป็นรายการให้แอดมินลบหรือจัดการได้ง่าย
-- **Section 3 (Project Form):** ฟอร์มกรอกข้อมูลเพิ่มชิ้นงานใหม่ (Title, Description, Images, Demo URL) ซึ่งจะส่งคำสั่ง Insert/Update ไปที่ Supabase
+- **Section 1 (Auth Protection & Data Fetching):** ใช้ Session ตรวจสอบ หากไม่มีสิทธิ์จะถูกเด้งกลับไปหน้าจอ Login มีฟังก์ชันดึงโปรเจคและหมวดหมู่มาโชว์
+- **Section 2 (Project Form & GitHub Sync):** ฟอร์มกรอกข้อมูลเพิ่มชิ้นงานใหม่ (Title, Description, Images, ฯลฯ) มีปุ่มดึงข้อมูลภาษาจาก GitHub อัตโนมัติ
+- **Section 3 (Data Settings):** ส่วนเสริมที่สามารถจัดการเรียงลำดับ Categories เพิ่ม/ลบหมวดหมู่ และมีลิสต์ผลงานทั้งหมดด้านล่างให้กด Edit หรือ Delete ได้
 
 ### `src/lib/supabase.js`
 - **Purpose:** ไฟล์เชื่อมต่อฐานข้อมูล

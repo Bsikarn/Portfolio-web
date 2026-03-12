@@ -1,52 +1,34 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-// import { useGLTF } from "@react-three/drei"; // Uncomment this when you want to use your own 3D model
-import { Sphere, MeshDistortMaterial, Float, Stars } from "@react-three/drei";
+import { useGLTF, Float, Stars } from "@react-three/drei";
 
 export default function AnimatedBlob() {
   const meshRef = useRef();
 
-  // ⚠️ TODO: If you have your own 3D model (.glb/.gltf file), uncomment the line below to load it:
-  // const { scene } = useGLTF('/your-model-file.glb');
+  // Load 3D model from public folder
+  const { scene } = useGLTF('/ergoninane-potion-76.glb');
 
-  // useFrame executes every frame, rotating the blob to give it a spinning effect
+  // useFrame executes every frame
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      // Gentle circular rotation to simulate looking around the model
+      // Use Math.sin for gentle left-right sway
+      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.4) * 0.5; // Sway left and right
+      // Use Math.abs(Math.sin) to ensure positive values (tilt downwards only, no tilting up)
+      meshRef.current.rotation.x = Math.abs(Math.sin(state.clock.elapsedTime * 0.2)) * 0.1; // Maximum downward tilt then return to origin
     }
   });
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-      {/* 
-        ⚠️ IF YOU USE YOUR OWN 3D MODEL (useGLTF):
-        1. Remove this entire <Sphere> ... </Sphere> block (including MeshDistortMaterial).
-        2. Replace it with your 3D model object like this: 
-           <primitive object={scene} ref={meshRef} scale={1.5} />
-      */}
-
-      {/* 
-        Sphere creates the base 3D shape.
-        Args: [radius, widthSegments, heightSegments]
-      */}
-      <Sphere ref={meshRef} args={[1.4, 64, 64]}>
-        {/* 
-          MeshDistortMaterial is what makes the sphere look like a liquid "blob".
-          It displaces the vertices of the geometry continuously.
-        */}
-        <MeshDistortMaterial
-          color="#A3D8F4"
-          attach="material"
-          distort={0.45} // Intensity of the distortion (how bumpy it gets)
-          speed={2.5}  // Speed of the distortion animation
-          roughness={0.1}
-          metalness={0.1}
-        />
-      </Sphere>
+    <Float speed={2} rotationIntensity={0.2} floatIntensity={1}>
+      {/* Place 3D model in the center, adjusted scale and position */}
+      <primitive object={scene} ref={meshRef} scale={0.3} position={[0, -0.9, 0]} />
 
       {/* Background stars component within the 3D scene */}
       <Stars radius={8} depth={3} count={200} factor={1} saturation={0} fade />
     </Float>
   );
 }
+
+// Preload 3D model to prevent jittering during initial render
+useGLTF.preload('/ergoninane-potion-76.glb');

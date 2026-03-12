@@ -9,6 +9,7 @@ export const styles = {
     filterTab: { padding: "8px 20px", borderRadius: 50, border: "none", cursor: "pointer", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 13, transition: "all 0.2s" },
     mainContentWrapper: { maxWidth: 1440, margin: "0 auto", paddingBottom: 80 },
     selectionSection: { padding: "0 24px", marginBottom: 32 },
+    // Match the styling of the project details card (detailsMainCard)
     selectionCardOuter: { background: "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(24px)", borderRadius: 24, padding: "24px 0", boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", border: "1px solid rgba(255,255,255,0.6)" },
     selectionHeading: { padding: "0 24px", marginBottom: 16, fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 18, color: "#0d1b2a" },
     noProjectsText: { padding: "20px 24px", textAlign: "center", color: "#8aabcc" },

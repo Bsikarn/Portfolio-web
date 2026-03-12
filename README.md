@@ -12,7 +12,7 @@ A Minimalist Full-Stack Personal Portfolio Website focusing on premium aesthetic
 ## ✨ Active Features
 
 - **Minimalist Design:** Card-based Layout with glassmorphism effects and a soft color palette.
-- **3D & Animations:** Interactive 3D Background, Animated Blobs, and falling emoji reactions.
+- **3D & Animations:** Interactive 3D Background with a gently rotating custom 3D model (`ergoninane-potion-76.glb`), and falling emoji reactions.
 - **Custom Routing Transition:** Framer Motion based slide transitions between pages without using React Router.
 - **Realtime Dashboard:** An Admin Panel to manage projects that updates live via Supabase Realtime subscriptions.
 - **Authentication:** Protected Admin routes using Supabase Auth.
