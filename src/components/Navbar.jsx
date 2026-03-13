@@ -1,34 +1,20 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
-import Menu from "lucide-react/dist/esm/icons/menu";
-import X from "lucide-react/dist/esm/icons/x";
-import { styles } from "../styles/Navbar.styles";
+import { MessageCircle, Menu, X } from "lucide-react";
 
 export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen }) {
-  // Track if the viewport is mobile width (less than 768px)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  // Manage the state of the mobile dropdown menu (open/closed)
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Hook to handle window resize events and update mobile layout state
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
-      // Auto-close the mobile menu if resizing back to a desktop view
-      if (window.innerWidth >= 768) {
-        setMenuOpen(false);
-      }
+      if (window.innerWidth >= 768) setMenuOpen(false);
     };
-
-    // Use passive listener for better scroll/resize performance
     window.addEventListener("resize", handleResize, { passive: true });
-
-    // Cleanup listener on unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Handle navigation link clicks and auto-close the mobile menu
   const handleNavClick = (p) => {
     setPage(p);
     setMenuOpen(false);
@@ -36,27 +22,25 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
 
   return (
     <>
-      <nav style={{ ...styles.nav, zIndex: 1000 }}>
-
+      <nav className="fixed top-0 left-0 right-0 z-[1000] px-[32px] h-[64px] flex items-center justify-between bg-white/60 backdrop-blur-[20px] border-b border-brand-secondary/25 shadow-[0_2px_20px_rgba(13,110,253,0.07)]">
+        
         {/* Left Section: Easter Egg / Interactive Button */}
-        <div style={styles.leftContainer}>
-          {/* Animated Cheer Up Button */}
+        <div className="flex items-center flex-1">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onCheerUp}
             aria-label="Cheer up!"
-            style={styles.cheerButton}
+            className="px-[14px] py-[6px] rounded-[50px] bg-gradient-to-br from-brand-accent to-brand-secondary border-none cursor-pointer font-sans font-semibold text-[20px] text-[#1a2a4a] shadow-[0_2px_8px_rgba(163,216,244,0.4)]"
           >
             🎉
           </motion.button>
         </div>
 
         {/* Center Section: Logo */}
-        <div style={styles.logoContainer}>
-          {/* Main Logo Container. Double-click acts as a hidden backdoor to the Admin section */}
+        <div className="flex items-center justify-center flex-1">
           <div
-            style={{ ...styles.logoText, cursor: "pointer" }}
+            className="cursor-pointer font-sans font-extrabold text-[22px] bg-gradient-to-br from-brand-primary to-brand-secondary bg-clip-text text-transparent tracking-[-0.5px]"
             onDoubleClick={() => handleNavClick("Admin")}
             title="Beaut.Portfolio"
           >
@@ -65,25 +49,14 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
         </div>
 
         {/* Right Section: Navigation Links and Actions */}
-        <div style={styles.navLinksContainer}>
-
-          {/* Desktop Navigation Links */}
+        <div className="flex items-center gap-[12px] flex-1 justify-end">
           {!isMobile && ["Home", "Projects", "Contact"].map((p) => (
             <button
               key={p}
               onClick={() => handleNavClick(p)}
-              style={{
-                ...styles.navLink,
-                background: page === p ? "#0D6EFD" : "transparent",
-                color: page === p ? "white" : "#4a6a8a",
-              }}
-              // Hover effects managed via React synthetic events
-              onMouseEnter={(e) => {
-                if (page !== p) e.currentTarget.style.color = "#0D6EFD";
-              }}
-              onMouseLeave={(e) => {
-                if (page !== p) e.currentTarget.style.color = "#4a6a8a";
-              }}
+              className={`px-[16px] py-[7px] rounded-[50px] border-none cursor-pointer font-sans font-semibold text-[13px] transition-all duration-200 ${
+                page === p ? "bg-brand-primary text-white" : "bg-transparent text-[#4a6a8a] hover:text-brand-primary"
+              }`}
             >
               {p}
             </button>
@@ -95,43 +68,26 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
             whileTap={{ scale: 0.9 }}
             onClick={() => setChatOpen((v) => !v)}
             aria-label="Open AI Assistant"
-            style={{
-              ...styles.chatButton,
-              // Change button appearance based on chat state
-              background: chatOpen
-                ? "linear-gradient(135deg,#0D6EFD,#4d9fff)"
-                : "rgba(163,216,244,0.3)",
-              boxShadow: chatOpen ? "0 4px 14px rgba(13,110,253,0.35)" : "none",
-            }}
+            className={`w-[38px] h-[38px] rounded-full border-none cursor-pointer flex items-center justify-center ${
+              chatOpen 
+                ? "bg-gradient-to-br from-brand-primary to-[#4d9fff] shadow-[0_4px_14px_rgba(13,110,253,0.35)]" 
+                : "bg-brand-secondary/30 shadow-none"
+            }`}
           >
             <MessageCircle size={17} color={chatOpen ? "white" : "#0D6EFD"} />
           </motion.button>
 
-          {/* Mobile Menu Toggle Button (Hamburger icon) */}
+          {/* Mobile Menu Toggle */}
           {isMobile && (
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle Menu"
-              style={{
-                background: "transparent", border: "none", cursor: "pointer",
-                marginLeft: "12px", color: "#0D6EFD", display: "flex",
-                justifyContent: "center", alignItems: "center", width: 32, height: 32
-              }}
+              className="bg-transparent border-none cursor-pointer ml-[12px] text-brand-primary flex justify-center items-center w-[32px] h-[32px]"
             >
-              {/* Transition animations between hamburger (menu) and close (X) icons */}
-              <div style={{ position: "relative", width: 24, height: 24 }}>
-                <motion.div
-                  animate={{ rotate: menuOpen ? 180 : 0, opacity: menuOpen ? 1 : 0, scale: menuOpen ? 1 : 0.5 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ position: "absolute", top: 0, left: 0 }}
-                >
+              <div className="relative w-[24px] h-[24px]">
+                <motion.div animate={{ rotate: menuOpen ? 180 : 0, opacity: menuOpen ? 1 : 0, scale: menuOpen ? 1 : 0.5 }} transition={{ duration: 0.3 }} className="absolute top-0 left-0">
                   <X size={24} />
                 </motion.div>
-                <motion.div
-                  animate={{ rotate: menuOpen ? -180 : 0, opacity: menuOpen ? 0 : 1, scale: menuOpen ? 0.5 : 1 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ position: "absolute", top: 0, left: 0 }}
-                >
+                <motion.div animate={{ rotate: menuOpen ? -180 : 0, opacity: menuOpen ? 0 : 1, scale: menuOpen ? 0.5 : 1 }} transition={{ duration: 0.3 }} className="absolute top-0 left-0">
                   <Menu size={24} />
                 </motion.div>
               </div>
@@ -140,45 +96,22 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
         </div>
       </nav>
 
-      {/* Mobile Navigation Dropdown Menu */}
+      {/* Mobile Dropdown */}
       <AnimatePresence>
         {isMobile && menuOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            style={{
-              position: "fixed",
-              top: 64, // Positioned right below the navbar
-              left: 0,
-              right: 0,
-              background: "rgba(255,255,255,0.95)",
-              backdropFilter: "blur(20px)", // Glassmorphism effect
-              borderBottom: "1px solid rgba(163,216,244,0.25)",
-              boxShadow: "0 10px 25px rgba(13,110,253,0.1)",
-              zIndex: 999, // Just below the navbar's z-index
-              display: "flex",
-              flexDirection: "column",
-              padding: "16px",
-            }}
+            className="fixed top-[64px] left-0 right-0 bg-white/95 backdrop-blur-[20px] border-b border-brand-secondary/25 shadow-[0_10px_25px_rgba(13,110,253,0.1)] z-[999] flex flex-col p-[16px]"
           >
-            {/* Render mobile links */}
             {["Home", "Projects", "Contact"].map((p) => (
               <button
                 key={p}
                 onClick={() => handleNavClick(p)}
-                style={{
-                  padding: "16px",
-                  background: page === p ? "rgba(13,110,253,0.1)" : "transparent",
-                  color: page === p ? "#0D6EFD" : "#4a6a8a",
-                  fontWeight: page === p ? 700 : 500,
-                  border: "none",
-                  borderRadius: "12px",
-                  textAlign: "center",
-                  fontSize: "16px",
-                  fontFamily: "'Poppins',sans-serif",
-                  marginBottom: "8px"
-                }}
+                className={`p-[16px] border-none rounded-[12px] text-center text-[16px] font-sans mb-[8px] ${
+                  page === p ? "bg-brand-primary/10 text-brand-primary font-bold" : "bg-transparent text-[#4a6a8a] font-medium"
+                }`}
               >
                 {p}
               </button>
@@ -189,4 +122,3 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
     </>
   );
 }
-

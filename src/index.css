@@ -1,7 +1,11 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply m-0 p-0 min-h-screen bg-gradient-to-br from-[#f0f8ff] to-[#fef6fb] font-sans;
+  }
 }
 
 body {
