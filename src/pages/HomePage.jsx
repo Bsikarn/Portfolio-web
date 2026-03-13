@@ -116,7 +116,7 @@ export default function HomePage({ setPage }) {
         <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} />
       </StackedCard>
 
-      <div className="relative z-2">
+      <div className="relative z-[2]">
         <div className="flex flex-col gap-0">
           
           {/* About Me */}

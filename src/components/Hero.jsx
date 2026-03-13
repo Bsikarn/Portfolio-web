@@ -3,7 +3,7 @@ import { FileText } from "lucide-react";
 
 export default function Hero({ setPage, isPdfOpen, setIsPdfOpen }) {
   return (
-    <section className="h-[calc(100vh-64px)] flex flex-col items-center justify-between px-[48px] py-[40px] max-w-[1440px] mx-auto relative z-1">
+    <section className="h-[calc(100vh-64px)] flex flex-col items-center justify-between px-[48px] py-[40px] max-w-[1440px] mx-auto relative z-[1]">
       <div className="shrink-0 z-10 text-center">
         <div className="inline-block px-[20px] py-[8px] rounded-[50px] bg-white/80 border border-brand-primary/15 text-[13px] font-bold text-brand-primary font-sans backdrop-blur-[10px] shadow-[0_4px_12px_rgba(13,110,253,0.08)]">
           👋 Available for hire
