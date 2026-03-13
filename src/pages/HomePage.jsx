@@ -45,6 +45,27 @@ export default function HomePage({ setPage }) {
   // UseRef for persistent local project count, updated alongside stats
   const projectCountRef = useRef(0);
 
+  // Web Worker for offloading heavy tasks
+  const workerRef = useRef(null);
+
+  useEffect(() => {
+    // Initialize Web Worker
+    workerRef.current = new Worker(new URL("../lib/worker.js", import.meta.url), { type: "module" });
+
+    // Handle incoming messages from the Worker
+    workerRef.current.onmessage = (e) => {
+      const { type, payload } = e.data;
+      if (type === 'PROCESS_PROJECT_TAGS_RESULT') {
+        setTechCounts(payload.counts);
+        setPortfolioLanguages(payload.portfolioLanguages);
+      }
+    };
+
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
   useEffect(() => {
     // Helper function to update the stats UI state from the DB data
     const updateStatsUI = (pCount, views, cheers) => {
@@ -81,29 +102,13 @@ export default function HomePage({ setPage }) {
 
         // Fetch all projects to count occurrences of technologies/tools locally
         const { data: allProjectsData } = await supabase.from("projects").select("tags, tools, languages");
-        if (allProjectsData) {
-          const counts = {};
-          const langSet = new Set();
-
-          allProjectsData.forEach(p => {
-            const items = [...(p.tags || []), ...(p.tools || [])];
-
-            if (p.languages) {
-              p.languages.forEach(l => {
-                langSet.add(l.name);
-                counts[l.name] = (counts[l.name] || 0) + 1;
-              });
-            }
-
-            items.forEach(item => {
-              // Normalize the string "React" to "React.js" to merge tag counts
-              let normalizedItem = item;
-              if (item === "React") normalizedItem = "React.js";
-              counts[normalizedItem] = (counts[normalizedItem] || 0) + 1;
-            });
+        
+        // Delegate the heavy iteration task to the Web Worker
+        if (allProjectsData && workerRef.current) {
+          workerRef.current.postMessage({
+            type: 'PROCESS_PROJECT_TAGS',
+            payload: allProjectsData
           });
-          setTechCounts(counts);
-          setPortfolioLanguages(Array.from(langSet));
         }
       } catch (error) {
         console.error("Error fetching stats:", error);

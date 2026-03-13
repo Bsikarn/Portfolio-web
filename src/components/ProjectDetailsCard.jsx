@@ -142,11 +142,11 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
                         <h3 style={styles.subHeadingStyle}><ImageIcon size={20} color="#0D6EFD" /> Project Gallery</h3>
                         <div style={{ ...styles.galleryGrid, gridTemplateColumns: selected.gallery.length === 1 ? "1fr" : "1fr 1fr" }}>
                             <div onClick={() => openGalleryLightbox(0)} style={{ ...styles.galleryLargeItem, height: selected.gallery.length === 1 ? 400 : 250 }}>
-                                <motion.img whileHover={{ scale: 1.05 }} src={selected.gallery[0]} style={styles.galleryImage} />
+                                <motion.img whileHover={{ scale: 1.05 }} src={selected.gallery[0]} style={{ ...styles.galleryImage, aspectRatio: "16/9" }} />
                             </div>
                             {selected.gallery.length > 1 && (
                                 <div onClick={() => openGalleryLightbox(1)} style={styles.gallerySmallItem}>
-                                    <motion.img whileHover={{ scale: selected.gallery.length > 2 ? 1 : 1.05 }} src={selected.gallery[1]} style={styles.galleryImage} />
+                                    <motion.img whileHover={{ scale: selected.gallery.length > 2 ? 1 : 1.05 }} src={selected.gallery[1]} style={{ ...styles.galleryImage, aspectRatio: "16/9" }} />
                                     {selected.gallery.length > 2 && (
                                         <div style={styles.galleryOverlay}>+{selected.gallery.length - 2}</div>
                                     )}
@@ -170,7 +170,7 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
                             onClick={openAwardLightbox}
                             style={{ ...styles.awardImageSide, background: selected.award.image_url ? "transparent" : "#ffe58f", cursor: selected.award.image_url ? "pointer" : "default" }}
                         >
-                            {selected.award.image_url ? <img src={selected.award.image_url} alt="Award" style={styles.coverImage} /> : <><ImageIcon size={32} style={styles.placeholderIcon} /><span style={styles.placeholderText}>Event Photo</span></>}
+                            {selected.award.image_url ? <img src={selected.award.image_url} alt="Award" style={{ ...styles.coverImage, aspectRatio: "16/9" }} /> : <><ImageIcon size={32} style={styles.placeholderIcon} /><span style={styles.placeholderText}>Event Photo</span></>}
                         </motion.div>
                     </div>
                 )}

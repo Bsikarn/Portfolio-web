@@ -27,7 +27,6 @@ A Minimalist Full-Stack Personal Portfolio Website focusing on premium aesthetic
   - `data/`: Static configuration and constant strings.
   - `lib/`: Configuration files and service initializations (e.g., `supabase.js`).
   - `styles/`: Additional styling definitions.
-- `docs/private/` (❌ **DO NOT TOUCH**): The private knowledge repository and troubleshooting guidelines for the AI Agent. Includes `*-knowledge.md` and `*-trouble.md`.
-- `NEW_setup.md` (✔️ **SAFE TO MODIFY**): Step-by-step from-scratch setup guide and granular code structure logic explanation.
+- `docs/private/` (❌ **DO NOT TOUCH**): The private knowledge repository and troubleshooting guidelines for the AI Agent.
 - `public/` (✔️ **SAFE TO MODIFY**): Static assets such as images and fonts.
 - `package.json` / `vite.config.js` (✔️ **SAFE TO MODIFY**): Project configuration and package dependencies.

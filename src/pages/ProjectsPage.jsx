@@ -286,7 +286,7 @@ export default function ProjectsPage() {
               </>
             )}
             <div onClick={(e) => e.stopPropagation()} style={styles.lightboxContent}>
-              {lightboxItems[lightboxIndex].type === 'image' ? <img src={lightboxItems[lightboxIndex].url} alt="Gallery" style={styles.lightboxImage} /> : <iframe src={lightboxItems[lightboxIndex].url} allowFullScreen style={styles.lightboxVideo} title="Video Player" />}
+              {lightboxItems[lightboxIndex].type === 'image' ? <img src={lightboxItems[lightboxIndex].url} alt="Gallery" style={{ ...styles.lightboxImage, aspectRatio: "16/9" }} /> : <iframe src={lightboxItems[lightboxIndex].url} allowFullScreen style={{ ...styles.lightboxVideo, aspectRatio: "16/9" }} title="Video Player" />}
             </div>
           </motion.div>
         )}
