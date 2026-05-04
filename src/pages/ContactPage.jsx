@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Github, Linkedin } from "lucide-react";
 import { styles } from "../styles/ContactPage.styles";
+import { supabase } from "../lib/supabase";
 
 export default function ContactPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -13,11 +14,26 @@ export default function ContactPage() {
   }, []);
 
   // Predefined contact links and their visual properties
-  const CONTACTS = [
+  const [contacts, setContacts] = useState([
     { icon: <Mail size={28} />, label: "Email", handle: "sikarn.pat@gmail.com", href: "mailto:sikarn.pat@gmail.com", color: "#ffc8d5", accent: "#ff6b6b" },
     { icon: <Github size={28} />, label: "GitHub", handle: "Bsikarn", href: "https://github.com/Bsikarn", color: "#A3D8F4", accent: "#0D6EFD" },
     { icon: <Linkedin size={28} />, label: "LinkedIn", handle: "Sikarn Pattarasirimongkol", href: "https://linkedin.com/in/sbeaut", color: "#c4f0e0", accent: "#0077b5" },
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from("portfolio_settings").select("contact_links").eq("id", 1).single();
+      if (data?.contact_links) {
+        const cl = data.contact_links;
+        setContacts([
+          { icon: <Mail size={28} />, label: "Email", handle: cl.email || "N/A", href: cl.email ? `mailto:${cl.email}` : "#", color: "#ffc8d5", accent: "#ff6b6b" },
+          { icon: <Github size={28} />, label: "GitHub", handle: cl.github_handle || "N/A", href: cl.github_url || "#", color: "#A3D8F4", accent: "#0D6EFD" },
+          { icon: <Linkedin size={28} />, label: "LinkedIn", handle: cl.linkedin_handle || "N/A", href: cl.linkedin_url || "#", color: "#c4f0e0", accent: "#0077b5" },
+        ]);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   return (
     <div style={styles.container}>
@@ -38,7 +54,7 @@ export default function ContactPage() {
 
       {/* Grid container for contact cards */}
       <div style={styles.cardsContainer}>
-        {CONTACTS.map((c, i) => (
+        {contacts.map((c, i) => (
           <motion.a
             key={c.label}
             href={c.href}

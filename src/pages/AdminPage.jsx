@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { styles } from "../styles/AdminPage.styles";
-
+import SettingsPanel from "../components/admin/SettingsPanel";
+import CategoryManager from "../components/admin/CategoryManager";
 export default function AdminPage({ setPage }) {
   // Initial state for the project form
   const initialFormState = {
@@ -9,7 +10,7 @@ export default function AdminPage({ setPage }) {
     link_url: "", github_url: "", tags: "", tools: "", features: "",
     my_role: "", problem: "", solution: "", results_impact: "", key_learnings: "",
     languages: "",
-    video_url: "", gallery_urls: "",
+    video_url: "", gallery_urls: "", certificate_url: "", activity_url: "",
     has_award: false, award_title: "", award_description: "", award_competition: "", award_image_url: "",
     is_recommended: false
   };
@@ -17,13 +18,14 @@ export default function AdminPage({ setPage }) {
   const [formData, setFormData] = useState(initialFormState);
   const [projectsList, setProjectsList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
-  const [newCategoryName, setNewCategoryName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncingGithub, setIsSyncingGithub] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [contentType, setContentType] = useState("Project");
 
+  const [adminTab, setAdminTab] = useState("Content"); // "Content" or "Settings"
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     if (setPage) setPage("Home");
@@ -52,11 +54,13 @@ export default function AdminPage({ setPage }) {
     if (error) console.error("Error fetching categories:", error);
   };
 
-  // Fetch data on component mount
+
+
   useEffect(() => {
     fetchProjects();
     fetchCategories();
   }, []);
+
 
   // Generic handler for form inputs, including checkboxes
   const handleChange = (e) => {
@@ -75,43 +79,6 @@ export default function AdminPage({ setPage }) {
     }
   };
 
-  // Add new category handler
-  const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) return;
-    const { error } = await supabase.rpc("admin_insert_category", { p_name: newCategoryName.trim() });
-    if (error) {
-      alert("Error adding category: " + error.message);
-    } else {
-      setNewCategoryName("");
-      fetchCategories();
-    }
-  };
-
-  // Delete category handler
-  const handleDeleteCategory = async (id, name) => {
-    if (window.confirm(`Are you sure you want to delete category "${name}"?`)) {
-      const { error } = await supabase.rpc("admin_delete_category", { p_id: id });
-      if (error) {
-        alert("Error deleting category: " + error.message);
-      } else {
-        fetchCategories();
-      }
-    }
-  };
-
-  // Update category sort order
-  const handleUpdateCategoryOrder = async (id, newOrder) => {
-    const parsedOrder = parseInt(newOrder) || 0;
-    // Optimistically update UI
-    setCategoriesList(prev => prev.map(c => c.id === id ? { ...c, sort_order: parsedOrder } : c).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)));
-
-    // Attempt RPC call
-    const { error } = await supabase.rpc("admin_update_category_order", { p_id: id, p_sort_order: parsedOrder });
-    if (error) {
-      console.error("Order update failed (SQL missing?). Reverting.", error);
-      fetchCategories(); // Revert on failure
-    }
-  };
 
   // GitHub Language Sync handler
   const handleSyncGithub = async () => {
@@ -177,7 +144,7 @@ export default function AdminPage({ setPage }) {
 
     // Transform comma-separated and newline-separated strings into arrays for Supabase
     const payload = {
-      title: formData.title, category: formData.category, description: formData.description,
+      title: formData.title, category: (contentType === "Achievement" || contentType === "Activity") ? contentType : formData.category, description: formData.description,
       image_icon: formData.image_icon, year: formData.year,
       link_url: formData.link_url, github_url: formData.github_url,
       my_role: formData.my_role, problem: formData.problem, solution: formData.solution,
@@ -190,7 +157,9 @@ export default function AdminPage({ setPage }) {
         return { name: name?.trim(), percent: Number(percent) || 0, color: color?.trim() || "#ccc" };
       }) : [],
       video_url: formData.video_url,
-      gallery: formData.gallery_urls ? formData.gallery_urls.split(",").map(url => url.trim()).filter(Boolean) : [],
+      gallery: (contentType === "Achievement" || contentType === "Activity") 
+        ? [formData.certificate_url?.trim() || "", formData.activity_url?.trim() || ""] 
+        : (formData.gallery_urls ? formData.gallery_urls.split(",").map(url => url.trim()).filter(Boolean) : []),
       award: formData.has_award ? {
         title: formData.award_title, description: formData.award_description,
         competition: formData.award_competition, image_url: formData.award_image_url
@@ -219,10 +188,12 @@ export default function AdminPage({ setPage }) {
     }
   };
 
-  // Populate form with existing project data for editing
   const handleEdit = (project) => {
     setIsEditing(true);
     setEditId(project.id);
+    if (project.category === "Achievement") setContentType("Achievement");
+    else if (project.category === "Activity") setContentType("Activity");
+    else setContentType("Project");
     setFormData({
       title: project.title || "", category: project.category || (categoriesList.length > 0 ? categoriesList[0].name : "Frontend"), description: project.description || "",
       image_icon: project.image_icon || "💻", year: project.year || "",
@@ -234,6 +205,7 @@ export default function AdminPage({ setPage }) {
       features: project.features ? project.features.join("\n") : "",
       languages: project.languages ? project.languages.map(l => `${l.name}:${l.percent}:${l.color}`).join(", ") : "",
       video_url: project.video_url || "", gallery_urls: project.gallery ? project.gallery.join(", ") : "",
+      certificate_url: project.gallery?.[0] || "", activity_url: project.gallery?.[1] || "",
       has_award: !!project.award, award_title: project.award?.title || "", award_description: project.award?.description || "",
       award_competition: project.award?.competition || "", award_image_url: project.award?.image_url || "",
       is_recommended: project.is_recommended || false
@@ -264,47 +236,29 @@ export default function AdminPage({ setPage }) {
     });
     setIsEditing(false);
     setEditId(null);
+    setContentType("Project");
   };
 
   return (
     <div style={styles.pageContainer}>
+      {/* Main Admin Tabs */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "10px", position: "relative", zIndex: 10 }}>
+        <button onClick={() => setAdminTab("Content")} style={{ flex: 1, padding: "16px", borderRadius: "16px", fontWeight: "bold", cursor: "pointer", border: "none", background: adminTab === "Content" ? "#0f172a" : "#f8fafc", color: adminTab === "Content" ? "white" : "#475569" }}>📝 Manage Content</button>
+        <button onClick={() => setAdminTab("Settings")} style={{ flex: 1, padding: "16px", borderRadius: "16px", fontWeight: "bold", cursor: "pointer", border: "none", background: adminTab === "Settings" ? "#0f172a" : "#f8fafc", color: adminTab === "Settings" ? "white" : "#475569" }}>⚙️ Personal Info & Links</button>
+      </div>
+
       <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "flex-end", paddingBottom: 20 }}>
         <button onClick={handleSignOut} style={{ padding: "10px 20px", background: "#ef4444", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: "bold", boxShadow: "0 4px 12px rgba(239, 68, 68, 0.3)" }}>
           🚪 Sign Out
         </button>
       </div>
-      <div style={{ position: "relative", zIndex: 1, marginBottom: 40 }}>
+
+      {adminTab === "Content" ? (
+      <>
+        <div style={{ position: "relative", zIndex: 1, marginBottom: 40 }}>
 
         {/* Category Management */}
-        <div style={{ ...styles.cardContainer, marginBottom: "20px" }}>
-          <h2 style={styles.existingProjectsTitle}>🏷️ Manage Categories</h2>
-          <div style={{ ...styles.flexRow, marginBottom: "16px" }}>
-            <input
-              type="text"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              placeholder="New Category Name"
-              style={{ ...styles.inputStyle, flex: 2 }}
-            />
-            <button onClick={handleAddCategory} style={{ ...styles.submitBtn, padding: "10px", flex: 1 }}>Add Category</button>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", flexDirection: "column" }}>
-            {categoriesList.map(cat => (
-              <div key={cat.id} style={{ display: "flex", alignItems: "center", background: "#f4f4f5", padding: "8px 12px", border: "1px solid #e4e4e7", fontSize: "14px", color: "#18181b" }}>
-                <span style={{ flex: 1, fontWeight: "bold" }}>{cat.name}</span>
-                <span style={{ fontSize: "12px", color: "#71717a", marginRight: "8px" }}>Order:</span>
-                <input
-                  type="number"
-                  value={cat.sort_order || 0}
-                  onChange={(e) => handleUpdateCategoryOrder(cat.id, e.target.value)}
-                  style={{ width: "60px", padding: "4px", marginRight: "16px", border: "1px solid #d4d4d8", fontSize: "14px" }}
-                  title="Sort Order (Lower is first)"
-                />
-                <button onClick={() => handleDeleteCategory(cat.id, cat.name)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: "bold" }}>Delete</button>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CategoryManager categoriesList={categoriesList} setCategoriesList={setCategoriesList} fetchCategories={fetchCategories} />
 
         <div style={styles.cardContainer}>
 
@@ -319,20 +273,41 @@ export default function AdminPage({ setPage }) {
           {/* Project Form */}
           <form onSubmit={handleSubmit} style={styles.formContainer}>
 
+            {/* Content Type Selector */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+              {["Project", "Achievement", "Activity"].map(type => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setContentType(type)}
+                  style={{
+                    flex: 1, padding: "12px", borderRadius: "12px", fontWeight: "bold", cursor: "pointer", border: "none",
+                    background: contentType === type ? "#0D6EFD" : "#eef3ff",
+                    color: contentType === type ? "white" : "#3b82f6",
+                    boxShadow: contentType === type ? "0 4px 12px rgba(13,110,253,0.3)" : "none"
+                  }}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+
             {/* Basic Information Section */}
             <div style={styles.sectionStyle}>
               <h3 style={styles.sectionHeading}>📌 Basic Info</h3>
               <div style={styles.gridContainer}>
                 <div><label style={styles.labelStyle}>Project Title</label><input type="text" name="title" value={formData.title} onChange={handleChange} required style={styles.inputStyle} /></div>
                 <div style={styles.flexRow}>
-                  <div style={styles.flex1}>
-                    <label style={styles.labelStyle}>Category</label>
-                    <select name="category" value={formData.category} onChange={handleChange} style={styles.inputStyle}>
-                      {categoriesList.map(cat => (
-                        <option key={cat.id} value={cat.name}>{cat.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                  {contentType === "Project" && (
+                    <div style={styles.flex1}>
+                      <label style={styles.labelStyle}>Category</label>
+                      <select name="category" value={formData.category} onChange={handleChange} style={styles.inputStyle}>
+                        {categoriesList.map(cat => (
+                          <option key={cat.id} value={cat.name}>{cat.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div style={styles.flex1}><label style={styles.labelStyle}>Year</label><input type="text" name="year" value={formData.year} onChange={handleChange} style={styles.inputStyle} /></div>
                   <div style={styles.flex1}><label style={styles.labelStyle}>Icon</label><input type="text" name="image_icon" value={formData.image_icon} onChange={handleChange} style={styles.inputStyle} /></div>
                 </div>
@@ -340,39 +315,43 @@ export default function AdminPage({ setPage }) {
               </div>
             </div>
 
-            {/* Problem & Solution Section */}
-            <div style={styles.sectionStyle}>
-              <h3 style={{ ...styles.sectionHeading, color: "#ef4444" }}>⚠️ The Problem & Solution</h3>
-              <div style={styles.gridContainer}>
-                <div><label style={styles.labelStyle}>The Problem</label><textarea name="problem" value={formData.problem} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Problem encountered..." /></div>
-                <div><label style={styles.labelStyle}>The Solution</label><textarea name="solution" value={formData.solution} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Solution implemented..." /></div>
-              </div>
-            </div>
+            {contentType === "Project" && (
+              <>
+                {/* Problem & Solution Section */}
+                <div style={styles.sectionStyle}>
+                  <h3 style={{ ...styles.sectionHeading, color: "#ef4444" }}>⚠️ The Problem & Solution</h3>
+                  <div style={styles.gridContainer}>
+                    <div><label style={styles.labelStyle}>The Problem</label><textarea name="problem" value={formData.problem} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Problem encountered..." /></div>
+                    <div><label style={styles.labelStyle}>The Solution</label><textarea name="solution" value={formData.solution} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Solution implemented..." /></div>
+                  </div>
+                </div>
 
-            {/* Role, Tech Stack & Tools Section */}
-            <div style={styles.sectionStyle}>
-              <h3 style={{ ...styles.sectionHeading, color: "#3b82f6" }}>⚙️ Role, Tech Stack & Tools</h3>
-              <div style={styles.gridContainer}>
-                <div><label style={styles.labelStyle}>My Role</label><input type="text" name="my_role" value={formData.my_role} onChange={handleChange} style={styles.inputStyle} placeholder="e.g. Lead Developer, Data Engineer" /></div>
-                <div><label style={styles.labelStyle}>Tech Stack (Comma-separated)</label><input type="text" name="tags" value={formData.tags} onChange={handleChange} style={styles.inputStyle} placeholder="React, Node.js" /></div>
-                <div><label style={styles.labelStyle}>Tools (Comma-separated)</label><input type="text" name="tools" value={formData.tools} onChange={handleChange} style={styles.inputStyle} placeholder="Figma, Docker, Postman" /></div>
-              </div>
-            </div>
+                {/* Role, Tech Stack & Tools Section */}
+                <div style={styles.sectionStyle}>
+                  <h3 style={{ ...styles.sectionHeading, color: "#3b82f6" }}>⚙️ Role, Tech Stack & Tools</h3>
+                  <div style={styles.gridContainer}>
+                    <div><label style={styles.labelStyle}>My Role</label><input type="text" name="my_role" value={formData.my_role} onChange={handleChange} style={styles.inputStyle} placeholder="e.g. Lead Developer, Data Engineer" /></div>
+                    <div><label style={styles.labelStyle}>Tech Stack (Comma-separated)</label><input type="text" name="tags" value={formData.tags} onChange={handleChange} style={styles.inputStyle} placeholder="React, Node.js" /></div>
+                    <div><label style={styles.labelStyle}>Tools (Comma-separated)</label><input type="text" name="tools" value={formData.tools} onChange={handleChange} style={styles.inputStyle} placeholder="Figma, Docker, Postman" /></div>
+                  </div>
+                </div>
 
-            {/* Key Features Section */}
-            <div style={styles.sectionStyle}>
-              <h3 style={{ ...styles.sectionHeading, color: "#10b981" }}>✨ Key Features</h3>
-              <div><label style={styles.labelStyle}>Features (Each feature on a new line)</label><textarea name="features" value={formData.features} onChange={handleChange} rows="4" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
-            </div>
+                {/* Key Features Section */}
+                <div style={styles.sectionStyle}>
+                  <h3 style={{ ...styles.sectionHeading, color: "#10b981" }}>✨ Key Features</h3>
+                  <div><label style={styles.labelStyle}>Features (Each feature on a new line)</label><textarea name="features" value={formData.features} onChange={handleChange} rows="4" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
+                </div>
 
-            {/* Results & Learnings Section */}
-            <div style={styles.sectionStyle}>
-              <h3 style={{ ...styles.sectionHeading, color: "#f59e0b" }}>📈 Results & Learnings</h3>
-              <div style={styles.gridContainer}>
-                <div><label style={styles.labelStyle}>Results & Impact</label><textarea name="results_impact" value={formData.results_impact} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Achieved results..." /></div>
-                <div><label style={styles.labelStyle}>Key Learnings</label><textarea name="key_learnings" value={formData.key_learnings} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Lessons learned..." /></div>
-              </div>
-            </div>
+                {/* Results & Learnings Section */}
+                <div style={styles.sectionStyle}>
+                  <h3 style={{ ...styles.sectionHeading, color: "#f59e0b" }}>📈 Results & Learnings</h3>
+                  <div style={styles.gridContainer}>
+                    <div><label style={styles.labelStyle}>Results & Impact</label><textarea name="results_impact" value={formData.results_impact} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Achieved results..." /></div>
+                    <div><label style={styles.labelStyle}>Key Learnings</label><textarea name="key_learnings" value={formData.key_learnings} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Lessons learned..." /></div>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Media & Links Section */}
             <div style={styles.sectionStyle}>
@@ -383,49 +362,60 @@ export default function AdminPage({ setPage }) {
                   <div style={styles.flex1}><label style={styles.labelStyle}>GitHub</label><input type="url" name="github_url" value={formData.github_url} onChange={handleChange} style={styles.inputStyle} /></div>
                 </div>
                 <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>
-                <div><label style={styles.labelStyle}>Gallery URLs (Comma-separated)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
+                {contentType === "Project" ? (
+                  <div><label style={styles.labelStyle}>Gallery URLs (Comma-separated)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
+                ) : (
+                  <>
+                    <div><label style={styles.labelStyle}>Certificate Image URL</label><input type="url" name="certificate_url" value={formData.certificate_url} onChange={handleChange} style={styles.inputStyle} placeholder="Leave empty if not applicable" /></div>
+                    <div><label style={styles.labelStyle}>Activity Picture URL</label><input type="url" name="activity_url" value={formData.activity_url} onChange={handleChange} style={styles.inputStyle} placeholder="Leave empty if not applicable" /></div>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Languages Section */}
-            <div style={styles.sectionStyle}>
-              <h3 style={{ ...styles.sectionHeading, color: "#8b5cf6" }}>📊 Languages Used</h3>
-              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                <div style={{ flex: 1 }}>
-                  <label style={styles.labelStyle}>Languages (Format Name:Percent:Color, comma-separated)</label>
-                  <input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" />
+            {contentType === "Project" && (
+              <>
+                {/* Languages Section */}
+                <div style={styles.sectionStyle}>
+                  <h3 style={{ ...styles.sectionHeading, color: "#8b5cf6" }}>📊 Languages Used</h3>
+                  <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={styles.labelStyle}>Languages (Format Name:Percent:Color, comma-separated)</label>
+                      <input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" />
+                    </div>
+                    <button type="button" onClick={handleSyncGithub} disabled={isSyncingGithub} style={{ ...styles.submitBtn, padding: "10px", marginTop: "25px", backgroundColor: isSyncingGithub ? "#ccc" : "#0f172a", whiteSpace: "nowrap" }}>
+                      {isSyncingGithub ? "Syncing..." : "🔄 Sync from GitHub"}
+                    </button>
+                  </div>
                 </div>
-                <button type="button" onClick={handleSyncGithub} disabled={isSyncingGithub} style={{ ...styles.submitBtn, padding: "10px", marginTop: "25px", backgroundColor: isSyncingGithub ? "#ccc" : "#0f172a", whiteSpace: "nowrap" }}>
-                  {isSyncingGithub ? "Syncing..." : "🔄 Sync from GitHub"}
-                </button>
-              </div>
-            </div>
 
-            {/* Awards Section (Conditional Fields) */}
-            <div style={{ ...styles.sectionStyle, background: formData.has_award ? "#fffcf0" : "#f9fafb" }}>
-              <label style={{ ...styles.awardCheckboxLabel, color: formData.has_award ? "#874d00" : "#333" }}>
-                <input type="checkbox" name="has_award" checked={formData.has_award} onChange={handleChange} style={styles.checkbox} />
-                🏆 This project received an award
-              </label>
+                {/* Awards Section (Conditional Fields) */}
+                <div style={{ ...styles.sectionStyle, background: formData.has_award ? "#fffcf0" : "#f9fafb" }}>
+                  <label style={{ ...styles.awardCheckboxLabel, color: formData.has_award ? "#874d00" : "#333" }}>
+                    <input type="checkbox" name="has_award" checked={formData.has_award} onChange={handleChange} style={styles.checkbox} />
+                    🏆 This project received an award
+                  </label>
 
-              {/* Show award details fields only if has_award is true */}
-              {formData.has_award && (
-                <div style={styles.awardFields}>
-                  <div><label style={styles.labelStyle}>Award Title</label><input type="text" name="award_title" value={formData.award_title} onChange={handleChange} style={styles.inputStyle} /></div>
-                  <div><label style={styles.labelStyle}>Competition</label><input type="text" name="award_competition" value={formData.award_competition} onChange={handleChange} style={styles.inputStyle} /></div>
-                  <div><label style={styles.labelStyle}>Description</label><textarea name="award_description" value={formData.award_description} onChange={handleChange} rows="2" style={styles.inputStyle} /></div>
-                  <div><label style={styles.labelStyle}>Image URL</label><input type="url" name="award_image_url" value={formData.award_image_url} onChange={handleChange} style={styles.inputStyle} /></div>
+                  {/* Show award details fields only if has_award is true */}
+                  {formData.has_award && (
+                    <div style={styles.awardFields}>
+                      <div><label style={styles.labelStyle}>Award Title</label><input type="text" name="award_title" value={formData.award_title} onChange={handleChange} style={styles.inputStyle} /></div>
+                      <div><label style={styles.labelStyle}>Competition</label><input type="text" name="award_competition" value={formData.award_competition} onChange={handleChange} style={styles.inputStyle} /></div>
+                      <div><label style={styles.labelStyle}>Description</label><textarea name="award_description" value={formData.award_description} onChange={handleChange} rows="2" style={styles.inputStyle} /></div>
+                      <div><label style={styles.labelStyle}>Image URL</label><input type="url" name="award_image_url" value={formData.award_image_url} onChange={handleChange} style={styles.inputStyle} /></div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Recommended Section */}
-            <div style={{ ...styles.sectionStyle, background: formData.is_recommended ? "#f0fdfa" : "#f9fafb", marginTop: "16px" }}>
-              <label style={{ ...styles.awardCheckboxLabel, color: formData.is_recommended ? "#0f766e" : "#333" }}>
-                <input type="checkbox" name="is_recommended" checked={formData.is_recommended} onChange={handleChange} style={styles.checkbox} />
-                ⭐ Recommend this project
-              </label>
-            </div>
+                {/* Recommended Section */}
+                <div style={{ ...styles.sectionStyle, background: formData.is_recommended ? "#f0fdfa" : "#f9fafb", marginTop: "16px" }}>
+                  <label style={{ ...styles.awardCheckboxLabel, color: formData.is_recommended ? "#0f766e" : "#333" }}>
+                    <input type="checkbox" name="is_recommended" checked={formData.is_recommended} onChange={handleChange} style={styles.checkbox} />
+                    ⭐ Recommend this project
+                  </label>
+                </div>
+              </>
+            )}
 
             <button type="submit" style={{ ...styles.submitBtn, backgroundColor: isEditing ? "#10b981" : "#0D6EFD" }}>
               {isEditing ? "✅ Update Project" : "💾 Save Project"}
@@ -437,9 +427,24 @@ export default function AdminPage({ setPage }) {
       {/* Existing Projects List View */}
       <div style={{ position: "relative", zIndex: 2 }}>
         <div style={styles.cardContainer}>
-          <h2 style={styles.existingProjectsTitle}>📋 Existing Projects</h2>
+          <h2 style={styles.existingProjectsTitle}>📋 Existing Content</h2>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+            {["Project", "Achievement", "Activity"].map(type => (
+              <button
+                key={type}
+                onClick={() => setContentType(type)}
+                style={{
+                  padding: "8px 16px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", border: "none",
+                  background: contentType === type ? "#0D6EFD" : "#eef3ff",
+                  color: contentType === type ? "white" : "#3b82f6",
+                }}
+              >
+                {type}s
+              </button>
+            ))}
+          </div>
           <div style={styles.projectListContainer}>
-            {projectsList.map((project) => (
+            {projectsList.filter(p => contentType === "Project" ? (p.category !== "Achievement" && p.category !== "Activity") : p.category === contentType).map((project) => (
               <div key={project.id} style={styles.projectListItem}>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                   <div style={{ ...styles.projectIcon, background: "linear-gradient(135deg, #f0f6ff, #e0f2fe)", borderRadius: "12px", padding: "8px", width: "40px", height: "40px", display: "flex", justifyContent: "center", alignItems: "center" }}>{project.image_icon}</div>
@@ -461,6 +466,9 @@ export default function AdminPage({ setPage }) {
           </div>
         </div>
       </div>
+      </>
+      <SettingsPanel />
+      )}
     </div>
   );
 }

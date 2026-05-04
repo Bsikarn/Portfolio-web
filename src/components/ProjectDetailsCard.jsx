@@ -201,8 +201,55 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
                     </div>
 
                     <div style={styles.actionBtnsWrap}>
-                        <motion.a href={selected.link_url || "#"} target="_blank" rel="noopener noreferrer" onClick={(e) => handleLinkClick(e, selected.link_url)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={styles.liveBtn}><ExternalLink size={16} /> Live Preview</motion.a>
-                        <motion.a href={selected.github_url || "#"} target="_blank" rel="noopener noreferrer" onClick={(e) => handleLinkClick(e, selected.github_url)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={styles.githubBtn}><Github size={16} /> GitHub</motion.a>
+                        <motion.a 
+                            href={selected.link_url || "#"} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            onClick={(e) => {
+                                if (!selected.link_url || selected.link_url === "#") e.preventDefault();
+                                else handleLinkClick(e, selected.link_url);
+                            }} 
+                            whileHover={(!selected.link_url || selected.link_url === "#") ? {} : { scale: 1.05 }} 
+                            whileTap={(!selected.link_url || selected.link_url === "#") ? {} : { scale: 0.95 }} 
+                            style={{
+                                ...styles.liveBtn, 
+                                padding: "10px", 
+                                width: "40px", 
+                                height: "40px", 
+                                display: "flex", 
+                                justifyContent: "center", 
+                                alignItems: "center", 
+                                borderRadius: "12px",
+                                opacity: (!selected.link_url || selected.link_url === "#") ? 0.5 : 1,
+                                cursor: (!selected.link_url || selected.link_url === "#") ? "not-allowed" : "pointer",
+                                background: (!selected.link_url || selected.link_url === "#") ? "#e0e0e0" : styles.liveBtn.background,
+                                color: (!selected.link_url || selected.link_url === "#") ? "#9e9e9e" : styles.liveBtn.color
+                            }}
+                            title="Live Preview"
+                        >
+                            <ExternalLink size={20} />
+                        </motion.a>
+                        <motion.a 
+                            href={selected.github_url || "#"} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            onClick={(e) => {
+                                if (!selected.github_url || selected.github_url === "#") e.preventDefault();
+                                else handleLinkClick(e, selected.github_url);
+                            }} 
+                            whileHover={(!selected.github_url || selected.github_url === "#") ? {} : { scale: 1.05 }} 
+                            whileTap={(!selected.github_url || selected.github_url === "#") ? {} : { scale: 0.95 }} 
+                            style={{
+                                ...styles.githubBtn,
+                                opacity: (!selected.github_url || selected.github_url === "#") ? 0.5 : 1,
+                                cursor: (!selected.github_url || selected.github_url === "#") ? "not-allowed" : "pointer",
+                                background: (!selected.github_url || selected.github_url === "#") ? "#e0e0e0" : styles.githubBtn.background,
+                                color: (!selected.github_url || selected.github_url === "#") ? "#9e9e9e" : styles.githubBtn.color,
+                                border: (!selected.github_url || selected.github_url === "#") ? "none" : styles.githubBtn.border
+                            }}
+                        >
+                            <Github size={16} /> GitHub
+                        </motion.a>
                     </div>
                 </div>
             </div>

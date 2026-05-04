@@ -21,12 +21,7 @@ export default function ProjectMiniCard({ project, selectedId, isDragging, handl
                 boxShadow: selectedId === project.id ? "0 8px 24px rgba(13,110,253,0.15)" : "0 4px 16px rgba(13,110,253,0.05)"
             }}
         >
-            {/* Conditional badging: Award takes precedence over Recommended */}
-            {project.award && <div style={styles.awardBadge}><Trophy size={12} /> AWARD</div>}
-            {project.is_recommended && !project.award && <div style={styles.recommendedBadge}><Target size={12} /> RECOMMENDED</div>}
-            
-            {/* Dedicated icon container with gradient background */}
-            <div style={{ ...styles.projectIconBadge, background: `linear-gradient(135deg, #f0f6ff, #e0f2fe)` }}>{project.image_icon}</div>
+
             
             {/* Title and Category textual data */}
             <div style={styles.overflowHidden}>

@@ -42,7 +42,8 @@ export default function ProjectsPage() {
         const { data: catData, error: catError } = await supabase.from("categories").select("*").order("name");
         if (catError) throw catError;
         if (catData) {
-          const sortedCats = catData.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+          const filteredCats = catData.filter(c => c.name !== "Achievement" && c.name !== "Activity");
+          const sortedCats = filteredCats.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
           setCategoriesData(["All", ...sortedCats.map(c => c.name)]);
         }
 
@@ -50,8 +51,9 @@ export default function ProjectsPage() {
         const { data: projData, error: projError } = await supabase.from("projects").select("*");
         if (projError) throw projError;
         if (projData) {
+          const filteredProjData = projData.filter(p => p.category !== "Achievement" && p.category !== "Activity");
           // Sort: Projects with awards first, then recommended, then alphabetically by title
-          const sortedData = projData.sort((a, b) => {
+          const sortedData = filteredProjData.sort((a, b) => {
             const hasAwardA = a.award ? 1 : 0;
             const hasAwardB = b.award ? 1 : 0;
             if (hasAwardA !== hasAwardB) return hasAwardB - hasAwardA;
