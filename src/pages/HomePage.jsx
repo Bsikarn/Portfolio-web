@@ -209,13 +209,27 @@ export default function HomePage({ setPage }) {
                 <div className="w-[48px] h-[48px] rounded-[16px] bg-gradient-to-br from-[#fff0f4] to-[#ffe4e6] flex items-center justify-center text-[#ff6b6b] shrink-0">
                   <Trophy size={24} />
                 </div>
-                <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Achievements & Awards</h2>
+                <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Achievements</h2>
               </div>
               <div className="flex flex-col gap-[20px]">
                 {achievements.length > 0 ? achievements.map(ach => (
                   <div key={ach.id} className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] p-[20px] bg-[#f8fbff] rounded-[16px] border border-[#eef3ff]">
                     <div>
-                      <div className="font-sans font-bold text-[18px] text-brand-dark">{ach.title} {ach.year && <span className="text-[14px] text-brand-muted font-normal ml-[8px]">({ach.year})</span>}</div>
+                      <div className="font-sans font-bold text-[18px] text-brand-dark flex items-center flex-wrap">
+                        {ach.title} 
+                        {ach.year && <span className="text-[14px] text-brand-muted font-normal ml-[8px]">({ach.year})</span>}
+                        {ach.link_url && (
+                          <button 
+                            onClick={() => {
+                              localStorage.setItem("targetProjectId", ach.link_url);
+                              setPage("Projects");
+                            }}
+                            className="ml-[12px] bg-[#eef3ff] text-[#0D6EFD] text-[12px] font-semibold px-[12px] py-[4px] rounded-full hover:bg-[#0D6EFD] hover:text-white transition-colors cursor-pointer"
+                          >
+                            Project
+                          </button>
+                        )}
+                      </div>
                       <div className="font-sans text-[14px] text-brand-muted mt-[4px]">{ach.description}</div>
                     </div>
                     <div className="flex gap-[12px] shrink-0">

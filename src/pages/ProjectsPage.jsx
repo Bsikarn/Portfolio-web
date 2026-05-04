@@ -66,8 +66,14 @@ export default function ProjectsPage() {
             return a.title.localeCompare(b.title);
           });
           setProjectsData(sortedData);
-          // Auto-select the first project in the sorted list
-          if (sortedData.length > 0) setSelectedId(sortedData[0].id);
+          // Auto-select the target project from localStorage if it exists, otherwise the first project
+          const targetId = localStorage.getItem("targetProjectId");
+          if (targetId) {
+            setSelectedId(Number(targetId));
+            localStorage.removeItem("targetProjectId"); // Consume the ID
+          } else if (sortedData.length > 0) {
+            setSelectedId(sortedData[0].id);
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error.message);

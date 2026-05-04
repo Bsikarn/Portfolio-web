@@ -358,7 +358,11 @@ export default function AdminPage({ setPage }) {
               <h3 style={{ ...styles.sectionHeading, color: "#6366f1" }}>🌍 Media & Links</h3>
               <div style={styles.gridContainer}>
                 <div style={styles.flexRow}>
-                  <div style={styles.flex1}><label style={styles.labelStyle}>Live Link</label><input type="url" name="link_url" value={formData.link_url} onChange={handleChange} style={styles.inputStyle} /></div>
+                  {contentType === "Achievement" ? (
+                    <div style={styles.flex1}><label style={styles.labelStyle}>Linked Project ID</label><input type="text" name="link_url" value={formData.link_url} onChange={handleChange} style={styles.inputStyle} placeholder="e.g. 12 (links the button)" /></div>
+                  ) : (
+                    <div style={styles.flex1}><label style={styles.labelStyle}>Live Link</label><input type="url" name="link_url" value={formData.link_url} onChange={handleChange} style={styles.inputStyle} /></div>
+                  )}
                   <div style={styles.flex1}><label style={styles.labelStyle}>GitHub</label><input type="url" name="github_url" value={formData.github_url} onChange={handleChange} style={styles.inputStyle} /></div>
                 </div>
                 <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>
@@ -467,6 +471,7 @@ export default function AdminPage({ setPage }) {
         </div>
       </div>
       </>
+      ) : (
       <SettingsPanel />
       )}
     </div>

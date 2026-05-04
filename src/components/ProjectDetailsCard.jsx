@@ -160,7 +160,7 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
                 {selected.award && (
                     <div style={styles.awardSection}>
                         <div style={styles.awardTextSide}>
-                            <div style={styles.awardLabelTag}><Trophy size={14} /> AWARDS & RECOGNITION</div>
+                            <div style={styles.awardLabelTag}><Trophy size={14} /> Achievements</div>
                             <h3 style={styles.awardTitle}>{selected.award.title}</h3>
                             <p style={styles.awardComp}>📍 {selected.award.competition}</p>
                             <p style={styles.awardDesc}>{selected.award.description}</p>

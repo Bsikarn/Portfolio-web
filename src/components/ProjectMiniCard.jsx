@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Trophy, Target } from "lucide-react";
+import { Trophy, ThumbsUp } from "lucide-react";
 import { styles } from "../styles/ProjectsPage.styles";
 
 // A smaller card component used to display a summary of a project within a list or grid
@@ -22,16 +22,13 @@ export default function ProjectMiniCard({ project, selectedId, isDragging, handl
             }}
         >
             {project.award && (
-                <div style={styles.awardBadge}><Trophy size={12} /> AWARD</div>
+                <div style={styles.awardBadge}><Trophy size={12} /></div>
             )}
             {!project.award && project.is_recommended && (
-                <div style={styles.recommendedBadge}><Target size={12} /> RECOMMENDED</div>
+                <div style={styles.recommendedBadge}><ThumbsUp size={12} /></div>
             )}
 
-            {/* Project Emoji Icon */}
-            <div style={{ ...styles.projectIconBadge, background: "linear-gradient(135deg, #f0f6ff, #e0f2fe)" }}>
-                {project.image_icon}
-            </div>
+
             {/* Title and Category textual data */}
             <div style={styles.overflowHidden}>
                 <div style={styles.projectMiniTitle}>{project.title}</div>
