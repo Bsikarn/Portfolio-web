@@ -16,7 +16,12 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
             style={styles.detailsMainCard}
         >
             {/* Header Banner representing the Project */}
-            <div style={{ ...styles.coverHeader, background: `linear-gradient(135deg, #f0f6ff, #e0f2fe)` }}>
+            <div style={{ 
+                ...styles.coverHeader, 
+                background: selected.video_url?.includes("youtube.com/embed/") 
+                    ? `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url(https://img.youtube.com/vi/${selected.video_url.split("embed/")[1].split("?")[0]}/maxresdefault.jpg) center/cover no-repeat` 
+                    : `linear-gradient(135deg, #f0f6ff, #e0f2fe)` 
+            }}>
                 <motion.div
                     whileHover={{ scale: 1.1 }}
                     onClick={openVideoLightbox}
