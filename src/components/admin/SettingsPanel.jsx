@@ -4,7 +4,7 @@ import { styles } from "../../styles/AdminPage.styles";
 
 export default function SettingsPanel() {
   const [settingsData, setSettingsData] = useState({
-    name: "", role: "", intro: "", gpa: "", education: "", languages: "",
+    name: "", role: "", intro: "", gpa: "", education: "", languages: "", image_url: "",
     email: "", github_handle: "", github_url: "", linkedin_handle: "", linkedin_url: "", resume_url: "", portfolio_url: ""
   });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -38,7 +38,8 @@ export default function SettingsPanel() {
       about_me: { 
         name: settingsData.name, role: settingsData.role, intro: settingsData.intro, 
         gpa: settingsData.gpa, education: settingsData.education, 
-        languages: settingsData.languages ? settingsData.languages.split(",").map(l => l.trim()).filter(Boolean) : []
+        languages: settingsData.languages ? settingsData.languages.split(",").map(l => l.trim()).filter(Boolean) : [],
+        image_url: settingsData.image_url || ""
       },
       contact_links: { 
         email: settingsData.email, github_handle: settingsData.github_handle, github_url: settingsData.github_url, 
@@ -72,6 +73,7 @@ export default function SettingsPanel() {
                 <div style={styles.flex1}><label style={styles.labelStyle}>GPA</label><input type="text" name="gpa" value={settingsData.gpa} onChange={handleSettingsChange} style={styles.inputStyle} /></div>
                 <div style={styles.flex1}><label style={styles.labelStyle}>Languages</label><input type="text" name="languages" value={settingsData.languages} onChange={handleSettingsChange} style={styles.inputStyle} placeholder="Thai (Native), English (Professional)" /></div>
               </div>
+              <div><label style={styles.labelStyle}>Profile Image URL</label><input type="url" name="image_url" value={settingsData.image_url || ""} onChange={handleSettingsChange} style={styles.inputStyle} placeholder="https://..." /></div>
             </div>
           </div>
 

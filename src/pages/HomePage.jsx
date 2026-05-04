@@ -149,8 +149,12 @@ export default function HomePage({ setPage }) {
               }`}
             >
               <div className={`flex ${isMobile ? "flex-col text-center items-center gap-[16px]" : "flex-row items-center gap-[32px]"}`}>
-                <div className="w-[120px] h-[120px] rounded-[24px] bg-gradient-to-br from-[#e0f2fe] to-[#fce7f3] flex items-center justify-center text-[48px] shrink-0 shadow-[inset_0_0_0_1px_rgba(163,216,244,0.5)]">
-                  <User size={56} color="#A3D8F4" />
+                <div className="w-[120px] h-[120px] rounded-[24px] bg-gradient-to-br from-[#e0f2fe] to-[#fce7f3] flex items-center justify-center text-[48px] shrink-0 shadow-[inset_0_0_0_1px_rgba(163,216,244,0.5)] overflow-hidden">
+                  {(aboutMe || ABOUT_ME)?.image_url ? (
+                    <img src={(aboutMe || ABOUT_ME).image_url} alt={(aboutMe || ABOUT_ME)?.name || "Profile"} className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={56} color="#A3D8F4" />
+                  )}
                 </div>
                 <div>
                   <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0 mb-[4px]">{(aboutMe || ABOUT_ME)?.name}</h2>
