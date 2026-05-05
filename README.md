@@ -16,13 +16,15 @@ A Minimalist Full-Stack Personal Portfolio Website focusing on premium aesthetic
 - **Custom Routing Transition:** Framer Motion based slide transitions between pages without using React Router.
 - **Realtime Dashboard:** An Admin Panel to manage projects that updates live via Supabase Realtime subscriptions.
 - **Authentication:** Protected Admin routes using Supabase Auth.
-- **AI ChatBot:** An integrated chatbot interface powered by an AI backend (Edge Functions/OpenRouter).
+- **AI ChatBot:** An integrated RAG (Retrieval-Augmented Generation) chatbot using Supabase Edge Functions and Google Gemini API (`@google/generative-ai`).
 - **Performance Optimized:** Lazy loading for 3D components and nested pages with a Glassmorphism Preloader.
 
 ## 📁 Directory Structure
 
 - `src/` (✔️ **SAFE TO MODIFY**): The main application source code.
   - `components/`: UI components such as Navbar, Cards, Background3D, and ChatBot.
+- `scripts/` (✔️ **SAFE TO MODIFY**): Helper scripts for data ingestion and setup.
+  - `seed-data.js`: Ingestion script for creating vector embeddings.
   - `pages/`: Main content views including HomePage, ProjectsPage, ContactPage, LoginPage, and AdminPage.
   - `data/`: Static configuration and constant strings.
   - `lib/`: Configuration files and service initializations (e.g., `supabase.js`).
