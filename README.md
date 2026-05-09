@@ -1,6 +1,6 @@
 # Beaut's Portfolio Website
 
-A personal portfolio website for Sirikarn Phattharasirimongkol (Beaut), a full-stack developer and Computer Engineering student at KMUTNB.
+A personal portfolio website for Sikarn Pattarasirimongkol (Beaut), a full-stack developer and Computer Engineering student at KMUTNB.
 
 ## Tech Stack
 
