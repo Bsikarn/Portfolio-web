@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const { message, history = [] } = await req.json();
     if (!message) {
       return new Response(JSON.stringify({ error: "No message provided." }), {
         status: 400,
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
 
 IDENTITY:
 - Full name (Thai): ศิริ์กาญจน์ ภัทรสิริมงคล
-- Full name (English): Sikarn Pattarasirimongkol
+- Full name (English): Sikarn Pattarasirimongkol (CRITICAL: NEVER spell it as Sirikarn or Phattharasirimongkol. Use EXACTLY "Sikarn Pattarasirimongkol")
 - Nickname (Thai): บิ๊วท์
 - Nickname (English): Beaut
 
@@ -126,6 +126,7 @@ ${contextText}`;
           model,
           messages: [
             { role: "system", content: systemPrompt },
+            ...history,
             { role: "user", content: message },
           ],
           max_tokens: 512,

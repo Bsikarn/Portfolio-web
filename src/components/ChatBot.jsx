@@ -54,6 +54,9 @@ export default function ChatBot({ isOpen, onClose }) {
     setLoading(true);
 
     try {
+      // Send the last 6 messages as history to give the AI context
+      const historyToSend = messages.map(m => ({ role: m.role, content: m.content })).slice(-6);
+
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-with-qwen`,
         {
@@ -62,7 +65,7 @@ export default function ChatBot({ isOpen, onClose }) {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           },
-          body: JSON.stringify({ message: input }),
+          body: JSON.stringify({ message: input, history: historyToSend }),
         }
       );
 
