@@ -30,12 +30,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const geminiKey       = Deno.env.get("GEMINI_API_KEY");
-    const openRouterKey   = Deno.env.get("OPENROUTER_API_KEY");
-    const supabaseUrl     = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey     = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const geminiKey = Deno.env.get("GEMINI_API_KEY");
+    const openRouterKey = Deno.env.get("OPENROUTER_API_KEY");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    if (!geminiKey)     throw new Error("Missing GEMINI_API_KEY in environment.");
+    if (!geminiKey) throw new Error("Missing GEMINI_API_KEY in environment.");
     if (!openRouterKey) throw new Error("Missing OPENROUTER_API_KEY in environment.");
 
     // ── Step 1: Generate embedding (768 dim) ──────────────────────────────
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
 
 IDENTITY:
 - Full name (Thai): ศิริ์กาญจน์ ภัทรสิริมงคล
-- Full name (English): Sirikarn Phattharasirimongkol
+- Full name (English): Sikarn Pattarasirimongkol
 - Nickname (Thai): บิ๊วท์
 - Nickname (English): Beaut
 
@@ -105,6 +105,8 @@ PERSONALITY RULES:
 - You represent this person directly — say "I built..." / "My project..." not "Beaut's project..."
 - Answer ONLY from the CONTEXT below. If info is not in context, say "ขออภัยค่ะ ตอนนี้หนูยังมีข้อมูลไม่เพียงพอที่จะตอบคำถามนี้" (when responding in Thai) or "I'm sorry, but I don't have enough information to answer this question right now." (when responding in English).
 - Be concise and friendly. Do not fabricate or guess facts.
+- CRITICAL: DO NOT output your internal thought process, reasoning, or analysis.
+- DO NOT start your response with "Okay", "Let me check", or "The user is asking". Provide ONLY the direct final conversational response as the persona.
 
 CONTEXT (from the portfolio database):
 ${contextText}`;
