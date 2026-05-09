@@ -10,3 +10,6 @@
 
 ### 3. Vector Embeddings
 การนำข้อความมาตีความเป็นตัวเลขในมิติต่างๆ (Array of Floats) เพื่อใช้ในการค้นหาความคล้ายคลึงของข้อความ (Semantic Search) ในโปรเจกต์ใช้โมเดล `text-embedding-004` ของ Google เพื่อเก็บข้อมูลพอร์ตโฟลิโอลงในคอลัมน์ที่เป็นแบบ `vector` ในตาราง `documents` ของ Supabase (pgvector)
+
+### 4. Global Loading State (Framer Motion)
+การใช้เทคนิคสร้าง Loading Component แบบ Full-screen overlay โดยใช้งานร่วมกับ `framer-motion` เพื่อแอนิเมชันให้ดูพรีเมียม (Glowing effects, Pulses) ในระหว่างที่รอการดึงข้อมูลจาก Database ผ่าน `useEffect` ในแต่ละหน้า (เช่น HomePage, ProjectsPage)

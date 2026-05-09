@@ -1,6 +1,4 @@
 export const styles = {
-    loadingContainer: { minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#0D6EFD" },
-    loadingText: { marginTop: 16, fontFamily: "'Poppins',sans-serif", fontWeight: 600 },
     pageContainer: { paddingTop: 64, minHeight: "100vh", position: "relative" },
     filterContainer: { padding: "24px 48px 16px", display: "flex", flexWrap: "wrap", gap: 10, maxWidth: 1440, margin: "0 auto", alignItems: "center" },
     searchBarWrap: { flex: "1 1 min-content", minWidth: 200, position: "relative", display: "flex", alignItems: "center" },

@@ -40,3 +40,5 @@ skills-lock.json
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+/supabase/.temp

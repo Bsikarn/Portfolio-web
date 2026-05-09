@@ -1,43 +1,31 @@
 /**
- * Web Worker for parsing heavy calculations in the background.
- * Prevents synchronous array calculations from blocking the Main UI Thread.
+ * Web Worker: processes project tag/language data off the main thread.
+ * Prevents heavy array iterations from blocking the UI.
  */
 
 self.onmessage = function (e) {
   const { type, payload } = e.data;
+  if (type !== "PROCESS_PROJECT_TAGS") return;
 
-  // Process and count tags, tools, and languages from all projects
-  if (type === 'PROCESS_PROJECT_TAGS') {
-    const allProjectsData = payload;
-    const counts = {};
-    const langSet = new Set();
+  const counts = {};
+  const langSet = new Set();
 
-    // Iterate over projects to count occurrences
-    allProjectsData.forEach((p) => {
-      const items = [...(p.tags || []), ...(p.tools || [])];
-
-      if (p.languages) {
-        p.languages.forEach((l) => {
-          langSet.add(l.name);
-          counts[l.name] = (counts[l.name] || 0) + 1;
-        });
-      }
-
-      items.forEach((item) => {
-        // Normalize the string "React" to "React.js" to merge tag counts
-        let normalizedItem = item;
-        if (item === "React") normalizedItem = "React.js";
-        counts[normalizedItem] = (counts[normalizedItem] || 0) + 1;
-      });
+  payload.forEach((project) => {
+    // Count language occurrences and collect unique names
+    project.languages?.forEach((l) => {
+      langSet.add(l.name);
+      counts[l.name] = (counts[l.name] || 0) + 1;
     });
 
-    // Send the processed result back to the main thread
-    self.postMessage({
-      type: 'PROCESS_PROJECT_TAGS_RESULT',
-      payload: {
-        counts,
-        portfolioLanguages: Array.from(langSet)
-      }
+    // Normalize "React" → "React.js" and count tags + tools
+    [...(project.tags || []), ...(project.tools || [])].forEach((item) => {
+      const key = item === "React" ? "React.js" : item;
+      counts[key] = (counts[key] || 0) + 1;
     });
-  }
+  });
+
+  self.postMessage({
+    type: "PROCESS_PROJECT_TAGS_RESULT",
+    payload: { counts, portfolioLanguages: Array.from(langSet) },
+  });
 };

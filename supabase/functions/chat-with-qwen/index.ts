@@ -2,150 +2,160 @@
  * --------------------------------------------------------------------------
  * Supabase Edge Function: chat-with-qwen
  * --------------------------------------------------------------------------
- * This Edge Function handles incoming user chat prompts, converts the 
- * message into an embedding vector using the lightweight Supabase/gte-small 
- * model via @xenova/transformers directly within Deno, searches for relevant 
- * context in the Supabase PostgreSQL database using pgvector and an RPC call, 
- * and uses OpenRouter's API (specifically a free Qwen model) to generate 
- * a context-aware response.
+ * RAG pipeline using Google Gemini only:
+ * 1. Generate query embedding via gemini-embedding-001 (768 dim)
+ * 2. Search relevant portfolio context via pgvector RPC
+ * 3. Generate response via Gemini 2.0 Flash
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0";
 
-// CORS headers to ensure the API can be called from the frontend web apps
 const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-// We will load the model just once globally per cold start
-let generateEmbedding: any = null;
-
-// The Supabase/gte-small model is small enough to run natively in Edge!
-const initModel = async () => {
-    if (!generateEmbedding) {
-        // We use feature-extraction to generate text embeddings
-        generateEmbedding = await pipeline('feature-extraction', 'Supabase/gte-small');
-    }
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 Deno.serve(async (req) => {
-    // 1. Handle preflight CORS requests implicitly
-    if (req.method === 'OPTIONS') {
-        return new Response(null, { headers: corsHeaders, status: 204 });
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders, status: 204 });
+  }
+
+  try {
+    const { message } = await req.json();
+    if (!message) {
+      return new Response(JSON.stringify({ error: "No message provided." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    try {
-        // 2. Parse the request payload expecting a 'message'
-        const { message } = await req.json();
+    const geminiKey       = Deno.env.get("GEMINI_API_KEY");
+    const openRouterKey   = Deno.env.get("OPENROUTER_API_KEY");
+    const supabaseUrl     = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey     = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-        if (!message) {
-            return new Response(JSON.stringify({ error: "No message provided." }), {
-                status: 400,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
+    if (!geminiKey)     throw new Error("Missing GEMINI_API_KEY in environment.");
+    if (!openRouterKey) throw new Error("Missing OPENROUTER_API_KEY in environment.");
 
-        // 3. Generate query embedding locally at the Edge
-        await initModel();
+    // ── Step 1: Generate embedding (768 dim) ──────────────────────────────
+    const embedRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "models/gemini-embedding-001",
+          content: { parts: [{ text: message }] },
+          outputDimensionality: 768, // Must match documents table vector(768)
+        }),
+      }
+    );
 
-        // Convert message to vector. We pool='mean' to get a single vector per phrase
-        // and normalize=true for cosine distance calculations.
-        const output = await generateEmbedding(message, {
-            pooling: 'mean',
-            normalize: true,
-        });
-
-        // Output comes as a Float32Array nested inside the response
-        const embedding = Array.from(output.data);
-
-        // 4. Connect to Supabase to retrieve matching portfolio documents
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-        const supabase = createClient(supabaseUrl, supabaseKey);
-
-        // Call our RPC function. Ensure match_threshold and match_count are tuned cleanly.
-        const { data: documents, error: dbError } = await supabase.rpc('match_documents', {
-            query_embedding: embedding,
-            match_threshold: 0.75, // Adjust this threshold if needed
-            match_count: 5,        // Get the top 5 most relevant documents
-        });
-
-        if (dbError) {
-            console.error("Supabase RPC Error:", dbError);
-            throw new Error(`Failed to retrieve documents: ${dbError.message}`);
-        }
-
-        // 5. Build our context string from the retrieved documents
-        let contextText = '';
-        if (documents && documents.length > 0) {
-            contextText = documents.map((doc: any) => doc.content).join('\n\n');
-        } else {
-            contextText = "No specific context found within the portfolio.";
-        }
-
-        // 6. Connect to OpenRouter API (Free Qwen Model)
-        const openRouterKey = Deno.env.get('OPENROUTER_API_KEY');
-        if (!openRouterKey) {
-            throw new Error("Missing OpenRouter API KEY in EnvVars.");
-        }
-
-        const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${openRouterKey}`,
-                "Content-Type": "application/json",
-                // Optional headers for OpenRouter stats
-                "HTTP-Referer": "https://sikarn-portfolio.vercel.app",
-                "X-Title": "Beaut Portfolio Chatbot"
-            },
-            body: JSON.stringify({
-                model: "qwen/qwen-2.5-72b-instruct:free",
-                messages: [
-                    {
-                        role: "system",
-                        // Pass background instructions and context to the AI
-                        content: `You are an AI assistant representing Sikarn, a full-stack developer.
-Respond to the user's questions about Sikarn using the following context context retrieved from the database. 
-If the answer is not in the context, be polite and say you don't know, or use general programming knowledge appropriately.
-Be concise, helpful, and friendly.
-
-CONTEXT (Database retrieved details):
-${contextText}
-`
-                    },
-                    {
-                        role: "user",
-                        content: message
-                    }
-                ]
-            })
-        });
-
-        // 7. Parse AI responses
-        if (!openRouterResponse.ok) {
-            const errorBody = await openRouterResponse.text();
-            console.error("OpenRouter API Failed:", errorBody);
-            throw new Error(`OpenRouter API responded with status ${openRouterResponse.status}`);
-        }
-
-        const openRouterData = await openRouterResponse.json();
-        const aiMessage = openRouterData.choices[0].message.content;
-
-        // 8. Return the generated answer back to our Frontend
-        return new Response(JSON.stringify({ reply: aiMessage }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200,
-        });
-
-    } catch (error: any) {
-        console.error("Function encountered an error:", error);
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 500,
-        });
+    if (!embedRes.ok) {
+      const err = await embedRes.text();
+      throw new Error(`Gemini embedding failed (${embedRes.status}): ${err}`);
     }
+
+    const embedData = await embedRes.json();
+    const embedding = embedData?.embedding?.values;
+    if (!embedding) throw new Error("No embedding values returned from Gemini.");
+
+    // ── Step 2: Search portfolio context via pgvector ─────────────────────
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data: documents, error: dbError } = await supabase.rpc("match_documents", {
+      query_embedding: embedding,
+      match_threshold: 0.5,
+      match_count: 5,
+    });
+
+    if (dbError) {
+      console.error("Supabase RPC Error:", dbError);
+      throw new Error(`Failed to retrieve documents: ${dbError.message}`);
+    }
+
+    // ── Step 3: Build context from retrieved documents ────────────────────
+    const contextText = documents?.length > 0
+      ? documents.map((doc: any) => doc.content).join("\n\n")
+      : "No specific context found within the portfolio.";
+
+    // ── Step 4: Generate response with fallback across free models ────────
+    // Free models on OpenRouter can be temporarily rate-limited (429).
+    // We try each model in order until one succeeds.
+    const FREE_MODELS = [
+      "google/gemma-4-26b-a4b-it:free",
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "minimax/minimax-m2.5:free",
+    ];
+
+    const systemPrompt = `You are an AI assistant acting as the personal representative of a full-stack developer and Computer Engineering student at KMUTNB.
+
+IDENTITY:
+- Full name (Thai): ศิริ์กาญจน์ ภัทรสิริมงคล
+- Full name (English): Sirikarn Phattharasirimongkol
+- Nickname (Thai): บิ๊วท์
+- Nickname (English): Beaut
+
+LANGUAGE RULES:
+- Default to English. Reply in English unless the user writes in Thai.
+- When responding in ENGLISH: use "I", refer to yourself as "Beaut" if name is asked.
+- When responding in THAI: use "หนู", feminine particles (ค่ะ/คะ), and use the THAI name "ศิริ์กาญจน์ ภัทรสิริมงคล" and nickname "บิ๊วท์". Project names and tool names can remain in English.
+
+PERSONALITY RULES:
+- You represent this person directly — say "I built..." / "My project..." not "Beaut's project..."
+- Answer ONLY from the CONTEXT below. If info is not in context, say "I don't have that information yet."
+- Be concise and friendly. Do not fabricate or guess facts.
+
+CONTEXT (from the portfolio database):
+${contextText}`;
+
+    let reply: string | null = null;
+
+    for (const model of FREE_MODELS) {
+      const chatRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openRouterKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://sikarn-portfolio.vercel.app",
+          "X-Title": "Sikarn Portfolio AI Assistant",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: message },
+          ],
+          max_tokens: 512,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!chatRes.ok) {
+        const errBody = await chatRes.json().catch(() => ({}));
+        const isRateLimit = chatRes.status === 429;
+        console.warn(`Model ${model} failed (${chatRes.status}). Rate-limited: ${isRateLimit}`);
+        if (isRateLimit) continue; // Try next model
+        throw new Error(`OpenRouter chat failed (${chatRes.status}): ${JSON.stringify(errBody)}`);
+      }
+
+      const chatData = await chatRes.json();
+      reply = chatData.choices?.[0]?.message?.content ?? null;
+      if (reply) break; // Success — stop trying
+    }
+
+    if (!reply) throw new Error("All free models are currently unavailable. Please try again later.");
+
+    return new Response(JSON.stringify({ reply }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+
+  } catch (error: any) {
+    console.error("Edge Function error:", error.message);
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
 });
