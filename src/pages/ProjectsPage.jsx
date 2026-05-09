@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ChevronsUp } from "lucide-react";
 import StackedCard from "../components/StackedCard";
@@ -271,27 +272,30 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Lightbox */}
-      <AnimatePresence>
-        {lightboxOpen && lightboxItems.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setLightboxOpen(false)} style={styles.lightboxOverlay}>
-            <X onClick={() => setLightboxOpen(false)} style={styles.lightboxClose} size={36} />
-            {lightboxItems.length > 1 && (
-              <>
-                <button onClick={prevLightbox} style={styles.lightboxLeftBtn}><ChevronLeft size={32} /></button>
-                <button onClick={nextLightbox} style={styles.lightboxRightBtn}><ChevronRight size={32} /></button>
-                <div style={styles.lightboxCounter}>{lightboxIndex + 1} / {lightboxItems.length}</div>
-              </>
-            )}
-            <div onClick={(e) => e.stopPropagation()} style={styles.lightboxContent}>
-              {lightboxItems[lightboxIndex].type === "image"
-                ? <img src={lightboxItems[lightboxIndex].url} alt="Gallery" style={{ ...styles.lightboxImage, aspectRatio: "16/9" }} />
-                : <iframe src={lightboxItems[lightboxIndex].url} allowFullScreen style={{ ...styles.lightboxVideo, aspectRatio: "16/9" }} title="Video Player" />
-              }
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Lightbox — rendered via Portal over document.body */}
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {lightboxOpen && lightboxItems.length > 0 && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setLightboxOpen(false)} style={styles.lightboxOverlay}>
+              <X onClick={() => setLightboxOpen(false)} style={styles.lightboxClose} size={36} />
+              {lightboxItems.length > 1 && (
+                <>
+                  <button type="button" onClick={prevLightbox} style={styles.lightboxLeftBtn}><ChevronLeft size={32} /></button>
+                  <button type="button" onClick={nextLightbox} style={styles.lightboxRightBtn}><ChevronRight size={32} /></button>
+                  <div style={styles.lightboxCounter}>{lightboxIndex + 1} / {lightboxItems.length}</div>
+                </>
+              )}
+              <div onClick={(e) => e.stopPropagation()} style={styles.lightboxContent}>
+                {lightboxItems[lightboxIndex].type === "image"
+                  ? <img src={lightboxItems[lightboxIndex].url} alt="Gallery" style={{ ...styles.lightboxImage, aspectRatio: "16/9" }} />
+                  : <iframe src={lightboxItems[lightboxIndex].url} allowFullScreen style={{ ...styles.lightboxVideo, aspectRatio: "16/9" }} title="Video Player" />
+                }
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* Floating Back-to-Top Button */}
       <AnimatePresence>

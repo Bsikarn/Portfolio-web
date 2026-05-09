@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, GraduationCap, Languages, Award, User, Heart, Users, FileText, Trophy, Activity, Image as ImageIcon, FileBadge } from "lucide-react";
+import { Code2, GraduationCap, Languages, Award, User, Heart, Users, Trophy, Activity, Image as ImageIcon, FileBadge } from "lucide-react";
 import StackedCard from "../components/StackedCard";
 import Hero from "../components/Hero";
 import LoadingPage from "../components/LoadingPage";
@@ -11,12 +11,87 @@ import { supabase } from "../lib/supabase";
 // Helper: merge DB about_me with constants fallback
 const getAbout = (dbAbout) => dbAbout || ABOUT_ME;
 
-// Helper: render stat cards
+// Helper: build stat card data array
 const STAT_TEMPLATE = (pCount, views, cheers) => [
   { icon: <Code2 size={24} />, label: "Total Projects", value: pCount || 0 },
   { icon: <Users size={24} />, label: "Profile Views", value: views.toLocaleString() },
   { icon: <Heart size={24} />, label: "Cheer Ups", value: cheers.toLocaleString() },
 ];
+
+// Module-level components — defined OUTSIDE the page function to prevent
+// React from treating them as new types on every re-render (unmount bug)
+const AnimatedSection = ({ children, className = "" }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.1 }}
+    transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
+
+const TagButton = ({ tag, index, activeTag, setActiveTag, techCounts }) => (
+  <motion.button
+    type="button"
+    onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+    onMouseLeave={() => setActiveTag(null)}
+    initial={{ opacity: 0, scale: 0.8 }}
+    whileInView={{ opacity: 1, scale: 1 }}
+    viewport={{ once: true }}
+    transition={{ delay: index * 0.05 }}
+    whileHover={{ scale: 1.05, background: "#0D6EFD", color: "white" }}
+    animate={activeTag === tag
+      ? { scale: 1.05, background: "#0D6EFD", color: "white" }
+      : { background: "rgba(255,255,255,0.9)", color: "#4a6a8a" }
+    }
+    className="inline-block px-[20px] py-[10px] rounded-[50px] border border-[#eef3ff] shadow-[0_4px_12px_rgba(13,110,253,0.04)] font-sans font-semibold text-[13px] cursor-pointer transition-colors duration-200"
+  >
+    {activeTag === tag ? `${techCounts[tag] || 0} projects` : tag}
+  </motion.button>
+);
+
+const MediaRow = ({ item, setPreviewImage, setPage }) => (
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] p-[20px] bg-[#f8fbff] rounded-[16px] border border-[#eef3ff]">
+    <div>
+      <div className="font-sans font-bold text-[18px] text-brand-dark flex items-center flex-wrap">
+        {item.title}
+        {item.year && <span className="text-[14px] text-brand-muted font-normal ml-[8px]">({item.year})</span>}
+        {item.link_url && (
+          <button
+            type="button"
+            onClick={() => { localStorage.setItem("targetProjectId", item.link_url); setPage("Projects"); }}
+            className="ml-[12px] bg-[#eef3ff] text-[#0D6EFD] text-[12px] font-semibold px-[12px] py-[4px] rounded-full hover:bg-[#0D6EFD] hover:text-white transition-colors cursor-pointer"
+          >
+            Project
+          </button>
+        )}
+      </div>
+      <div className="font-sans text-[14px] text-brand-muted mt-[4px]">{item.description}</div>
+    </div>
+    <div className="flex gap-[12px] shrink-0">
+      <button
+        type="button"
+        onClick={() => item.gallery?.[0] && setPreviewImage(item.gallery[0])}
+        disabled={!item.gallery?.[0]}
+        className={`w-[44px] h-[44px] rounded-[12px] border border-[#eef3ff] flex items-center justify-center shadow-[0_2px_8px_rgba(13,110,253,0.05)] transition-colors ${item.gallery?.[0] ? "bg-white text-brand-primary hover:bg-[#0D6EFD] hover:text-white cursor-pointer" : "bg-[#e0e0e0] text-[#9e9e9e] cursor-not-allowed opacity-50"}`}
+        title="View Certificate"
+      >
+        <FileBadge size={20} />
+      </button>
+      <button
+        type="button"
+        onClick={() => item.gallery?.[1] && setPreviewImage(item.gallery[1])}
+        disabled={!item.gallery?.[1]}
+        className={`w-[44px] h-[44px] rounded-[12px] border border-[#eef3ff] flex items-center justify-center shadow-[0_2px_8px_rgba(16,185,129,0.05)] transition-colors ${item.gallery?.[1] ? "bg-white text-[#10b981] hover:bg-[#10b981] hover:text-white cursor-pointer" : "bg-[#e0e0e0] text-[#9e9e9e] cursor-not-allowed opacity-50"}`}
+        title="View Activity Picture"
+      >
+        <ImageIcon size={20} />
+      </button>
+    </div>
+  </div>
+);
 
 export default function HomePage({ setPage }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -111,79 +186,6 @@ export default function HomePage({ setPage }) {
   if (isLoading) return <LoadingPage />;
 
   const about = getAbout(aboutMe);
-
-  // Reusable tag button component
-  const TagButton = ({ tag, index }) => (
-    <motion.button
-      key={tag}
-      onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-      onMouseLeave={() => setActiveTag(null)}
-      initial={{ opacity: 0, scale: 0.8 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: false }}
-      transition={{ delay: index * 0.05 }}
-      whileHover={{ scale: 1.05, background: "#0D6EFD", color: "white" }}
-      animate={activeTag === tag ? { scale: 1.05, background: "#0D6EFD", color: "white" } : { background: "rgba(255,255,255,0.9)", color: "#4a6a8a" }}
-      className="inline-block px-[20px] py-[10px] rounded-[50px] border border-[#eef3ff] shadow-[0_4px_12px_rgba(13,110,253,0.04)] font-sans font-semibold text-[13px] cursor-pointer transition-colors duration-200"
-    >
-      {activeTag === tag ? `${techCounts[tag] || 0} projects` : tag}
-    </motion.button>
-  );
-
-  // Reusable achievement/activity row
-  const MediaRow = ({ item }) => (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] p-[20px] bg-[#f8fbff] rounded-[16px] border border-[#eef3ff]">
-      <div>
-        <div className="font-sans font-bold text-[18px] text-brand-dark flex items-center flex-wrap">
-          {item.title}
-          {item.year && <span className="text-[14px] text-brand-muted font-normal ml-[8px]">({item.year})</span>}
-          {item.link_url && (
-            <button
-              onClick={() => { localStorage.setItem("targetProjectId", item.link_url); setPage("Projects"); }}
-              className="ml-[12px] bg-[#eef3ff] text-[#0D6EFD] text-[12px] font-semibold px-[12px] py-[4px] rounded-full hover:bg-[#0D6EFD] hover:text-white transition-colors cursor-pointer"
-            >
-              Project
-            </button>
-          )}
-        </div>
-        <div className="font-sans text-[14px] text-brand-muted mt-[4px]">{item.description}</div>
-      </div>
-      <div className="flex gap-[12px] shrink-0">
-        {/* Certificate button */}
-        <button
-          onClick={() => item.gallery?.[0] && setPreviewImage(item.gallery[0])}
-          disabled={!item.gallery?.[0]}
-          className={`w-[44px] h-[44px] rounded-[12px] border border-[#eef3ff] flex items-center justify-center shadow-[0_2px_8px_rgba(13,110,253,0.05)] transition-colors ${item.gallery?.[0] ? "bg-white text-brand-primary hover:bg-[#0D6EFD] hover:text-white cursor-pointer" : "bg-[#e0e0e0] text-[#9e9e9e] cursor-not-allowed opacity-50"}`}
-          title="View Certificate"
-        >
-          <FileBadge size={20} />
-        </button>
-        {/* Activity picture button */}
-        <button
-          onClick={() => item.gallery?.[1] && setPreviewImage(item.gallery[1])}
-          disabled={!item.gallery?.[1]}
-          className={`w-[44px] h-[44px] rounded-[12px] border border-[#eef3ff] flex items-center justify-center shadow-[0_2px_8px_rgba(16,185,129,0.05)] transition-colors ${item.gallery?.[1] ? "bg-white text-[#10b981] hover:bg-[#10b981] hover:text-white cursor-pointer" : "bg-[#e0e0e0] text-[#9e9e9e] cursor-not-allowed opacity-50"}`}
-          title="View Activity Picture"
-        >
-          <ImageIcon size={20} />
-        </button>
-      </div>
-    </div>
-  );
-
-  // Reusable card section wrapper with spring animation
-  const AnimatedSection = ({ children, className = "" }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, amount: 0.1 }}
-      transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-
   const sectionPad = isMobile ? "p-[40px_24px]" : "p-[40px_48px]";
   const cardPad = isMobile ? "p-[32px_24px] gap-[24px]" : "p-[48px] gap-[32px]";
 
@@ -258,7 +260,7 @@ export default function HomePage({ setPage }) {
               </div>
               <div className="flex flex-col gap-[20px]">
                 {achievements.length > 0
-                  ? achievements.map((ach) => <MediaRow key={ach.id} item={ach} />)
+                  ? achievements.map((ach) => <MediaRow key={ach.id} item={ach} setPreviewImage={setPreviewImage} setPage={setPage} />)
                   : <div className="text-brand-muted text-[14px]">No achievements added yet.</div>
                 }
               </div>
@@ -274,7 +276,7 @@ export default function HomePage({ setPage }) {
               </div>
               <div className="flex flex-col gap-[20px]">
                 {activities.length > 0
-                  ? activities.map((act) => <MediaRow key={act.id} item={act} />)
+                  ? activities.map((act) => <MediaRow key={act.id} item={act} setPreviewImage={setPreviewImage} setPage={setPage} />)
                   : <div className="text-brand-muted text-[14px]">No activities added yet.</div>
                 }
               </div>
@@ -288,19 +290,19 @@ export default function HomePage({ setPage }) {
                 <>
                   <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">LANGUAGES</h2>
                   <div className="flex flex-wrap justify-center gap-[12px] mb-[32px]">
-                    {portfolioLanguages.map((tag, i) => <TagButton key={tag} tag={tag} index={i} />)}
+                    {portfolioLanguages.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
                   </div>
                 </>
               )}
 
               <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">Technologies</h2>
               <div className="flex flex-wrap justify-center gap-[12px] mb-[32px]">
-                {TECHNOLOGIES_TAGS?.map((tag, i) => <TagButton key={tag} tag={tag} index={i} />)}
+                {TECHNOLOGIES_TAGS?.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
               </div>
 
               <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center mt-[16px]">Tools</h2>
               <div className="flex flex-wrap justify-center gap-[12px]">
-                {TOOLS_TAGS?.map((tag, i) => <TagButton key={tag} tag={tag} index={i} />)}
+                {TOOLS_TAGS?.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
               </div>
             </AnimatedSection>
           </section>

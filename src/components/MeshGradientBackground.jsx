@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './MeshGradientBackground.module.css';
 
 // Renders a full-screen animated mesh gradient background for visual aesthetics

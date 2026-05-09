@@ -1,4 +1,4 @@
-import { Code2, Heart, Users, Zap, Coffee, Star } from "lucide-react";
+import { Code2, Heart, Users } from "lucide-react";
 
 // Personal information used throughout the portfolio
 export const ABOUT_ME = {
@@ -10,21 +10,14 @@ export const ABOUT_ME = {
   languages: ["Thai (Native)", "English (Professional)"]
 };
 
-// Core technologies used
+// Core technologies used in this portfolio
 export const TECHNOLOGIES_TAGS = [
-  "React.js", "Vite", "Supabase", "PostgreSQL", "Clerk"
+  "React.js", "Vite", "Supabase", "PostgreSQL"
 ];
 
 // Tools used
 export const TOOLS_TAGS = [
   "Framer Motion", "Three.js", "React Three Fiber", "Lucide React", "Git"
-];
-
-// Statistics displayed on the home page
-export const STATS = [
-  { icon: <Code2 size={24} />, label: "Total Projects", value: "12+" },
-  { icon: <Users size={24} />, label: "Profile Views", value: "1,204" },
-  { icon: <Heart size={24} />, label: "Cheer Ups", value: "342" },
 ];
 
 // Available emojis for the falling animation effect

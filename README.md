@@ -1,34 +1,98 @@
-# Portfolio Web
+# Beaut's Portfolio Website
 
-A Minimalist Full-Stack Personal Portfolio Website focusing on premium aesthetics and smooth user experiences.
+A personal portfolio website for Sirikarn Phattharasirimongkol (Beaut), a full-stack developer and Computer Engineering student at KMUTNB.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Languages:** JavaScript, HTML, CSS
-- **Frontend:** React.js, Vite
-- **Backend:** Supabase (PostgreSQL, Realtime, Auth)
-- **Libraries/Tools:** `framer-motion` (Animations), `three.js` & `@react-three/fiber` & `@react-three/drei` (3D Graphics), `lucide-react` (Icons), `@supabase/supabase-js` (Database/Auth Client)
+### Languages
+- JavaScript (JSX), TypeScript (Edge Functions), SQL
 
-## ✨ Active Features
+### Frontend
+- React.js (Vite)
+- Framer Motion (animations & transitions)
+- Three.js + React Three Fiber (interactive 3D background)
+- Tailwind CSS (utility classes)
+- Lucide React (icons)
 
-- **Minimalist Design:** Card-based Layout with glassmorphism effects and a soft color palette.
-- **3D & Animations:** Interactive 3D Background with a gently rotating custom 3D model (`ergoninane-potion-76.glb`), and falling emoji reactions.
-- **Custom Routing Transition:** Framer Motion based slide transitions between pages without using React Router.
-- **Realtime Dashboard:** An Admin Panel to manage projects that updates live via Supabase Realtime subscriptions.
-- **Authentication:** Protected Admin routes using Supabase Auth.
-- **AI ChatBot:** An integrated RAG (Retrieval-Augmented Generation) chatbot using Supabase Edge Functions and Google Gemini API (`@google/generative-ai`).
-- **Performance Optimized:** Lazy loading for 3D components and nested pages with a Glassmorphism Preloader.
+### Backend & Database
+- Supabase (PostgreSQL, Realtime, Edge Functions, Auth)
+- pgvector (vector similarity search for AI)
 
-## 📁 Directory Structure
+### AI Assistant (RAG Pipeline)
+- Google Gemini API (`gemini-embedding-001`, 768-dim output) — Embedding
+- OpenRouter (`google/gemma-4-26b-a4b-it:free` with fallback models) — Chat generation
 
-- `src/` (✔️ **SAFE TO MODIFY**): The main application source code.
-  - `components/`: UI components such as Navbar, Cards, Background3D, and ChatBot.
-- `scripts/` (✔️ **SAFE TO MODIFY**): Helper scripts for data ingestion and setup.
-  - `seed-data.js`: Ingestion script for creating vector embeddings.
-  - `pages/`: Main content views including HomePage, ProjectsPage, ContactPage, LoginPage, and AdminPage.
-  - `data/`: Static configuration and constant strings.
-  - `lib/`: Configuration files and service initializations (e.g., `supabase.js`).
-  - `styles/`: Additional styling definitions.
-- `docs/private/` (❌ **DO NOT TOUCH**): The private knowledge repository and troubleshooting guidelines for the AI Agent.
-- `public/` (✔️ **SAFE TO MODIFY**): Static assets such as images and fonts.
-- `package.json` / `vite.config.js` (✔️ **SAFE TO MODIFY**): Project configuration and package dependencies.
+### Tools
+- Vite (build tool)
+- ESLint
+- Playwright (E2E tests)
+- Git + GitHub Actions
+
+## Active Features
+
+- **Home Page** — About Me, Achievements, Activities, Tech Tags, Live Stats
+- **Projects Page** — Filterable project cards with stacked detail view, back-to-top button
+- **Contact Page** — Dynamic contact links from database
+- **Admin Panel** — Full CRUD for projects, settings management (protected by Supabase Auth)
+- **AI Assistant** — RAG-based chatbot using Gemini embeddings + OpenRouter free model
+- **3D Background** — Interactive animated 3D model (lazy-loaded, code-split)
+- **Cheer Up** — Falling emoji animation with live counter (Supabase Realtime)
+
+## Directory Structure
+
+```
+src/
+├── components/
+│   ├── admin/
+│   │   ├── CategoryManager.jsx   # Admin: tab manager for project categories
+│   │   └── SettingsPanel.jsx     # Admin: site settings editor
+│   ├── AnimatedBlob.jsx          # 3D model animation using R3F
+│   ├── Background3DScene.jsx     # Three.js Canvas wrapper (lazy-loaded)
+│   ├── ChatBot.jsx               # AI Assistant chat UI
+│   ├── FallingEmoji.jsx          # Cheer-up animation particle
+│   ├── Hero.jsx                  # Landing hero section with resume PDF
+│   ├── LoadingPage.jsx           # Full-screen loading placeholder
+│   ├── MeshGradientBackground.jsx # Animated CSS gradient background
+│   ├── Navbar.jsx                # Navigation bar
+│   ├── ProjectDetailsCard.jsx    # Project detail modal card
+│   ├── ProjectMiniCard.jsx       # Project list item card
+│   ├── StackedCard.jsx           # Stacked scroll layout wrapper
+│   └── ThreeDPreloader.jsx       # Glassmorphism placeholder while 3D loads
+├── data/
+│   └── constants.jsx             # ABOUT_ME, TECHNOLOGIES_TAGS, TOOLS_TAGS, EMOJIS
+├── lib/
+│   ├── supabase.js               # Supabase client singleton
+│   └── worker.js                 # Web Worker: tag/language counting (off-thread)
+├── pages/
+│   ├── AdminPage.jsx             # Admin panel (protected route)
+│   ├── ContactPage.jsx           # Contact links page
+│   ├── HomePage.jsx              # Main portfolio page
+│   ├── LoginPage.jsx             # Admin login form
+│   └── ProjectsPage.jsx          # Projects explorer
+├── styles/
+│   ├── AdminPage.styles.js       # Inline style objects for AdminPage
+│   ├── ContactPage.styles.js     # Inline style objects for ContactPage
+│   ├── LoginPage.styles.js       # Inline style objects for LoginPage
+│   └── ProjectsPage.styles.js    # Inline style objects for ProjectsPage
+└── App.jsx                       # Root component, routing, global state
+
+scripts/
+└── seed-data.js                  # ⚠️ DO NOT MODIFY — Seeds AI documents table from live DB
+
+supabase/
+├── functions/
+│   └── chat-with-qwen/
+│       └── index.ts              # ⚠️ Edge Function — RAG AI pipeline
+└── migrations/
+    └── 20260510_recreate_documents_3072.sql  # Vector DB migration (run once)
+```
+
+## Environment Variables
+
+```env
+VITE_SUPABASE_URL=          # Supabase project URL
+VITE_SUPABASE_ANON_KEY=     # Supabase anon (public) key
+SUPABASE_SERVICE_ROLE_KEY=  # Service role key (seed script only)
+GEMINI_API_KEY=             # Google Gemini API key (embedding)
+OPENROUTER_API_KEY=         # OpenRouter key (chat generation, $0 credit limit OK)
+```
