@@ -1,7 +1,7 @@
 # Portfolio Web — Setup Guide (ไทย)
 
 ## ข้อมูลโปรเจค
-- **เจ้าของ:** นางสาวศิริ์กาญจน์ ภัทรสิริมงคล (ชื่อเล่น: บิ๊วท์)
+- **เจ้าของ:** นางสาวสิการย์ ภัทรสิริมงคล (ชื่อเล่น: บิ๊วท์)
 - **Stack:** React.js (Vite) + Supabase + Gemini API + OpenRouter
 - **AI Assistant:** RAG Pipeline (Gemini Embedding + OpenRouter free model)
 

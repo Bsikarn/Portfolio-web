@@ -1,8 +1,8 @@
 # Portfolio Web — Project Knowledge (ไทย)
 
 ## ข้อมูลเจ้าของ
-- **ชื่อจริง:** นางสาวศิริ์กาญจน์ ภัทรสิริมงคล
-- **ชื่อภาษาอังกฤษ:** Sirikarn Phattharasirimongkol
+- **ชื่อจริง:** นางสาวสิการย์ ภัทรสิริมงคล
+- **ชื่อภาษาอังกฤษ:** Sikarn Pattarasirimongkol
 - **ชื่อเล่น:** บิ๊วท์ (Beaut)
 - **มหาวิทยาลัย:** KMUTNB (King Mongkut's University of Technology North Bangkok)
 - **สาขา:** Computer Engineering
