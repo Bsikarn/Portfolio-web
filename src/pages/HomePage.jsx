@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Code2, GraduationCap, Languages, Award, User, Heart, Users, Trophy, Activity, Image as ImageIcon, FileBadge } from "lucide-react";
-import StackedCard from "../components/StackedCard";
+import ScrollSection from "../components/ScrollSection";
 import Hero from "../components/Hero";
 import LoadingPage from "../components/LoadingPage";
 import { TECHNOLOGIES_TAGS, TOOLS_TAGS, ABOUT_ME } from "../data/constants";
@@ -17,20 +17,6 @@ const STAT_TEMPLATE = (pCount, views, cheers) => [
   { icon: <Users size={24} />, label: "Profile Views", value: views.toLocaleString() },
   { icon: <Heart size={24} />, label: "Cheer Ups", value: cheers.toLocaleString() },
 ];
-
-// Module-level components — defined OUTSIDE the page function to prevent
-// React from treating them as new types on every re-render (unmount bug)
-const AnimatedSection = ({ children, className = "" }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 40 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.1 }}
-    transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-);
 
 const TagButton = ({ tag, index, activeTag, setActiveTag, techCounts }) => (
   <motion.button
@@ -191,16 +177,14 @@ export default function HomePage({ setPage }) {
 
   return (
     <div className="pt-[64px]">
-      <StackedCard stickyTop="64px" zIndex={1}>
-        <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} />
-      </StackedCard>
+      <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} />
 
       <div className="relative z-[2]">
         <div className="flex flex-col gap-0">
 
           {/* About Me */}
           <section className={`max-w-[1440px] mx-auto ${sectionPad}`}>
-            <AnimatedSection className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+            <ScrollSection id="about-me" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
               <div className={`flex ${isMobile ? "flex-col text-center items-center gap-[16px]" : "flex-row items-center gap-[32px]"}`}>
                 <div className="w-[120px] h-[120px] rounded-[24px] bg-gradient-to-br from-[#e0f2fe] to-[#fce7f3] flex items-center justify-center text-[48px] shrink-0 shadow-[inset_0_0_0_1px_rgba(163,216,244,0.5)] overflow-hidden">
                   {about?.image_url ? (
@@ -248,12 +232,12 @@ export default function HomePage({ setPage }) {
                   </div>
                 </div>
               </div>
-            </AnimatedSection>
+            </ScrollSection>
           </section>
 
           {/* Achievements */}
           <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
-            <AnimatedSection className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+            <ScrollSection id="achievements" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
               <div className="flex items-center gap-[16px]">
                 <div className="w-[48px] h-[48px] rounded-[16px] bg-gradient-to-br from-[#fff0f4] to-[#ffe4e6] flex items-center justify-center text-[#ff6b6b] shrink-0"><Trophy size={24} /></div>
                 <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Achievements</h2>
@@ -264,12 +248,12 @@ export default function HomePage({ setPage }) {
                   : <div className="text-brand-muted text-[14px]">No achievements added yet.</div>
                 }
               </div>
-            </AnimatedSection>
+            </ScrollSection>
           </section>
 
           {/* Activities */}
           <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
-            <AnimatedSection className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+            <ScrollSection id="activities" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
               <div className="flex items-center gap-[16px]">
                 <div className="w-[48px] h-[48px] rounded-[16px] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] flex items-center justify-center text-[#10b981] shrink-0"><Activity size={24} /></div>
                 <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Activities</h2>
@@ -280,12 +264,12 @@ export default function HomePage({ setPage }) {
                   : <div className="text-brand-muted text-[14px]">No activities added yet.</div>
                 }
               </div>
-            </AnimatedSection>
+            </ScrollSection>
           </section>
 
           {/* Technologies & Tools */}
           <section className={`max-w-[1440px] mx-auto ${sectionPad}`}>
-            <AnimatedSection className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
+            <ScrollSection id="technologies-and-tools" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
               {portfolioLanguages.length > 0 && (
                 <>
                   <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">LANGUAGES</h2>
@@ -304,12 +288,12 @@ export default function HomePage({ setPage }) {
               <div className="flex flex-wrap justify-center gap-[12px]">
                 {TOOLS_TAGS?.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
               </div>
-            </AnimatedSection>
+            </ScrollSection>
           </section>
 
           {/* Dashboard Stats */}
           <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[40px_24px_80px]" : "p-[40px_48px_100px]"}`}>
-            <AnimatedSection className={`bg-gradient-to-b from-white/80 to-[#f8fbff]/80 backdrop-blur-[16px] rounded-[32px] shadow-card-base border border-brand-secondary/30 ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
+            <ScrollSection id="dashboard-overview" className={`bg-gradient-to-b from-white/80 to-[#f8fbff]/80 backdrop-blur-[16px] rounded-[32px] shadow-card-base border border-brand-secondary/30 ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
               <div className="text-center mb-[32px]">
                 <h2 className="font-sans font-extrabold text-[24px] text-brand-dark m-0 mb-[8px]">Dashboard Overview</h2>
                 <p className="font-sans text-brand-muted-light text-[14px]">Real-time statistics of my portfolio</p>
@@ -327,7 +311,7 @@ export default function HomePage({ setPage }) {
                   </motion.div>
                 ))}
               </div>
-            </AnimatedSection>
+            </ScrollSection>
           </section>
 
         </div>

@@ -5,94 +5,100 @@ A personal portfolio website for Sikarn Pattarasirimongkol (Beaut), a full-stack
 ## Tech Stack
 
 ### Languages
-- JavaScript (JSX), TypeScript (Edge Functions), SQL
+- JavaScript
+- TypeScript (Edge Functions)
+- SQL
 
 ### Frontend
 - React.js (Vite)
-- Framer Motion (animations & transitions)
-- Three.js + React Three Fiber (interactive 3D background)
-- Tailwind CSS (utility classes)
-- Lucide React (icons)
+- Framer Motion (Page and Section Fade Transitions)
+- Three.js + React Three Fiber (3D Background scene)
+- Tailwind CSS (Utility classes)
+- Lucide React (Icons)
 
 ### Backend & Database
-- Supabase (PostgreSQL, Realtime, Edge Functions, Auth)
-- pgvector (vector similarity search for AI)
+- Supabase (PostgreSQL database, Realtime subscriptions, Edge Functions, Authentication)
+- pgvector (Vector embeddings storage)
 
 ### AI Assistant (RAG Pipeline)
-- Google Gemini API (`gemini-embedding-001`, 768-dim output) — Embedding
-- OpenRouter (`google/gemma-4-26b-a4b-it:free` with fallback models) — Chat generation
+- Google Gemini API (`gemini-embedding-001` or compatible) — Text embeddings
+- OpenRouter (`google/gemma-4-26b-a4b-it:free` or similar fallback model) — Conversational chat response generation
 
 ### Tools
-- Vite (build tool)
-- ESLint
-- Playwright (E2E tests)
-- Git + GitHub Actions
+- Vite (Build runner)
+- ESLint (Code checking)
+- Playwright (E2E testing)
+- Git & GitHub Actions (CI/CD workflows)
 
 ## Active Features
 
-- **Home Page** — About Me, Achievements, Activities, Tech Tags, Live Stats
-- **Projects Page** — Filterable project cards with stacked detail view, back-to-top button
-- **Contact Page** — Dynamic contact links from database
-- **Admin Panel** — Full CRUD for projects, settings management (protected by Supabase Auth)
-- **AI Assistant** — RAG-based chatbot using Gemini embeddings + OpenRouter free model
-- **3D Background** — Interactive animated 3D model (lazy-loaded, code-split)
-- **Cheer Up** — Falling emoji animation with live counter (Supabase Realtime)
+- **Home Page** — Clean portfolio dashboard presenting About Me info, Academic Achievements, Student Activities, Skill Tags, and Live profile counter.
+- **Projects Page** — Showcases developer works with filter tools, search capabilities, horizontal drag project catalog, and full-screen lightbox detail view.
+- **Contact Page** — Direct links to Social platforms retrieved dynamically from the backend settings.
+- **Admin Panel** — Comprehensive backend console for CRUD database entries, file assets uploading, and configuration controls.
+- **AI Assistant Overlay** — RAG chatbot powered by vector search matching portfolio details with Gemini embedding vectors.
+- **Fixed 3D Background** — Permanently locked and non-scrolling animated 3D Blob scene overlaying soft mesh gradients.
+- **Scroll-Triggered Blur** — Smooth central background blur (Bokeh effect) automatically adjusting focus as users scroll down content sections.
+- **Simple Fade Transitions** — Unified, lightweight fade transitions (0.5s duration) applied consistently to section containers and page routes.
+- **Cheer Up Action** — Interactive floating emoji animations triggered by realtime postgres channel updates.
 
 ## Directory Structure
 
-```
+```text
 src/
 ├── components/
 │   ├── admin/
-│   │   ├── CategoryManager.jsx   # Admin: tab manager for project categories
-│   │   └── SettingsPanel.jsx     # Admin: site settings editor
-│   ├── AnimatedBlob.jsx          # 3D model animation using R3F
-│   ├── Background3DScene.jsx     # Three.js Canvas wrapper (lazy-loaded)
-│   ├── ChatBot.jsx               # AI Assistant chat UI
-│   ├── FallingEmoji.jsx          # Cheer-up animation particle
-│   ├── Hero.jsx                  # Landing hero section with resume PDF
-│   ├── LoadingPage.jsx           # Full-screen loading placeholder
-│   ├── MeshGradientBackground.jsx # Animated CSS gradient background
-│   ├── Navbar.jsx                # Navigation bar
-│   ├── ProjectDetailsCard.jsx    # Project detail modal card
-│   ├── ProjectMiniCard.jsx       # Project list item card
-│   ├── StackedCard.jsx           # Stacked scroll layout wrapper
-│   └── ThreeDPreloader.jsx       # Glassmorphism placeholder while 3D loads
+│   │   ├── CategoryManager.jsx
+│   │   └── SettingsPanel.jsx
+│   ├── AnimatedBlob.jsx
+│   ├── Background3DScene.jsx
+│   ├── ChatBot.jsx
+│   ├── FallingEmoji.jsx
+│   ├── Hero.jsx
+│   ├── LoadingPage.jsx
+│   ├── MeshGradientBackground.jsx
+│   ├── Navbar.jsx
+│   ├── ProjectDetailsCard.jsx
+│   ├── ProjectMiniCard.jsx
+│   ├── ScrollSection.jsx          # ⚠️ Scroll observer with fade logic
+│   ├── StackedCard.jsx            # ⚠️ Legacy / Unused in current build
+│   └── ThreeDPreloader.jsx
+├── context/
+│   └── BackgroundBlurContext.jsx  # ⚠️ Central background blur manager
 ├── data/
-│   └── constants.jsx             # ABOUT_ME, TECHNOLOGIES_TAGS, TOOLS_TAGS, EMOJIS
+│   └── constants.jsx
 ├── lib/
-│   ├── supabase.js               # Supabase client singleton
-│   └── worker.js                 # Web Worker: tag/language counting (off-thread)
+│   ├── supabase.js
+│   └── worker.js
 ├── pages/
-│   ├── AdminPage.jsx             # Admin panel (protected route)
-│   ├── ContactPage.jsx           # Contact links page
-│   ├── HomePage.jsx              # Main portfolio page
-│   ├── LoginPage.jsx             # Admin login form
-│   └── ProjectsPage.jsx          # Projects explorer
+│   ├── AdminPage.jsx
+│   ├── ContactPage.jsx
+│   ├── HomePage.jsx
+│   ├── LoginPage.jsx
+│   └── ProjectsPage.jsx
 ├── styles/
-│   ├── AdminPage.styles.js       # Inline style objects for AdminPage
-│   ├── ContactPage.styles.js     # Inline style objects for ContactPage
-│   ├── LoginPage.styles.js       # Inline style objects for LoginPage
-│   └── ProjectsPage.styles.js    # Inline style objects for ProjectsPage
-└── App.jsx                       # Root component, routing, global state
+│   ├── AdminPage.styles.js
+│   ├── ContactPage.styles.js
+│   ├── LoginPage.styles.js
+│   └── ProjectsPage.styles.js
+└── App.jsx
 
 scripts/
-└── seed-data.js                  # ⚠️ DO NOT MODIFY — Seeds AI documents table from live DB
+└── seed-data.js                  # ⚠️ DO NOT TOUCH (Data seeder)
 
 supabase/
 ├── functions/
 │   └── chat-with-qwen/
-│       └── index.ts              # ⚠️ Edge Function — RAG AI pipeline
+│       └── index.ts              # ⚠️ DO NOT TOUCH (Edge RAG handler)
 └── migrations/
-    └── 20260510_recreate_documents_3072.sql  # Vector DB migration (run once)
 ```
 
 ## Environment Variables
 
 ```env
-VITE_SUPABASE_URL=          # Supabase project URL
-VITE_SUPABASE_ANON_KEY=     # Supabase anon (public) key
-SUPABASE_SERVICE_ROLE_KEY=  # Service role key (seed script only)
-GEMINI_API_KEY=             # Google Gemini API key (embedding)
-OPENROUTER_API_KEY=         # OpenRouter key (chat generation, $0 credit limit OK)
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+GEMINI_API_KEY=
+OPENROUTER_API_KEY=
 ```

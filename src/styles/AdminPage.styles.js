@@ -1,6 +1,6 @@
 export const styles = {
     pageContainer: { padding: "120px 20px 40px", minHeight: "100vh", backgroundColor: "#f4f4f5", fontFamily: "sans-serif" },
-    cardContainer: { maxWidth: 900, margin: "0 auto 30px", backgroundColor: "#ffffff", padding: "24px", border: "1px solid #d4d4d8" },
+    cardContainer: { maxWidth: 900, margin: "0 auto 30px", backgroundColor: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", padding: "24px", border: "1px solid #d4d4d8" },
     headerRow: { display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e4e4e7", paddingBottom: 16, marginBottom: 24 },
     pageTitle: { fontSize: 24, margin: 0, color: "#18181b", fontWeight: "bold" },
     cancelBtn: { padding: "6px 12px", background: "#f4f4f5", border: "1px solid #d4d4d8", color: "#18181b", cursor: "pointer" },
@@ -18,7 +18,7 @@ export const styles = {
     submitBtn: { padding: "12px", color: "white", border: "none", fontSize: "15px", fontWeight: "bold", cursor: "pointer", backgroundColor: "#27272a" },
     existingProjectsTitle: { fontSize: 20, margin: "0 0 20px 0", color: "#18181b", fontWeight: "bold" },
     projectListContainer: { display: "flex", flexDirection: "column", gap: "8px" },
-    projectListItem: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", background: "#ffffff", border: "1px solid #e4e4e7" },
+    projectListItem: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", border: "1px solid #e4e4e7" },
     projectIcon: { fontSize: "20px", background: "#f4f4f5", padding: "4px", border: "1px solid #e4e4e7", width: "32px", height: "32px", display: "flex", justifyContent: "center", alignItems: "center" },
     projectTitleText: { fontWeight: "bold", color: "#18181b" },
     projectCategoryText: { fontSize: 12, color: "#71717a", marginTop: "2px" },

@@ -30,10 +30,10 @@ export default function LoginPage({ setPage }) {
   return (
     <div style={styles.pageContainer}>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.4 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
         style={styles.loginCard}
       >
         <h2 style={styles.title}>Welcome Back</h2>

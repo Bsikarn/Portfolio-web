@@ -8,7 +8,7 @@ export const styles = {
         padding: "20px"
     },
     loginCard: {
-        background: "rgba(255, 255, 255, 0.9)",
+        background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(16px)",
         borderRadius: "16px",
         padding: "40px",

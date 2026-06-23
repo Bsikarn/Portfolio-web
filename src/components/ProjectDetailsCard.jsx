@@ -54,7 +54,7 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
       transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
       style={styles.detailsMainCard}
     >
-      {/* Cover Header with play button and navigation arrows */}
+      {/* Cover Header with play button */}
       <div style={{ ...styles.coverHeader, background: getCoverBg(selected.video_url) }}>
         <motion.div
           whileHover={{ scale: 1.1 }}
@@ -63,8 +63,6 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
         >
           <Play size={32} style={styles.playIconMargin} />
         </motion.div>
-        <button onClick={() => nav(-1)} style={styles.navLeftArrow}><ChevronLeft size={24} /></button>
-        <button onClick={() => nav(1)} style={styles.navRightArrow}><ChevronRight size={24} /></button>
       </div>
 
       <div style={{ ...styles.detailsPadding, padding: isMobile ? "32px 24px" : "40px 48px" }}>

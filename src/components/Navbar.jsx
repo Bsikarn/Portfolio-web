@@ -22,7 +22,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-[1000] px-[32px] h-[64px] flex items-center justify-between bg-white/60 backdrop-blur-[20px] border-b border-brand-secondary/25 shadow-[0_2px_20px_rgba(13,110,253,0.07)]">
+      <nav className="fixed top-0 left-0 right-0 z-[1000] px-[32px] h-[64px] flex items-center justify-between bg-white border-b border-brand-secondary/25 shadow-[0_2px_20px_rgba(13,110,253,0.07)]">
         
         {/* Left Section: Easter Egg / Interactive Button */}
         <div className="flex items-center flex-1">
@@ -103,7 +103,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-[64px] left-0 right-0 bg-white/95 backdrop-blur-[20px] border-b border-brand-secondary/25 shadow-[0_10px_25px_rgba(13,110,253,0.1)] z-[999] flex flex-col p-[16px]"
+            className="fixed top-[64px] left-0 right-0 bg-white border-b border-brand-secondary/25 shadow-[0_10px_25px_rgba(13,110,253,0.1)] z-[999] flex flex-col p-[16px]"
           >
             {["Home", "Projects", "Contact"].map((p) => (
               <button

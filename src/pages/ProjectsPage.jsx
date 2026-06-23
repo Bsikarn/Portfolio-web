@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useScroll } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ChevronsUp } from "lucide-react";
-import StackedCard from "../components/StackedCard";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ChevronsUp, ArrowDown } from "lucide-react";
+import ScrollSection from "../components/ScrollSection";
+// Background blur managed inside ScrollSection wrapper
 import ProjectMiniCard from "../components/ProjectMiniCard";
 import ProjectDetailsCard from "../components/ProjectDetailsCard";
 import LoadingPage from "../components/LoadingPage";
@@ -41,6 +42,8 @@ export default function ProjectsPage() {
   const [lightboxItems, setLightboxItems] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // Handled automatically via ScrollSection components
+
   // Drag-to-scroll state
   const scrollContainerRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,10 +51,14 @@ export default function ProjectsPage() {
   const [scrollLeft, setScrollLeft] = useState(0);
   const dragDistance = useRef(0);
 
-  // Show back-to-top button when user has scrolled past the selection card
+  // Show back-to-top button when user has scrolled past the selection card, and manage scroll-down indicator visibility
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showScrollDown, setShowScrollDown] = useState(true);
   useEffect(() => {
-    const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+      setShowScrollDown(window.scrollY < 80);
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -178,99 +185,164 @@ export default function ProjectsPage() {
   return (
     <div style={styles.pageContainer}>
 
-      {/* Filter Bar */}
-      <StackedCard stickyTop="64px" zIndex={1}>
-        <div style={styles.filterContainer}>
-          {/* Search */}
-          <div style={styles.searchBarWrap}>
-            <Search size={18} style={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Search project name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={styles.searchInput}
-            />
+      {/* Filter Bar and Project Scroll List */}
+      <div style={{ maxWidth: 1440, margin: "0 auto" }}>
+        <ScrollSection id="project-selector" className="flex flex-col">
+          <div style={styles.filterContainer}>
+            {/* Search */}
+            <div style={styles.searchBarWrap}>
+              <Search size={18} style={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search project name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={styles.searchInput}
+              />
+            </div>
+            {/* Category Tabs */}
+            {categoriesData.map((f) => (
+              <motion.button
+                key={f}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveFilter(f)}
+                style={{
+                  ...styles.filterTab,
+                  background: activeFilter === f ? "#0D6EFD" : "white",
+                  color: activeFilter === f ? "white" : "#4a6a8a",
+                  boxShadow: activeFilter === f ? "0 4px 12px rgba(13,110,253,0.3)" : "0 2px 8px rgba(0,0,0,0.05)",
+                }}
+              >
+                {f}
+              </motion.button>
+            ))}
           </div>
-          {/* Category Tabs */}
-          {categoriesData.map((f) => (
-            <motion.button
-              key={f}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveFilter(f)}
-              style={{
-                ...styles.filterTab,
-                background: activeFilter === f ? "#0D6EFD" : "white",
-                color: activeFilter === f ? "white" : "#4a6a8a",
-                boxShadow: activeFilter === f ? "0 4px 12px rgba(13,110,253,0.3)" : "0 2px 8px rgba(0,0,0,0.05)",
-              }}
-            >
-              {f}
-            </motion.button>
-          ))}
-        </div>
 
-        {/* Project Scroll List */}
-        <div style={styles.mainContentWrapper}>
-          <div style={styles.selectionSection}>
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
-              style={styles.selectionCardOuter}
-            >
-              <div style={styles.selectionHeading}>Select Project</div>
-              {filtered.length === 0 ? (
-                <div style={styles.noProjectsText}>No projects found.</div>
-              ) : (
-                <div
-                  ref={scrollContainerRef}
-                  onMouseDown={handleMouseDown}
-                  onMouseLeave={handleMouseLeave}
-                  onMouseUp={handleMouseUp}
-                  onMouseMove={handleMouseMove}
-                  style={{ ...styles.scrollRow, scrollSnapType: isDragging ? "none" : "x mandatory", cursor: isDragging ? "grabbing" : "grab" }}
-                >
-                  <AnimatePresence>
-                    {filtered.map((p) => (
-                      <ProjectMiniCard key={p.id} project={p} selectedId={selectedId} isDragging={isDragging} handleCardClick={handleCardClick} />
-                    ))}
-                  </AnimatePresence>
-                </div>
-              )}
-              {filtered.length > 0 && (
-                <div style={styles.scrollHintWrap}>
-                  <motion.div animate={{ x: [-4, 4, -4] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
-                    <ArrowLeftRight size={14} />
-                  </motion.div>
-                  <span>drag left-right to see other projects</span>
-                </div>
-              )}
-            </motion.div>
+          {/* Project Scroll List */}
+          <div style={styles.mainContentWrapper}>
+            <div style={styles.selectionSection}>
+              <div
+                style={styles.selectionCardOuter}
+              >
+                <div style={styles.selectionHeading}>Select Project</div>
+                {filtered.length === 0 ? (
+                  <div style={styles.noProjectsText}>No projects found.</div>
+                ) : (
+                  <div
+                    ref={scrollContainerRef}
+                    onMouseDown={handleMouseDown}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                    style={{ ...styles.scrollRow, scrollSnapType: isDragging ? "none" : "x mandatory", cursor: isDragging ? "grabbing" : "grab" }}
+                  >
+                    <AnimatePresence>
+                      {filtered.map((p) => (
+                        <ProjectMiniCard key={p.id} project={p} selectedId={selectedId} isDragging={isDragging} handleCardClick={handleCardClick} />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+                {filtered.length > 0 && (
+                  <div style={styles.scrollHintWrap}>
+                    <motion.div animate={{ x: [-4, 4, -4] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
+                      <ArrowLeftRight size={14} />
+                    </motion.div>
+                    <span>drag left-right to see other projects</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </StackedCard>
+        </ScrollSection>
+      </div>
 
       {/* Project Detail Card */}
-      <div style={{ ...styles.mainContentWrapper, position: "relative", zIndex: 2 }}>
+      <div style={styles.mainContentWrapper}>
         <div style={{ ...styles.detailsOuterContainer, padding: isMobile ? "0 16px" : styles.detailsOuterContainer.padding }}>
-          <AnimatePresence mode="wait">
-            {selected && (
-              <ProjectDetailsCard
-                selected={selected}
-                nav={nav}
-                openVideoLightbox={openVideoLightbox}
-                openAwardLightbox={openAwardLightbox}
-                openGalleryLightbox={openGalleryLightbox}
-                handleLinkClick={handleLinkClick}
-                isMobile={isMobile}
-              />
-            )}
-          </AnimatePresence>
+          <ScrollSection id="project-details" className="w-full" threshold={isMobile ? 0.08 : 0.25}>
+            <AnimatePresence mode="wait">
+              {selected && (
+                <ProjectDetailsCard
+                  selected={selected}
+                  nav={nav}
+                  openVideoLightbox={openVideoLightbox}
+                  openAwardLightbox={openAwardLightbox}
+                  openGalleryLightbox={openGalleryLightbox}
+                  handleLinkClick={handleLinkClick}
+                  isMobile={isMobile}
+                />
+              )}
+            </AnimatePresence>
+          </ScrollSection>
         </div>
       </div>
+
+      {/* Fixed Left/Right Navigation Arrows for selected project */}
+      {selected && (
+        <>
+          <motion.button
+            whileHover={{ scale: 1.1, opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => nav(-1)}
+            style={{
+              position: "fixed",
+              left: isMobile ? "12px" : "24px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 100,
+              width: isMobile ? "44px" : "56px",
+              height: isMobile ? "44px" : "56px",
+              borderRadius: "50%",
+              border: "none",
+              cursor: "pointer",
+              background: "rgba(255, 255, 255, 0.4)",
+              backdropFilter: "blur(8px)",
+              color: "#0D6EFD",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+              opacity: 0.6,
+              transition: "opacity 0.2s, background-color 0.2s"
+            }}
+            title="Previous Project"
+          >
+            <ChevronLeft size={isMobile ? 22 : 28} />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.1, opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => nav(1)}
+            style={{
+              position: "fixed",
+              right: isMobile ? "12px" : "24px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 100,
+              width: isMobile ? "44px" : "56px",
+              height: isMobile ? "44px" : "56px",
+              borderRadius: "50%",
+              border: "none",
+              cursor: "pointer",
+              background: "rgba(255, 255, 255, 0.4)",
+              backdropFilter: "blur(8px)",
+              color: "#0D6EFD",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+              opacity: 0.6,
+              transition: "opacity 0.2s, background-color 0.2s"
+            }}
+            title="Next Project"
+          >
+            <ChevronRight size={isMobile ? 22 : 28} />
+          </motion.button>
+        </>
+      )}
 
       {/* Lightbox — rendered via Portal over document.body */}
       {typeof document !== "undefined" && createPortal(
@@ -329,6 +401,44 @@ export default function ProjectsPage() {
           >
             <ChevronsUp size={22} />
           </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Scroll Down Indicator */}
+      <AnimatePresence>
+        {showScrollDown && (
+          <div style={{ position: "fixed", bottom: 32, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 200, pointerEvents: "none" }}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <div style={{
+                fontFamily: "'Poppins', sans-serif",
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#8aabcc",
+                textTransform: "uppercase",
+                letterSpacing: "1px"
+              }}>
+                Scroll down
+              </div>
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", willChange: "transform" }}
+              >
+                <ArrowDown size={20} style={{ color: "#0D6EFD" }} />
+              </motion.div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

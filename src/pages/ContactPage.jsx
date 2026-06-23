@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Github, Linkedin } from "lucide-react";
+import ScrollSection from "../components/ScrollSection";
 import { styles } from "../styles/ContactPage.styles";
 import { supabase } from "../lib/supabase";
 import LoadingPage from "../components/LoadingPage";
@@ -48,10 +49,8 @@ export default function ContactPage() {
   return (
     <div style={styles.container}>
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+      <ScrollSection
+        id="contact-header"
         style={{ ...styles.headerWrapper, padding: isMobile ? "32px 24px" : "48px 64px" }}
       >
         <div style={styles.header}>
@@ -60,19 +59,16 @@ export default function ContactPage() {
           </h1>
           <p style={styles.subtitle}>I'm always open to exciting opportunities and collaborations.</p>
         </div>
-      </motion.div>
+      </ScrollSection>
 
       {/* Contact Cards */}
-      <div style={styles.cardsContainer}>
+      <ScrollSection id="contact-cards" style={styles.cardsContainer}>
         {contacts.map((c, i) => (
           <motion.a
             key={c.label}
             href={c.href}
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", bounce: 0.5, duration: 0.6, delay: i * 0.1 }}
             whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(13,110,253,0.18)" }}
             style={styles.card}
           >
@@ -84,19 +80,16 @@ export default function ContactPage() {
             <div style={{ ...styles.connectBtn, background: c.color, color: c.accent }}>Connect →</div>
           </motion.a>
         ))}
-      </div>
+      </ScrollSection>
 
       {/* Footer Info */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ type: "spring", bounce: 0.5, duration: 0.8, delay: 0.2 }}
+      <ScrollSection
+        id="contact-footer"
         style={styles.footerInfo}
       >
         <div style={styles.footerLocation}>Based in Bangkok, TH</div>
         <div style={styles.footerResponse}>⏱️ Usually responds within 24 hours</div>
-      </motion.div>
+      </ScrollSection>
     </div>
   );
 }

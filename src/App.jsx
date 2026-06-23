@@ -3,6 +3,7 @@ import { supabase } from "./lib/supabase";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar";
+import { useBackgroundBlur } from "./context/BackgroundBlurContext";
 import FallingEmoji from "./components/FallingEmoji";
 import MeshGradientBackground from "./components/MeshGradientBackground";
 import { EMOJIS } from "./data/constants";
@@ -19,25 +20,15 @@ const ContactPage = lazy(() => import("./pages/ContactPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 
-// Index mapping for page transitions (used to determine slide direction)
-const PAGE_INDEX = {
-  Home: 0,
-  Projects: 1,
-  Contact: 2,
-  Login: 3,
-  Admin: 4,
-};
-
-// Animation variants for Framer Motion to handle page sliding
-const slideVariants = {
-  initial: (direction) => ({ opacity: 0, x: direction > 0 ? 50 : -50 }),
-  animate: { opacity: 1, x: 0 },
-  exit: (direction) => ({ opacity: 0, x: direction > 0 ? -50 : 50 }),
+// Animation variants for Framer Motion to handle page fading (simplified)
+const fadeVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 export default function App() {
   const [page, setPage] = useState("Home");
-  const [direction, setDirection] = useState(1);
   const [chatOpen, setChatOpen] = useState(false);
   const [emojis, setEmojis] = useState([]);
   const [session, setSession] = useState(null);
@@ -64,7 +55,6 @@ export default function App() {
       newPage = "Login";
     }
 
-    setDirection(PAGE_INDEX[newPage] > PAGE_INDEX[page] ? 1 : -1);
     setPage(newPage);
   }, [page, session]);
 
@@ -97,12 +87,13 @@ export default function App() {
     setEmojis((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
+  const { blurAmount } = useBackgroundBlur();
+
   return (
     <>
-      <MeshGradientBackground />
-
-      {/* Global 3D Background placed behind page contents */}
+      {/* Global Background Container containing Mesh Gradient and 3D Scene */}
       <div
+        id="global-background-container"
         style={{
           position: "fixed",
           top: 0,
@@ -111,8 +102,13 @@ export default function App() {
           height: "100vh",
           zIndex: 0,
           pointerEvents: "none",
+          filter: `blur(${blurAmount}px)`,
+          transition: "filter 0.5s ease-out",
+          willChange: "filter",
         }}
       >
+        <MeshGradientBackground />
+
         {/* Soft glowing orb effect */}
         <div
           style={{
@@ -155,16 +151,15 @@ export default function App() {
         setChatOpen={setChatOpen}
       />
 
-      {/* AnimatePresence handles mounting/unmounting animations using slideVariants */}
-      <AnimatePresence mode="wait" custom={direction}>
+      {/* AnimatePresence handles mounting/unmounting animations using fade-in/out */}
+      <AnimatePresence mode="wait">
         <motion.div
           key={page}
-          custom={direction}
-          variants={slideVariants}
+          variants={fadeVariants}
           initial="initial"
           animate="animate"
           exit="exit"
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
           style={{ position: "relative", zIndex: 1 }}
         >
           <Suspense fallback={null}>

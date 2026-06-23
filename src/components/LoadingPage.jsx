@@ -10,17 +10,7 @@ export default function LoadingPage() {
       transition={{ duration: 0.3 }}
       className="fixed inset-0 z-[9999] bg-white/60 backdrop-blur-[20px] flex flex-col items-center justify-center"
     >
-      {/* Animated ring stack */}
-      <div className="relative flex items-center justify-center mb-[24px]">
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-          className="absolute w-[120px] h-[120px] rounded-full border-t-2 border-r-2 border-brand-primary/30" />
-        <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-          className="absolute w-[90px] h-[90px] rounded-full border-b-2 border-l-2 border-[#ffc8d5]" />
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="absolute w-[60px] h-[60px] rounded-full border-t-2 border-brand-primary" />
-        {/* Glowing center orb */}
-        <div className="w-[30px] h-[30px] bg-gradient-to-tr from-[#A3D8F4] to-[#ffc8d5] rounded-full blur-[8px] animate-pulse" />
-      </div>
+
 
       {/* Loading label */}
       <motion.h2

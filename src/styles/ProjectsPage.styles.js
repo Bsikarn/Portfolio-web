@@ -8,7 +8,7 @@ export const styles = {
     mainContentWrapper: { maxWidth: 1440, margin: "0 auto", paddingBottom: 80 },
     selectionSection: { padding: "0 24px", marginBottom: 32 },
     // Match the styling of the project details card (detailsMainCard)
-    selectionCardOuter: { background: "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(24px)", borderRadius: 24, padding: "24px 0", boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", border: "1px solid rgba(255,255,255,0.6)" },
+    selectionCardOuter: { background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", borderRadius: 24, padding: "24px 0", boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", border: "1px solid rgba(255,255,255,0.8)" },
     selectionHeading: { padding: "0 24px", marginBottom: 16, fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 18, color: "#0d1b2a" },
     noProjectsText: { padding: "20px 24px", textAlign: "center", color: "#8aabcc" },
     scrollRow: { display: "flex", gap: 20, overflowX: "auto", padding: "10px 24px 16px", scrollbarWidth: "none", userSelect: "none" },
@@ -21,7 +21,7 @@ export const styles = {
     projectMiniTitle: { fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 15, color: "#0d1b2a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
     projectMiniCategory: { fontFamily: "'Poppins',sans-serif", fontSize: 12, color: "#8aabcc", fontWeight: 500, marginTop: 4 },
     detailsOuterContainer: { padding: "0 24px" },
-    detailsMainCard: { background: "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(24px)", borderRadius: 24, boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", overflow: "hidden", border: "1px solid rgba(255,255,255,0.6)" },
+    detailsMainCard: { background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", borderRadius: 24, boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", overflow: "hidden", border: "1px solid rgba(255,255,255,0.8)" },
     coverHeader: { height: 350, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" },
     playVideoButton: { width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", color: "#0D6EFD", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" },
     playIconMargin: { marginLeft: 4 },
