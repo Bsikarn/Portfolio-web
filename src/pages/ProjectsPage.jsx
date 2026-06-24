@@ -186,8 +186,8 @@ export default function ProjectsPage() {
     <div style={styles.pageContainer}>
 
       {/* Filter Bar and Project Scroll List */}
-      <div style={{ maxWidth: 1440, margin: "0 auto" }}>
-        <ScrollSection id="project-selector" className="flex flex-col">
+      <div style={{ maxWidth: 1440, margin: "0 auto", width: "100%" }}>
+        <ScrollSection id="project-selector" className="flex flex-col w-full overflow-hidden">
           <div style={styles.filterContainer}>
             {/* Search */}
             <div style={styles.searchBarWrap}>

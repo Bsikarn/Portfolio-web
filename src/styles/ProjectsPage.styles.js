@@ -5,10 +5,10 @@ export const styles = {
     searchIcon: { position: "absolute", left: 16, color: "#8aabcc" },
     searchInput: { width: "100%", padding: "10px 16px 10px 44px", borderRadius: 50, border: "1px solid #e2e8f0", fontFamily: "'Poppins',sans-serif", fontSize: 14, outline: "none", transition: "all 0.2s", background: "white", color: "#0d1b2a" },
     filterTab: { padding: "8px 20px", borderRadius: 50, border: "none", cursor: "pointer", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 13, transition: "all 0.2s" },
-    mainContentWrapper: { maxWidth: 1440, margin: "0 auto", paddingBottom: 80 },
+    mainContentWrapper: { maxWidth: 1440, margin: "0 auto", paddingBottom: 80, width: "100%", overflow: "hidden" },
     selectionSection: { padding: "0 24px", marginBottom: 32 },
     // Match the styling of the project details card (detailsMainCard)
-    selectionCardOuter: { background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", borderRadius: 24, padding: "24px 0", boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", border: "1px solid rgba(255,255,255,0.8)" },
+    selectionCardOuter: { background: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", borderRadius: 24, padding: "24px 0", boxShadow: "0 24px 64px rgba(13,110,253,0.15), 0 8px 24px rgba(13,110,253,0.05)", border: "1px solid rgba(255,255,255,0.8)", width: "100%", overflow: "hidden" },
     selectionHeading: { padding: "0 24px", marginBottom: 16, fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 18, color: "#0d1b2a" },
     noProjectsText: { padding: "20px 24px", textAlign: "center", color: "#8aabcc" },
     scrollRow: { display: "flex", gap: 20, overflowX: "auto", padding: "10px 24px 16px", scrollbarWidth: "none", userSelect: "none" },
