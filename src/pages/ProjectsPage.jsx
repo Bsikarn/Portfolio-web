@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ChevronsUp, ArrowDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ArrowDown, FolderGit2, FileText } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 // Background blur managed inside ScrollSection wrapper
 import ProjectMiniCard from "../components/ProjectMiniCard";
@@ -110,7 +110,8 @@ export default function ProjectsPage() {
 
   // Filter by category + search
   const filtered = projectsData.filter((p) => {
-    const matchCat = activeFilter === "All" || p.category === activeFilter;
+    const cats = p.category ? p.category.split(",").map((c) => c.trim()) : [];
+    const matchCat = activeFilter === "All" || cats.includes(activeFilter);
     const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
@@ -279,70 +280,7 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {/* Fixed Left/Right Navigation Arrows for selected project */}
-      {selected && (
-        <>
-          <motion.button
-            whileHover={{ scale: 1.1, opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => nav(-1)}
-            style={{
-              position: "fixed",
-              left: isMobile ? "12px" : "24px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              zIndex: 100,
-              width: isMobile ? "44px" : "56px",
-              height: isMobile ? "44px" : "56px",
-              borderRadius: "50%",
-              border: "none",
-              cursor: "pointer",
-              background: "rgba(255, 255, 255, 0.4)",
-              backdropFilter: "blur(8px)",
-              color: "#0D6EFD",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-              opacity: 0.6,
-              transition: "opacity 0.2s, background-color 0.2s"
-            }}
-            title="Previous Project"
-          >
-            <ChevronLeft size={isMobile ? 22 : 28} />
-          </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.1, opacity: 1, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => nav(1)}
-            style={{
-              position: "fixed",
-              right: isMobile ? "12px" : "24px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              zIndex: 100,
-              width: isMobile ? "44px" : "56px",
-              height: isMobile ? "44px" : "56px",
-              borderRadius: "50%",
-              border: "none",
-              cursor: "pointer",
-              background: "rgba(255, 255, 255, 0.4)",
-              backdropFilter: "blur(8px)",
-              color: "#0D6EFD",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-              opacity: 0.6,
-              transition: "opacity 0.2s, background-color 0.2s"
-            }}
-            title="Next Project"
-          >
-            <ChevronRight size={isMobile ? 22 : 28} />
-          </motion.button>
-        </>
-      )}
 
       {/* Lightbox — rendered via Portal over document.body */}
       {typeof document !== "undefined" && createPortal(
@@ -369,40 +307,7 @@ export default function ProjectsPage() {
         document.body
       )}
 
-      {/* Floating Back-to-Top Button */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.5, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.5, y: 20 }}
-            transition={{ type: "spring", bounce: 0.4, duration: 0.4 }}
-            whileHover={{ scale: 1.1, boxShadow: "0 12px 32px rgba(13,110,253,0.45)" }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
-            style={{
-              position: "fixed",
-              bottom: 32,
-              right: 28,
-              zIndex: 500,
-              width: 52,
-              height: 52,
-              borderRadius: "50%",
-              border: "none",
-              cursor: "pointer",
-              background: "linear-gradient(135deg, #0D6EFD, #4d9fff)",
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 6px 24px rgba(13,110,253,0.35)",
-            }}
-            title="Back to top"
-          >
-            <ChevronsUp size={22} />
-          </motion.button>
-        )}
-      </AnimatePresence>
+
 
       {/* Scroll Down Indicator */}
       <AnimatePresence>
@@ -426,9 +331,16 @@ export default function ProjectsPage() {
                 fontWeight: 600,
                 color: "#8aabcc",
                 textTransform: "uppercase",
-                letterSpacing: "1px"
+                letterSpacing: "1px",
+                display: "flex",
+                alignItems: "center",
+                gap: 6
               }}>
                 Scroll down
+                <span style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 2, opacity: 0.7 }}>
+                  <FolderGit2 size={12} />
+                  <FileText size={12} />
+                </span>
               </div>
               <motion.div
                 animate={{ y: [0, 8, 0] }}

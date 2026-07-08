@@ -24,7 +24,7 @@ export function BackgroundBlurProvider({ children }) {
   const blurAmount = activeSections.size > 0 ? 15 : 0;
 
   return (
-    <BackgroundBlurContext.Provider value={{ blurAmount, registerSection }}>
+    <BackgroundBlurContext.Provider value={{ blurAmount, registerSection, activeSections }}>
       {children}
     </BackgroundBlurContext.Provider>
   );

@@ -3,9 +3,13 @@ import { Suspense } from "react";
 import AnimatedBlob from "./AnimatedBlob";
 
 // Extracted 3D Scene to allow for code-splitting and lazy loading of @react-three/fiber
-export default function Background3DScene() {
+// Receives page and blurAmount to throttle/disable rendering when not focused on Home
+export default function Background3DScene({ page, blurAmount }) {
+    const isLowQuality = page !== "Home" || blurAmount > 0;
+
     return (
         <Canvas
+            frameloop={isLowQuality ? "never" : "always"}
             camera={{ position: [0, 0, 3.5] }}
             style={{
                 position: "absolute",
@@ -24,7 +28,7 @@ export default function Background3DScene() {
         The external Suspense in App.jsx handles the loading of the Canvas itself.
       */}
             <Suspense fallback={null}>
-                <AnimatedBlob />
+                <AnimatedBlob lowQuality={isLowQuality} />
             </Suspense>
         </Canvas>
     );

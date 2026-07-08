@@ -5,8 +5,9 @@ import { Code2, GraduationCap, Languages, Award, User, Heart, Users, Trophy, Act
 import ScrollSection from "../components/ScrollSection";
 import Hero from "../components/Hero";
 import LoadingPage from "../components/LoadingPage";
-import { TECHNOLOGIES_TAGS, TOOLS_TAGS, ABOUT_ME } from "../data/constants";
+import { ABOUT_ME } from "../data/constants";
 import { supabase } from "../lib/supabase";
+import { useBackgroundBlur } from "../context/BackgroundBlurContext";
 
 // Helper: merge DB about_me with constants fallback
 const getAbout = (dbAbout) => dbAbout || ABOUT_ME;
@@ -23,13 +24,13 @@ const TagButton = ({ tag, index, activeTag, setActiveTag, techCounts }) => (
     type="button"
     onClick={() => setActiveTag(activeTag === tag ? null : tag)}
     onMouseLeave={() => setActiveTag(null)}
-    initial={{ opacity: 0, scale: 0.8 }}
-    whileInView={{ opacity: 1, scale: 1 }}
+    initial={{ opacity: 0 }}
+    whileInView={{ opacity: 1 }}
     viewport={{ once: true }}
-    transition={{ delay: index * 0.05 }}
-    whileHover={{ scale: 1.05, background: "#0D6EFD", color: "white" }}
+    transition={{ delay: index * 0.03 }}
+    whileHover={{ background: "#0D6EFD", color: "white" }}
     animate={activeTag === tag
-      ? { scale: 1.05, background: "#0D6EFD", color: "white" }
+      ? { background: "#0D6EFD", color: "white" }
       : { background: "rgba(255,255,255,0.9)", color: "#4a6a8a" }
     }
     className="inline-block px-[20px] py-[10px] rounded-[50px] border border-[#eef3ff] shadow-[0_4px_12px_rgba(13,110,253,0.04)] font-sans font-semibold text-[13px] cursor-pointer transition-colors duration-200"
@@ -80,6 +81,7 @@ const MediaRow = ({ item, setPreviewImage, setPage }) => (
 );
 
 export default function HomePage({ setPage }) {
+  const { activeSections } = useBackgroundBlur();
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isPdfOpen, setIsPdfOpen] = useState(false);
@@ -91,6 +93,8 @@ export default function HomePage({ setPage }) {
   const [previewImage, setPreviewImage] = useState(null);
   const [techCounts, setTechCounts] = useState({});
   const [portfolioLanguages, setPortfolioLanguages] = useState([]);
+  const [portfolioTags, setPortfolioTags] = useState([]);
+  const [portfolioTools, setPortfolioTools] = useState([]);
   const [activeTag, setActiveTag] = useState(null);
 
   const projectCountRef = useRef(0);
@@ -118,6 +122,8 @@ export default function HomePage({ setPage }) {
       if (type === "PROCESS_PROJECT_TAGS_RESULT") {
         setTechCounts(payload.counts);
         setPortfolioLanguages(payload.portfolioLanguages);
+        setPortfolioTags(payload.portfolioTags);
+        setPortfolioTools(payload.portfolioTools);
       }
     };
     return () => workerRef.current?.terminate();
@@ -130,11 +136,11 @@ export default function HomePage({ setPage }) {
         // Increment views and fetch stats in parallel
         const [, { count: projectCount }, { data: statsData }, { data: settingsData }, { data: actsData }, { data: allProjectsData }] = await Promise.all([
           supabase.rpc("increment_views"),
-          supabase.from("projects").select("*", { count: "exact", head: true }),
+          supabase.from("projects").select("*", { count: "exact", head: true }).neq("category", "Achievement").neq("category", "Activity"),
           supabase.from("site_stats").select("*").eq("id", 1).single(),
           supabase.from("portfolio_settings").select("about_me").eq("id", 1).single(),
           supabase.from("projects").select("*").in("category", ["Achievement", "Activity"]).order("year", { ascending: false }).order("id", { ascending: false }),
-          supabase.from("projects").select("tags, tools, languages"),
+          supabase.from("projects").select("tags, tools, languages").neq("category", "Achievement").neq("category", "Activity"),
         ]);
 
         projectCountRef.current = projectCount || 0;
@@ -168,6 +174,19 @@ export default function HomePage({ setPage }) {
 
     return () => supabase.removeChannel(subscription);
   }, []);
+
+  const homeSections = ["about-me", "achievements", "activities", "technologies-and-tools", "dashboard-overview"];
+  const currentActiveSection = homeSections.slice().reverse().find(id => activeSections?.has(id));
+  const activeIndex = homeSections.indexOf(currentActiveSection) + 1;
+  const totalSections = homeSections.length;
+
+  const sectionLabels = {
+    "about-me": "About Me",
+    "achievements": "Achievements",
+    "activities": "Activities",
+    "technologies-and-tools": "Skills",
+    "dashboard-overview": "Dashboard"
+  };
 
   if (isLoading) return <LoadingPage />;
 
@@ -279,15 +298,23 @@ export default function HomePage({ setPage }) {
                 </>
               )}
 
-              <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">Technologies</h2>
-              <div className="flex flex-wrap justify-center gap-[12px] mb-[32px]">
-                {TECHNOLOGIES_TAGS?.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
-              </div>
+              {portfolioTags.length > 0 && (
+                <>
+                  <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">Technologies</h2>
+                  <div className="flex flex-wrap justify-center gap-[12px] mb-[32px]">
+                    {portfolioTags.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
+                  </div>
+                </>
+              )}
 
-              <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center mt-[16px]">Tools</h2>
-              <div className="flex flex-wrap justify-center gap-[12px]">
-                {TOOLS_TAGS?.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
-              </div>
+              {portfolioTools.length > 0 && (
+                <>
+                  <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center mt-[16px]">Tools</h2>
+                  <div className="flex flex-wrap justify-center gap-[12px]">
+                    {portfolioTools.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
+                  </div>
+                </>
+              )}
             </ScrollSection>
           </section>
 
@@ -295,8 +322,7 @@ export default function HomePage({ setPage }) {
           <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[40px_24px_80px]" : "p-[40px_48px_100px]"}`}>
             <ScrollSection id="dashboard-overview" className={`bg-gradient-to-b from-white/80 to-[#f8fbff]/80 backdrop-blur-[16px] rounded-[32px] shadow-card-base border border-brand-secondary/30 ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
               <div className="text-center mb-[32px]">
-                <h2 className="font-sans font-extrabold text-[24px] text-brand-dark m-0 mb-[8px]">Dashboard Overview</h2>
-                <p className="font-sans text-brand-muted-light text-[14px]">Real-time statistics of my portfolio</p>
+                <h2 className="font-sans font-extrabold text-[24px] text-brand-dark m-0">Dashboard Overview</h2>
               </div>
               <div className={`grid gap-[24px] ${isMobile ? "grid-cols-1" : "grid-cols-3"}`}>
                 {realStats.map((s) => (
@@ -349,6 +375,44 @@ export default function HomePage({ setPage }) {
         </AnimatePresence>,
         document.body
       )}
+
+      {/* Active Section Indicator Float Box */}
+      <AnimatePresence>
+        {currentActiveSection && sectionLabels[currentActiveSection] && (
+          <motion.div
+            key={currentActiveSection}
+            initial={{ opacity: 0, y: 20, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 20, x: "-50%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            style={{
+              position: "fixed",
+              bottom: "24px",
+              left: "50%",
+              zIndex: 1000,
+              background: "rgba(255, 255, 255, 0.65)", // transparency increased by 10%
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRadius: "16px",
+              border: "1px solid rgba(255, 255, 255, 0.4)",
+              padding: "10px 20px",
+              boxShadow: "0 8px 32px rgba(13, 110, 253, 0.15)",
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 700,
+              fontSize: "13px",
+              color: "#0D6EFD",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none"
+            }}
+          >
+            {sectionLabels[currentActiveSection]}
+            <span style={{ color: "#8aabcc", fontWeight: 500, marginLeft: "6px" }}>
+              ({activeIndex} / {totalSections})
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

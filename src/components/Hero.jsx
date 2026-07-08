@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, ArrowDown } from "lucide-react";
+import { FileText, ArrowDown, User, Trophy, Activity, Code2, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -111,7 +111,16 @@ export default function Hero({ setPage, isPdfOpen, setIsPdfOpen }) {
               transition={{ duration: 0.4 }}
               className="flex flex-col items-center gap-[8px]"
             >
-              <div className="font-sans text-[12px] font-semibold text-brand-muted uppercase tracking-[1px]">Scroll down</div>
+              <div className="font-sans text-[12px] font-semibold text-brand-muted uppercase tracking-[1px] flex items-center gap-[6px]">
+                Scroll down
+                <span className="flex items-center gap-[4px] ml-[2px] opacity-70">
+                  <User size={12} />
+                  <Trophy size={12} />
+                  <Activity size={12} />
+                  <Code2 size={12} />
+                  <Heart size={12} />
+                </span>
+              </div>
               <motion.div
                 animate={{ y: [0, 8, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}

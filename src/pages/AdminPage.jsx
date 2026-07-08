@@ -7,7 +7,7 @@ import CategoryManager from "../components/admin/CategoryManager";
 
 // Default form state for a new project
 const INITIAL_FORM = {
-  title: "", category: "Frontend", description: "", image_icon: "💻", year: "2026",
+  title: "", category: "Frontend", category2: "", description: "", image_icon: "💻", year: "2026",
   link_url: "", github_url: "", tags: "", tools: "", features: "",
   my_role: "", problem: "", solution: "", results_impact: "", key_learnings: "",
   languages: "", video_url: "", gallery_urls: "", certificate_url: "", activity_url: "",
@@ -17,9 +17,11 @@ const INITIAL_FORM = {
 
 // Parse a project from DB back to form-compatible shape
 function projectToForm(project) {
+  const cats = (project.category || "").split(",").map((c) => c.trim());
   return {
     title: project.title || "",
-    category: project.category || "Frontend",
+    category: cats[0] || "Frontend",
+    category2: cats[1] || "",
     description: project.description || "",
     image_icon: project.image_icon || "💻",
     year: project.year || "",
@@ -50,9 +52,10 @@ function projectToForm(project) {
 // Build the Supabase payload from form data
 function buildPayload(formData, contentType) {
   const isSpecial = contentType === "Achievement" || contentType === "Activity";
+  const selectedCats = [formData.category, formData.category2].filter(Boolean);
   return {
     title: formData.title,
-    category: isSpecial ? contentType : formData.category,
+    category: isSpecial ? contentType : selectedCats.join(", "),
     description: formData.description,
     image_icon: formData.image_icon,
     year: formData.year,
@@ -196,7 +199,7 @@ export default function AdminPage({ setPage }) {
   };
 
   const resetForm = () => {
-    setFormData({ ...INITIAL_FORM, category: categoriesList[0]?.name || "Frontend" });
+    setFormData({ ...INITIAL_FORM, category: categoriesList[0]?.name || "Frontend", category2: "" });
     setIsEditing(false);
     setEditId(null);
     setContentType("Project");
@@ -262,12 +265,21 @@ export default function AdminPage({ setPage }) {
                     <div><label style={styles.labelStyle}>Project Title</label><input type="text" name="title" value={formData.title} onChange={handleChange} required style={styles.inputStyle} /></div>
                     <div style={styles.flexRow}>
                       {contentType === "Project" && (
-                        <div style={styles.flex1}>
-                          <label style={styles.labelStyle}>Category</label>
-                          <select name="category" value={formData.category} onChange={handleChange} style={styles.inputStyle}>
-                            {categoriesList.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-                          </select>
-                        </div>
+                        <>
+                          <div style={styles.flex1}>
+                            <label style={styles.labelStyle}>Category 1</label>
+                            <select name="category" value={formData.category} onChange={handleChange} style={styles.inputStyle}>
+                              {categoriesList.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+                            </select>
+                          </div>
+                          <div style={styles.flex1}>
+                            <label style={styles.labelStyle}>Category 2</label>
+                            <select name="category2" value={formData.category2} onChange={handleChange} style={styles.inputStyle}>
+                              <option value="">None</option>
+                              {categoriesList.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+                            </select>
+                          </div>
+                        </>
                       )}
                       <div style={styles.flex1}><label style={styles.labelStyle}>Year</label><input type="text" name="year" value={formData.year} onChange={handleChange} style={styles.inputStyle} /></div>
                       <div style={styles.flex1}><label style={styles.labelStyle}>Icon</label><input type="text" name="image_icon" value={formData.image_icon} onChange={handleChange} style={styles.inputStyle} /></div>

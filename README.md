@@ -41,6 +41,10 @@ A personal portfolio website for Sikarn Pattarasirimongkol (Beaut), a full-stack
 - **Scroll-Triggered Blur** — Smooth central background blur (Bokeh effect) automatically adjusting focus as users scroll down content sections.
 - **Simple Fade Transitions** — Unified, lightweight fade transitions (0.5s duration) applied consistently to section containers and page routes.
 - **Cheer Up Action** — Interactive floating emoji animations triggered by realtime postgres channel updates.
+- **Scroll Progress Bar** — Eye-catching gradient progress indicator tracking scroll depth at the very bottom of Home and Projects screens.
+- **Active Section Indicator** — A floating glassmorphism badge centered at the bottom of the Home page displaying the name of the active content section.
+- **Performance Throttling (3D Scene)** — Dynamic WebGL saving feature disabling Canvas render loop and hiding DOM elements when not viewing the 3D model in focus.
+- **Dual-Row Project Catalog** — Spacious 2-row horizontal grid selector layout for projects with desktop drag and swipe interactivity.
 
 ## Directory Structure
 
@@ -101,4 +105,13 @@ VITE_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 GEMINI_API_KEY=
 OPENROUTER_API_KEY=
+```
+
+## Testing
+
+This project uses Playwright for End-to-End (E2E) testing. The test suite covers core functionalities including navbar page routing, interactive emoji triggers, AI Assistant Chatbot toggles, and projects category filtering.
+
+Run the test suite:
+```bash
+npx playwright test
 ```

@@ -7,6 +7,7 @@ import { useBackgroundBlur } from "./context/BackgroundBlurContext";
 import FallingEmoji from "./components/FallingEmoji";
 import MeshGradientBackground from "./components/MeshGradientBackground";
 import { EMOJIS } from "./data/constants";
+import { ChevronsUp } from "lucide-react";
 
 import { lazy, Suspense } from "react";
 import ThreeDPreloader from "./components/ThreeDPreloader";
@@ -32,6 +33,41 @@ export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [emojis, setEmojis] = useState([]);
   const [session, setSession] = useState(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [sectionTicks, setSectionTicks] = useState([]);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Monitor scroll position to calculate page scroll percentage and section ticks
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setScrollProgress(progress);
+
+      // Track section offset positions for progress bar division lines
+      const sections = page === "Home"
+        ? ["about-me", "achievements", "activities", "technologies-and-tools", "dashboard-overview"]
+        : ["project-selector", "project-details"];
+
+      const ticks = sections.map(id => {
+        const el = document.getElementById(id);
+        if (el && docHeight > 0) {
+          return (el.offsetTop / docHeight) * 100;
+        }
+        return null;
+      }).filter(v => v !== null && v > 0 && v < 100);
+
+      setSectionTicks(ticks);
+      setShowBackToTop(window.scrollY > 300);
+    };
+
+    // Calculate once on load/page change
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [page]); // Re-bind/re-calculate on page change to handle page height difference
 
   // Monitor Supabase Auth State
   useEffect(() => {
@@ -128,7 +164,7 @@ export default function App() {
         />
         {/* Code-split and lazy-loaded 3D background with Glassmorphism preloader */}
         <Suspense fallback={<ThreeDPreloader />}>
-          <Background3DScene />
+          <Background3DScene page={page} blurAmount={blurAmount} />
         </Suspense>
       </div>
 
@@ -182,6 +218,87 @@ export default function App() {
             <ChatBot isOpen={chatOpen} onClose={() => setChatOpen(false)} />
           </Suspense>
         ) : null}
+      </AnimatePresence>
+
+      {/* Scroll Progress Bar at the bottom of the screen */}
+      {(page === "Home" || page === "Projects") && (
+        <div
+          id="scroll-progress-bar"
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            width: "100vw",
+            height: "6px",
+            background: "#e2e8f0", // light gray bar container
+            zIndex: 9999,
+            overflow: "hidden"
+          }}
+        >
+          {/* Scroll progress gradient indicator */}
+          <div
+            style={{
+              height: "100%",
+              width: `${scrollProgress}%`,
+              background: "linear-gradient(90deg, #A3D8F4, #ffc8d5, #0D6EFD)",
+              transition: "width 0.05s ease-out",
+              borderRadius: "0 4px 4px 0",
+              boxShadow: "0 -2px 10px rgba(13,110,253,0.2)",
+            }}
+          />
+
+          {/* Section Divider Ticks */}
+          {sectionTicks.map((tickPercent, idx) => (
+            <div
+              key={idx}
+              style={{
+                position: "absolute",
+                left: `${tickPercent}%`,
+                top: 0,
+                width: "2px",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.15)", // Gray divider line
+                zIndex: 10000
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Floating Back-to-Top Shortcut Button */}
+      <AnimatePresence>
+        {showBackToTop && (page === "Home" || page === "Projects") && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 20 }}
+            transition={{ type: "spring", bounce: 0.4, duration: 0.4 }}
+            whileHover={{ scale: 1.1, boxShadow: "0 12px 32px rgba(13,110,253,0.45)" }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            style={{
+              position: "fixed",
+              bottom: 32,
+              right: 28,
+              zIndex: 500,
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              border: "none",
+              cursor: "pointer",
+              background: "linear-gradient(135deg, #0D6EFD, #4d9fff)",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 6px 24px rgba(13,110,253,0.35)",
+              pointerEvents: "auto"
+            }}
+            title="Back to top"
+          >
+            <ChevronsUp size={22} />
+          </motion.button>
+        )}
       </AnimatePresence>
     </>
   );

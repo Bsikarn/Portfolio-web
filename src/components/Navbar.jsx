@@ -27,11 +27,11 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
         {/* Left Section: Easter Egg / Interactive Button */}
         <div className="flex items-center flex-1">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onCheerUp}
             aria-label="Cheer up!"
-            className="px-[14px] py-[6px] rounded-[50px] bg-gradient-to-br from-brand-accent to-brand-secondary border-none cursor-pointer font-sans font-semibold text-[20px] text-[#1a2a4a] shadow-[0_2px_8px_rgba(163,216,244,0.4)]"
+            className="p-[6px] bg-transparent border-none cursor-pointer font-sans font-semibold text-[22px] shadow-none"
           >
             🎉
           </motion.button>

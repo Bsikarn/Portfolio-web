@@ -90,7 +90,6 @@ export default function ChatBot({ isOpen, onClose }) {
           <div style={S.botIcon}><Bot size={18} color="#0D6EFD" /></div>
           <div>
             <div style={S.botName}>Sikarn's AI Assistant</div>
-            <div style={S.botStatus}>● Online</div>
           </div>
         </div>
         <button onClick={onClose} style={S.closeBtn}><X size={14} /></button>
