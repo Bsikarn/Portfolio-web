@@ -1,5 +1,3 @@
-import { Code2, Heart, Users } from "lucide-react";
-
 // Personal information used throughout the portfolio
 export const ABOUT_ME = {
   name: "Sikarn Pattarasirimongkol",

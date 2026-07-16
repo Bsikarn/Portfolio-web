@@ -79,13 +79,13 @@ export default function ProjectsPage() {
         ]);
 
         if (catData) {
-          const filtered = catData.filter((c) => c.name !== "Achievement" && c.name !== "Activity");
+          const filtered = catData.filter((c) => c.name !== "Achievement" && c.name !== "Activity" && c.name !== "Experience");
           const sorted = [...filtered].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
           setCategoriesData(["All", ...sorted.map((c) => c.name)]);
         }
 
         if (projData) {
-          const visible = projData.filter((p) => p.category !== "Achievement" && p.category !== "Activity");
+          const visible = projData.filter((p) => p.category !== "Achievement" && p.category !== "Activity" && p.category !== "Experience");
           const sorted = sortProjects(visible);
           setProjectsData(sorted);
 
@@ -184,7 +184,8 @@ export default function ProjectsPage() {
   if (isLoading) return <LoadingPage />;
 
   return (
-    <div style={styles.pageContainer}>
+    <div data-testid="projects-container" style={styles.pageContainer}>
+
 
       {/* Filter Bar and Project Scroll List */}
       <div style={{ maxWidth: 1440, margin: "0 auto", width: "100%" }}>

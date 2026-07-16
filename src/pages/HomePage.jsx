@@ -80,7 +80,7 @@ const MediaRow = ({ item, setPreviewImage, setPage }) => (
   </div>
 );
 
-export default function HomePage({ setPage }) {
+export default function HomePage({ setPage, setContactOpen }) {
   const { activeSections } = useBackgroundBlur();
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -136,11 +136,11 @@ export default function HomePage({ setPage }) {
         // Increment views and fetch stats in parallel
         const [, { count: projectCount }, { data: statsData }, { data: settingsData }, { data: actsData }, { data: allProjectsData }] = await Promise.all([
           supabase.rpc("increment_views"),
-          supabase.from("projects").select("*", { count: "exact", head: true }).neq("category", "Achievement").neq("category", "Activity"),
+          supabase.from("projects").select("*", { count: "exact", head: true }).neq("category", "Achievement").neq("category", "Activity").neq("category", "Experience"),
           supabase.from("site_stats").select("*").eq("id", 1).single(),
           supabase.from("portfolio_settings").select("about_me").eq("id", 1).single(),
-          supabase.from("projects").select("*").in("category", ["Achievement", "Activity"]).order("year", { ascending: false }).order("id", { ascending: false }),
-          supabase.from("projects").select("tags, tools, languages").neq("category", "Achievement").neq("category", "Activity"),
+          supabase.from("projects").select("*").in("category", ["Achievement", "Activity", "Experience"]).order("year", { ascending: false }).order("id", { ascending: false }),
+          supabase.from("projects").select("tags, tools, languages").neq("category", "Achievement").neq("category", "Activity").neq("category", "Experience"),
         ]);
 
         projectCountRef.current = projectCount || 0;
@@ -180,6 +180,18 @@ export default function HomePage({ setPage }) {
   const activeIndex = homeSections.indexOf(currentActiveSection) + 1;
   const totalSections = homeSections.length;
 
+  const prevIndex = activeIndex - 2;
+  const prevSectionId = prevIndex >= 0 ? homeSections[prevIndex] : null;
+  const nextIndex = activeIndex;
+  const nextSectionId = nextIndex < totalSections ? homeSections[nextIndex] : null;
+
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const sectionLabels = {
     "about-me": "About Me",
     "achievements": "Achievements",
@@ -196,7 +208,7 @@ export default function HomePage({ setPage }) {
 
   return (
     <div className="pt-[64px]">
-      <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} />
+      <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} setContactOpen={setContactOpen} />
 
       <div className="relative z-[2]">
         <div className="flex flex-col gap-0">
@@ -377,40 +389,112 @@ export default function HomePage({ setPage }) {
       )}
 
       {/* Active Section Indicator Float Box */}
+      {/* Active Section Indicator Float Box & Shortcuts */}
       <AnimatePresence>
         {currentActiveSection && sectionLabels[currentActiveSection] && (
-          <motion.div
-            key={currentActiveSection}
-            initial={{ opacity: 0, y: 20, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 20, x: "-50%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          <div
             style={{
               position: "fixed",
               bottom: "24px",
               left: "50%",
+              transform: "translateX(-50%)",
               zIndex: 1000,
-              background: "rgba(255, 255, 255, 0.65)", // transparency increased by 10%
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              borderRadius: "16px",
-              border: "1px solid rgba(255, 255, 255, 0.4)",
-              padding: "10px 20px",
-              boxShadow: "0 8px 32px rgba(13, 110, 253, 0.15)",
-              fontFamily: "'Poppins', sans-serif",
-              fontWeight: 700,
-              fontSize: "13px",
-              color: "#0D6EFD",
               display: "flex",
               alignItems: "center",
-              pointerEvents: "none"
+              gap: "12px",
+              pointerEvents: "auto"
             }}
           >
-            {sectionLabels[currentActiveSection]}
-            <span style={{ color: "#8aabcc", fontWeight: 500, marginLeft: "6px" }}>
-              ({activeIndex} / {totalSections})
-            </span>
-          </motion.div>
+            {/* Prev Section Button */}
+            {prevSectionId && (
+              <motion.button
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -15 }}
+                onClick={() => scrollToSection(prevSectionId)}
+                style={{
+                  pointerEvents: "auto",
+                  background: "rgba(255, 255, 255, 0.65)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.4)",
+                  padding: "8px 14px",
+                  boxShadow: "0 8px 32px rgba(13, 110, 253, 0.1)",
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 600,
+                  fontSize: "12px",
+                  color: "#4a6a8a",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                ▲ {sectionLabels[prevSectionId]}
+              </motion.button>
+            )}
+
+            {/* Current Active Indicator Box */}
+            <motion.div
+              key={currentActiveSection}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              style={{
+                background: "rgba(255, 255, 255, 0.65)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                borderRadius: "16px",
+                border: "1px solid rgba(255, 255, 255, 0.4)",
+                padding: "10px 20px",
+                boxShadow: "0 8px 32px rgba(13, 110, 253, 0.15)",
+                fontFamily: "'Poppins', sans-serif",
+                fontWeight: 700,
+                fontSize: "13px",
+                color: "#0D6EFD",
+                display: "flex",
+                alignItems: "center",
+                whiteSpace: "nowrap",
+                pointerEvents: "none"
+              }}
+            >
+              {sectionLabels[currentActiveSection]}
+              <span style={{ color: "#8aabcc", fontWeight: 500, marginLeft: "6px" }}>
+                ({activeIndex} / {totalSections})
+              </span>
+            </motion.div>
+
+            {/* Next Section Button */}
+            {nextSectionId && (
+              <motion.button
+                initial={{ opacity: 0, x: 15 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 15 }}
+                onClick={() => scrollToSection(nextSectionId)}
+                style={{
+                  pointerEvents: "auto",
+                  background: "rgba(255, 255, 255, 0.65)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.4)",
+                  padding: "8px 14px",
+                  boxShadow: "0 8px 32px rgba(13, 110, 253, 0.1)",
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 600,
+                  fontSize: "12px",
+                  color: "#4a6a8a",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  cursor: "pointer"
+                }}
+              >
+                {sectionLabels[nextSectionId]} ▼
+              </motion.button>
+            )}
+          </div>
         )}
       </AnimatePresence>
     </div>

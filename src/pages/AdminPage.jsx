@@ -38,8 +38,8 @@ function projectToForm(project) {
     languages: project.languages?.map((l) => `${l.name}:${l.percent}:${l.color}`).join(", ") || "",
     video_url: project.video_url || "",
     gallery_urls: project.gallery?.join(", ") || "",
-    certificate_url: project.gallery?.[0] || "",
-    activity_url: project.gallery?.[1] || "",
+    activity_url: project.gallery?.[0] || "",
+    certificate_url: project.gallery?.[1] || "",
     has_award: !!project.award,
     award_title: project.award?.title || "",
     award_description: project.award?.description || "",
@@ -51,7 +51,7 @@ function projectToForm(project) {
 
 // Build the Supabase payload from form data
 function buildPayload(formData, contentType) {
-  const isSpecial = contentType === "Achievement" || contentType === "Activity";
+  const isSpecial = contentType === "Achievement" || contentType === "Activity" || contentType === "Experience";
   const selectedCats = [formData.category, formData.category2].filter(Boolean);
   return {
     title: formData.title,
@@ -70,11 +70,26 @@ function buildPayload(formData, contentType) {
     tools: formData.tools ? formData.tools.split(",").map((t) => t.trim()).filter(Boolean) : [],
     features: formData.features ? formData.features.split("\n").map((f) => f.trim()).filter(Boolean) : [],
     languages: formData.languages
-      ? formData.languages.split(",").map((l) => { const [name, percent, color] = l.split(":"); return { name: name?.trim(), percent: Number(percent) || 0, color: color?.trim() || "#ccc" }; })
+      ? (() => {
+          const parts = formData.languages.split(",").map((l) => l.trim()).filter(Boolean);
+          const isSimple = parts.some(p => !p.includes(":"));
+          if (isSimple) {
+            return parts.map((name) => ({
+              name,
+              percent: 0,
+              color: "#888"
+            }));
+          } else {
+            return parts.map((l) => {
+              const [name, percent, color] = l.split(":");
+              return { name: name?.trim(), percent: Number(percent) || 0, color: color?.trim() || "#ccc" };
+            });
+          }
+        })()
       : [],
     video_url: formData.video_url,
     gallery: isSpecial
-      ? [formData.certificate_url?.trim() || "", formData.activity_url?.trim() || ""]
+      ? [formData.activity_url?.trim() || "", formData.certificate_url?.trim() || ""]
       : (formData.gallery_urls ? formData.gallery_urls.split(",").map((u) => u.trim()).filter(Boolean) : []),
     award: formData.has_award
       ? { title: formData.award_title, description: formData.award_description, competition: formData.award_competition, image_url: formData.award_image_url }
@@ -185,7 +200,7 @@ export default function AdminPage({ setPage }) {
   const handleEdit = (project) => {
     setIsEditing(true);
     setEditId(project.id);
-    setContentType(project.category === "Achievement" || project.category === "Activity" ? project.category : "Project");
+    setContentType(project.category === "Achievement" || project.category === "Activity" || project.category === "Experience" ? project.category : "Project");
     setFormData(projectToForm(project));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -246,7 +261,7 @@ export default function AdminPage({ setPage }) {
 
                 {/* Content Type Selector */}
                 <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-                  {["Project", "Achievement", "Activity"].map((type) => (
+                  {["Project", "Achievement", "Activity", "Experience"].map((type) => (
                     <button
                       key={type}
                       type="button"
@@ -331,18 +346,24 @@ export default function AdminPage({ setPage }) {
                   <h3 style={{ ...styles.sectionHeading, color: "#6366f1" }}>🌍 Media & Links</h3>
                   <div style={styles.gridContainer}>
                     <div style={styles.flexRow}>
-                      {contentType === "Achievement"
+                      {(contentType === "Achievement" || contentType === "Activity" || contentType === "Experience")
                         ? <div style={styles.flex1}><label style={styles.labelStyle}>Linked Project ID</label><input type="text" name="link_url" value={formData.link_url} onChange={handleChange} style={styles.inputStyle} placeholder="e.g. 12" /></div>
                         : <div style={styles.flex1}><label style={styles.labelStyle}>Live Link</label><input type="url" name="link_url" value={formData.link_url} onChange={handleChange} style={styles.inputStyle} /></div>
                       }
                       <div style={styles.flex1}><label style={styles.labelStyle}>GitHub</label><input type="url" name="github_url" value={formData.github_url} onChange={handleChange} style={styles.inputStyle} /></div>
                     </div>
-                    <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>
+                    {contentType === "Project" && <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>}
                     {contentType === "Project"
                       ? <div><label style={styles.labelStyle}>Gallery URLs (Comma-separated)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
                       : <>
-                          <div><label style={styles.labelStyle}>Certificate Image URL</label><input type="url" name="certificate_url" value={formData.certificate_url} onChange={handleChange} style={styles.inputStyle} /></div>
-                          <div><label style={styles.labelStyle}>Activity Picture URL</label><input type="url" name="activity_url" value={formData.activity_url} onChange={handleChange} style={styles.inputStyle} /></div>
+                          <div>
+                            <label style={styles.labelStyle}>Certificate/Verification Image URL</label>
+                            <input type="url" name="activity_url" value={formData.activity_url} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/certificate.jpg" />
+                          </div>
+                          <div>
+                            <label style={styles.labelStyle}>Activity/Participation Photo URL</label>
+                            <input type="url" name="certificate_url" value={formData.certificate_url} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/activity.jpg" />
+                          </div>
                         </>
                     }
                   </div>
@@ -404,7 +425,7 @@ export default function AdminPage({ setPage }) {
 
               {/* Content Type Filter */}
               <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-                {["Project", "Achievement", "Activity"].map((type) => (
+                {["Project", "Achievement", "Activity", "Experience"].map((type) => (
                   <button
                     key={type}
                     onClick={() => setContentType(type)}
@@ -417,7 +438,7 @@ export default function AdminPage({ setPage }) {
 
               <div style={styles.projectListContainer}>
                 {projectsList
-                  .filter((p) => contentType === "Project" ? p.category !== "Achievement" && p.category !== "Activity" : p.category === contentType)
+                  .filter((p) => contentType === "Project" ? p.category !== "Achievement" && p.category !== "Activity" && p.category !== "Experience" : p.category === contentType)
                   .map((project) => (
                     <div key={project.id} style={styles.projectListItem}>
                       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>

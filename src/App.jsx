@@ -16,8 +16,9 @@ import ThreeDPreloader from "./components/ThreeDPreloader";
 const Background3DScene = lazy(() => import("./components/Background3DScene"));
 const ChatBot = lazy(() => import("./components/ChatBot"));
 const HomePage = lazy(() => import("./pages/HomePage"));
+const ExperiencesPage = lazy(() => import("./pages/ExperiencesPage"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
-const ContactPage = lazy(() => import("./pages/ContactPage"));
+const ContactPopup = lazy(() => import("./components/ContactPopup"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 
@@ -31,6 +32,7 @@ const fadeVariants = {
 export default function App() {
   const [page, setPage] = useState("Home");
   const [chatOpen, setChatOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const [emojis, setEmojis] = useState([]);
   const [session, setSession] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -185,6 +187,7 @@ export default function App() {
         onCheerUp={handleCheerUp}
         chatOpen={chatOpen}
         setChatOpen={setChatOpen}
+        setContactOpen={setContactOpen}
       />
 
       {/* AnimatePresence handles mounting/unmounting animations using fade-in/out */}
@@ -199,9 +202,9 @@ export default function App() {
           style={{ position: "relative", zIndex: 1 }}
         >
           <Suspense fallback={null}>
-            {page === "Home" ? <HomePage setPage={handleSetPage} /> : null}
+            {page === "Home" ? <HomePage setPage={handleSetPage} setContactOpen={setContactOpen} /> : null}
+            {page === "Experiences" ? <ExperiencesPage setPage={handleSetPage} /> : null}
             {page === "Projects" ? <ProjectsPage /> : null}
-            {page === "Contact" ? <ContactPage /> : null}
             {page === "Login" ? <LoginPage setPage={handleSetPage} /> : null}
             {page === "Admin" ? (
               // If signed in, show Admin Page (Protected Route)
@@ -216,6 +219,15 @@ export default function App() {
         {chatOpen ? (
           <Suspense fallback={null}>
             <ChatBot isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+          </Suspense>
+        ) : null}
+      </AnimatePresence>
+
+      {/* Render Contact Popup Modal */}
+      <AnimatePresence>
+        {contactOpen ? (
+          <Suspense fallback={null}>
+            <ContactPopup isOpen={contactOpen} onClose={() => setContactOpen(false)} />
           </Suspense>
         ) : null}
       </AnimatePresence>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Menu, X } from "lucide-react";
 
-export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen }) {
+export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen, setContactOpen }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -16,8 +16,13 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
   }, []);
 
   const handleNavClick = (p) => {
-    setPage(p);
-    setMenuOpen(false);
+    if (p === "Contact") {
+      setContactOpen(true);
+      setMenuOpen(false);
+    } else {
+      setPage(p);
+      setMenuOpen(false);
+    }
   };
 
   return (
@@ -50,7 +55,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
 
         {/* Right Section: Navigation Links and Actions */}
         <div className="flex items-center gap-[12px] flex-1 justify-end">
-          {!isMobile && ["Home", "Projects", "Contact"].map((p) => (
+          {!isMobile && ["Home", "Experiences", "Projects"].map((p) => (
             <button
               key={p}
               onClick={() => handleNavClick(p)}
@@ -61,6 +66,14 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
               {p}
             </button>
           ))}
+          {!isMobile && (
+            <button
+              onClick={() => handleNavClick("Contact")}
+              className="px-[20px] py-[7px] rounded-[50px] border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-sans font-bold text-[13px] cursor-pointer transition-all duration-200 shadow-[0_2px_8px_rgba(13,110,253,0.08)] bg-white/50 backdrop-blur-[5px]"
+            >
+              Contact
+            </button>
+          )}
 
           {/* AI Chatbot Toggle Button */}
           <motion.button
@@ -105,7 +118,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-[64px] left-0 right-0 bg-white border-b border-brand-secondary/25 shadow-[0_10px_25px_rgba(13,110,253,0.1)] z-[999] flex flex-col p-[16px]"
           >
-            {["Home", "Projects", "Contact"].map((p) => (
+            {["Home", "Experiences", "Projects"].map((p) => (
               <button
                 key={p}
                 onClick={() => handleNavClick(p)}
@@ -116,6 +129,12 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
                 {p}
               </button>
             ))}
+            <button
+              onClick={() => handleNavClick("Contact")}
+              className="p-[14px] rounded-[12px] text-center text-[16px] font-sans font-bold border border-brand-primary text-brand-primary bg-white/50 hover:bg-brand-primary hover:text-white transition-all cursor-pointer shadow-[0_2px_8px_rgba(13,110,253,0.05)]"
+            >
+              Contact
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

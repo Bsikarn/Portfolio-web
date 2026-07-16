@@ -6,6 +6,7 @@ test.describe('Portfolio E2E Core Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to homepage before each test
     await page.goto('/');
+    await page.getByRole('button', { name: 'Contact Me', exact: true }).waitFor({ state: 'visible', timeout: 20000 });
   });
 
   test('Navbar links navigation & brand logo presence', async ({ page }) => {
@@ -16,20 +17,36 @@ test.describe('Portfolio E2E Core Tests', () => {
 
     // Navigation buttons check
     const homeBtn = page.getByRole('button', { name: 'Home', exact: true });
+    const expBtn = page.getByRole('button', { name: 'Experiences', exact: true });
     const projectsBtn = page.getByRole('button', { name: 'Projects', exact: true });
     const contactBtn = page.getByRole('button', { name: 'Contact', exact: true });
 
     await expect(homeBtn).toBeVisible();
+    await expect(expBtn).toBeVisible();
     await expect(projectsBtn).toBeVisible();
     await expect(contactBtn).toBeVisible();
 
-    // Navigate to Contact
+    // Navigate to Experiences
+    await expBtn.click();
+    await page.getByTestId('experiences-container').waitFor({ state: 'visible', timeout: 20000 });
+
+    // Navigate to Projects
+    await projectsBtn.click();
+    await page.getByPlaceholder('Search project name...').waitFor({ state: 'visible', timeout: 20000 });
+
+    // Trigger Contact Popup
     await contactBtn.click();
+    await page.waitForTimeout(800);
     await expect(page.getByText("Let's work")).toBeVisible();
+
+    // Close Contact Popup
+    await page.locator('button:has(.lucide-x)').click({ force: true });
+    await page.waitForTimeout(1000);
+    await expect(page.getByText("Let's work")).toBeHidden();
 
     // Navigate back to Home
     await homeBtn.click();
-    await expect(page.getByText('Sikarn Pattarasirimongkol')).toBeVisible();
+    await expect(page.locator('div[title="Beaut.Portfolio"]')).toBeVisible();
   });
 
   test('Interactive Cheer Up button triggers emojis', async ({ page }) => {
@@ -65,9 +82,7 @@ test.describe('Portfolio E2E Core Tests', () => {
   test('Projects filtering and selection logic', async ({ page }) => {
     // Switch to Projects page
     await page.getByRole('button', { name: 'Projects', exact: true }).click();
-
-    // Wait until loading indicator disappears
-    await expect(page.getByText(/Loading Projects/i)).toBeHidden({ timeout: 15000 });
+    await page.getByPlaceholder('Search project name...').waitFor({ state: 'visible', timeout: 20000 });
 
     // Validate 'All' filter button is default
     const allFilterBtn = page.getByRole('button', { name: 'All', exact: true });

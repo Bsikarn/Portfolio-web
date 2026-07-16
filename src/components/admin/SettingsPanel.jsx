@@ -24,14 +24,14 @@ function buildPayload(s) {
     contact_links: {
       email: s.email, github_handle: s.github_handle, github_url: s.github_url,
       linkedin_handle: s.linkedin_handle, linkedin_url: s.linkedin_url,
-      resume_url: s.resume_url, portfolio_url: s.portfolio_url,
+      resume_url: s.resume_url, cv_url: s.cv_url, portfolio_url: s.portfolio_url,
     },
   };
 }
 
 const INITIAL_SETTINGS = {
   name: "", role: "", intro: "", gpa: "", education: "", languages: "", image_url: "",
-  email: "", github_handle: "", github_url: "", linkedin_handle: "", linkedin_url: "", resume_url: "", portfolio_url: "",
+  email: "", github_handle: "", github_url: "", linkedin_handle: "", linkedin_url: "", resume_url: "", cv_url: "", portfolio_url: "",
 };
 
 export default function SettingsPanel() {
@@ -109,7 +109,8 @@ export default function SettingsPanel() {
                 <div style={styles.flex1}><Field label="LinkedIn URL" name="linkedin_url" type="url" /></div>
               </div>
               <div style={styles.flexRow}>
-                <div style={styles.flex1}><Field label="Resume/CV URL" name="resume_url" placeholder="# or https://..." /></div>
+                <div style={styles.flex1}><Field label="Resume URL" name="resume_url" placeholder="# or https://..." /></div>
+                <div style={styles.flex1}><Field label="CV URL" name="cv_url" placeholder="# or https://..." /></div>
                 <div style={styles.flex1}><Field label="Portfolio URL" name="portfolio_url" placeholder="# or https://..." /></div>
               </div>
             </div>
