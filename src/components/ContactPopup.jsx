@@ -121,7 +121,7 @@ export default function ContactPopup({ isOpen, onClose }) {
 
         {/* Footer */}
         <div className="mt-[20px] text-center font-sans text-[12px] text-brand-muted opacity-85">
-          Based in Bangkok, TH • Response time ~24h
+          Based in Bangkok, TH
         </div>
       </motion.div>
     </div>

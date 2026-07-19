@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ArrowDown, FolderGit2, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 // Background blur managed inside ScrollSection wrapper
 import ProjectMiniCard from "../components/ProjectMiniCard";
 import ProjectDetailsCard from "../components/ProjectDetailsCard";
 import LoadingPage from "../components/LoadingPage";
-import { supabase } from "../lib/supabase";
+import { supabase, getTransformedUrl } from "../lib/supabase";
 import { styles } from "../styles/ProjectsPage.styles";
 
 // Sort projects: awards first → recommended → alphabetical
@@ -19,14 +19,7 @@ function sortProjects(projects) {
   });
 }
 
-// Extract gallery from video url for thumbnail background
-function getCoverBg(project) {
-  if (project.video_url?.includes("youtube.com/embed/")) {
-    const videoId = project.video_url.split("embed/")[1].split("?")[0];
-    return `linear-gradient(rgba(0,0,0,0.2),rgba(0,0,0,0.2)), url(https://img.youtube.com/vi/${videoId}/maxresdefault.jpg) center/cover no-repeat`;
-  }
-  return "linear-gradient(135deg,#f0f6ff,#e0f2fe)";
-}
+
 
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -41,6 +34,32 @@ export default function ProjectsPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxItems, setLightboxItems] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [currentImageLoaded, setCurrentImageLoaded] = useState(false);
+
+  // Reset image loaded state when lightbox index changes
+  useEffect(() => {
+    setCurrentImageLoaded(false);
+  }, [lightboxIndex]);
+
+  // Preload next and previous images in the gallery when the current image is loaded
+  useEffect(() => {
+    if (currentImageLoaded && lightboxOpen && lightboxItems.length > 1) {
+      const nextIdx = (lightboxIndex + 1) % lightboxItems.length;
+      const prevIdx = (lightboxIndex - 1 + lightboxItems.length) % lightboxItems.length;
+
+      const nextItem = lightboxItems[nextIdx];
+      const prevItem = lightboxItems[prevIdx];
+
+      if (nextItem && nextItem.type === "image") {
+        const imgNext = new Image();
+        imgNext.src = getTransformedUrl(nextItem.url, { width: 1200 });
+      }
+      if (prevItem && prevItem.type === "image") {
+        const imgPrev = new Image();
+        imgPrev.src = getTransformedUrl(prevItem.url, { width: 1200 });
+      }
+    }
+  }, [currentImageLoaded, lightboxIndex, lightboxItems, lightboxOpen]);
 
   // Handled automatically via ScrollSection components
 
@@ -51,17 +70,7 @@ export default function ProjectsPage() {
   const [scrollLeft, setScrollLeft] = useState(0);
   const dragDistance = useRef(0);
 
-  // Show back-to-top button when user has scrolled past the selection card, and manage scroll-down indicator visibility
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showScrollDown, setShowScrollDown] = useState(true);
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
-      setShowScrollDown(window.scrollY < 80);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -298,7 +307,14 @@ export default function ProjectsPage() {
               )}
               <div onClick={(e) => e.stopPropagation()} style={styles.lightboxContent}>
                 {lightboxItems[lightboxIndex].type === "image"
-                  ? <img src={lightboxItems[lightboxIndex].url} alt="Gallery" style={{ ...styles.lightboxImage, aspectRatio: "16/9" }} />
+                  ? <img 
+                      src={getTransformedUrl(lightboxItems[lightboxIndex].url, { width: 1200 })} 
+                      alt="Gallery" 
+                      loading="lazy" 
+                      onLoad={() => setCurrentImageLoaded(true)} 
+                      onError={(e) => { e.target.src = lightboxItems[lightboxIndex].url; }}
+                      style={{ ...styles.lightboxImage, aspectRatio: "16/9" }} 
+                    />
                   : <iframe src={lightboxItems[lightboxIndex].url} allowFullScreen style={{ ...styles.lightboxVideo, aspectRatio: "16/9" }} title="Video Player" />
                 }
               </div>
@@ -310,50 +326,7 @@ export default function ProjectsPage() {
 
 
 
-      {/* Scroll Down Indicator */}
-      <AnimatePresence>
-        {showScrollDown && (
-          <div style={{ position: "fixed", bottom: 32, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 200, pointerEvents: "none" }}>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <div style={{
-                fontFamily: "'Poppins', sans-serif",
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#8aabcc",
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                display: "flex",
-                alignItems: "center",
-                gap: 6
-              }}>
-                Scroll down
-                <span style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: 2, opacity: 0.7 }}>
-                  <FolderGit2 size={12} />
-                  <FileText size={12} />
-                </span>
-              </div>
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", willChange: "transform" }}
-              >
-                <ArrowDown size={20} style={{ color: "#0D6EFD" }} />
-              </motion.div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Briefcase, Calendar, Building2, ImageIcon, FileText, ArrowRight } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 import LoadingPage from "../components/LoadingPage";
-import { supabase } from "../lib/supabase";
+import { supabase, getTransformedUrl } from "../lib/supabase";
 
 export default function ExperiencesPage({ setPage }) {
   const [experiences, setExperiences] = useState([]);
@@ -128,8 +128,10 @@ export default function ExperiencesPage({ setPage }) {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              src={previewImage}
+              src={getTransformedUrl(previewImage, { width: 1200 })}
               alt="Enlarged view"
+              loading="lazy"
+              onError={(e) => { e.target.src = previewImage; }}
               className="max-w-[95%] max-h-[90%] rounded-[16px] shadow-[0_24px_64px_rgba(0,0,0,0.5)] object-contain"
             />
           </motion.div>

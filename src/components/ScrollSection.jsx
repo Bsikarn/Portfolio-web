@@ -7,7 +7,7 @@ import { useBackgroundBlur } from "../context/BackgroundBlurContext";
  * Uses Intersection Observer to fade content in/out as it enters/leaves the viewport.
  * Also registers with the global background blur manager when intersecting by >= threshold (default 20%).
  */
-export default function ScrollSection({ id, children, className = "", style = {}, threshold = 0.2 }) {
+export default function ScrollSection({ id, children, className = "", style = {}, threshold = 0.1, rootMargin = "0px" }) {
   const elementRef = useRef(null);
   const { registerSection } = useBackgroundBlur();
   const [isVisible, setIsVisible] = useState(false);
@@ -20,9 +20,8 @@ export default function ScrollSection({ id, children, className = "", style = {}
         registerSection(id, isIntersecting);
       },
       {
-        // 20% of the element needs to be visible in the viewport to trigger
         threshold: threshold,
-        rootMargin: "-5% 0px -5% 0px", // Slight margin to feel more organic
+        rootMargin: rootMargin,
       }
     );
 

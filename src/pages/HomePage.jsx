@@ -6,7 +6,7 @@ import ScrollSection from "../components/ScrollSection";
 import Hero from "../components/Hero";
 import LoadingPage from "../components/LoadingPage";
 import { ABOUT_ME } from "../data/constants";
-import { supabase } from "../lib/supabase";
+import { supabase, getTransformedUrl } from "../lib/supabase";
 import { useBackgroundBlur } from "../context/BackgroundBlurContext";
 
 // Helper: merge DB about_me with constants fallback
@@ -208,18 +208,24 @@ export default function HomePage({ setPage, setContactOpen }) {
 
   return (
     <div className="pt-[64px]">
-      <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} setContactOpen={setContactOpen} />
+      <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} setContactOpen={setContactOpen} scrollToSection={scrollToSection} />
 
       <div className="relative z-[2]">
         <div className="flex flex-col gap-0">
 
           {/* About Me */}
           <section className={`max-w-[1440px] mx-auto ${sectionPad}`}>
-            <ScrollSection id="about-me" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+            <ScrollSection id="about-me" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
               <div className={`flex ${isMobile ? "flex-col text-center items-center gap-[16px]" : "flex-row items-center gap-[32px]"}`}>
                 <div className="w-[120px] h-[120px] rounded-[24px] bg-gradient-to-br from-[#e0f2fe] to-[#fce7f3] flex items-center justify-center text-[48px] shrink-0 shadow-[inset_0_0_0_1px_rgba(163,216,244,0.5)] overflow-hidden">
                   {about?.image_url ? (
-                    <img src={about.image_url} alt={about?.name || "Profile"} className="w-full h-full object-cover" />
+                    <img 
+                      src={getTransformedUrl(about.image_url, { width: 240 })} 
+                      alt={about?.name || "Profile"} 
+                      loading="lazy" 
+                      onError={(e) => { e.target.src = about.image_url; }}
+                      className="w-full h-full object-cover" 
+                    />
                   ) : (
                     <User size={56} color="#A3D8F4" />
                   )}
@@ -268,7 +274,7 @@ export default function HomePage({ setPage, setContactOpen }) {
 
           {/* Achievements */}
           <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
-            <ScrollSection id="achievements" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+            <ScrollSection id="achievements" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
               <div className="flex items-center gap-[16px]">
                 <div className="w-[48px] h-[48px] rounded-[16px] bg-gradient-to-br from-[#fff0f4] to-[#ffe4e6] flex items-center justify-center text-[#ff6b6b] shrink-0"><Trophy size={24} /></div>
                 <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Achievements</h2>
@@ -284,7 +290,7 @@ export default function HomePage({ setPage, setContactOpen }) {
 
           {/* Activities */}
           <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
-            <ScrollSection id="activities" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+            <ScrollSection id="activities" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
               <div className="flex items-center gap-[16px]">
                 <div className="w-[48px] h-[48px] rounded-[16px] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] flex items-center justify-center text-[#10b981] shrink-0"><Activity size={24} /></div>
                 <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Activities</h2>
@@ -300,7 +306,7 @@ export default function HomePage({ setPage, setContactOpen }) {
 
           {/* Technologies & Tools */}
           <section className={`max-w-[1440px] mx-auto ${sectionPad}`}>
-            <ScrollSection id="technologies-and-tools" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
+            <ScrollSection id="technologies-and-tools" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
               {portfolioLanguages.length > 0 && (
                 <>
                   <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">LANGUAGES</h2>
@@ -332,7 +338,7 @@ export default function HomePage({ setPage, setContactOpen }) {
 
           {/* Dashboard Stats */}
           <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[40px_24px_80px]" : "p-[40px_48px_100px]"}`}>
-            <ScrollSection id="dashboard-overview" className={`bg-gradient-to-b from-white/80 to-[#f8fbff]/80 backdrop-blur-[16px] rounded-[32px] shadow-card-base border border-brand-secondary/30 ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
+            <ScrollSection id="dashboard-overview" rootMargin="-25% 0px -25% 0px" className={`bg-gradient-to-b from-white/80 to-[#f8fbff]/80 backdrop-blur-[16px] rounded-[32px] shadow-card-base border border-brand-secondary/30 ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
               <div className="text-center mb-[32px]">
                 <h2 className="font-sans font-extrabold text-[24px] text-brand-dark m-0">Dashboard Overview</h2>
               </div>
@@ -366,13 +372,15 @@ export default function HomePage({ setPage, setContactOpen }) {
               onClick={() => setPreviewImage(null)}
               className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-[24px]"
             >
-              <motion.img
+               <motion.img
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ type: "spring", bounce: 0.4 }}
-                src={previewImage}
+                src={getTransformedUrl(previewImage, { width: 1200 })}
                 alt="Preview"
+                loading="lazy"
+                onError={(e) => { e.target.src = previewImage; }}
                 className="max-w-full max-h-[90vh] rounded-[16px] object-contain shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               />

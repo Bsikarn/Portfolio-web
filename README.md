@@ -15,6 +15,8 @@ A personal portfolio website for Sikarn Pattarasirimongkol (Beaut), a full-stack
 - Three.js + React Three Fiber (3D Background scene)
 - Tailwind CSS (Utility classes)
 - Lucide React (Icons)
+- Supabase Image Transformations (Dynamic WebP rendering & sizing)
+- JavaScript Image Preloading (Asynchronous next/prev image pre-fetching)
 
 ### Backend & Database
 - Supabase (PostgreSQL database, Realtime subscriptions, Edge Functions, Authentication)
@@ -45,6 +47,7 @@ A personal portfolio website for Sikarn Pattarasirimongkol (Beaut), a full-stack
 - **Active Section Indicator** — A floating glassmorphism badge centered at the bottom of the Home page displaying the name of the active content section.
 - **Performance Throttling (3D Scene)** — Dynamic WebGL saving feature disabling Canvas render loop and hiding DOM elements when not viewing the 3D model in focus.
 - **Dual-Row Project Catalog** — Spacious 2-row horizontal grid selector layout for projects with desktop drag and swipe interactivity.
+- **Image Optimization** — Dynamic resizing and webp conversion utilizing Supabase Image Transformations combined with `loading="lazy"` and JavaScript-based async preloading of next/prev gallery assets.
 
 ## Directory Structure
 
@@ -65,14 +68,13 @@ src/
 │   ├── ProjectDetailsCard.jsx
 │   ├── ProjectMiniCard.jsx
 │   ├── ScrollSection.jsx          # ⚠️ Scroll observer with fade logic
-│   ├── StackedCard.jsx            # ⚠️ Legacy / Unused in current build
 │   └── ThreeDPreloader.jsx
 ├── context/
 │   └── BackgroundBlurContext.jsx  # ⚠️ Central background blur manager
 ├── data/
 │   └── constants.jsx
 ├── lib/
-│   ├── supabase.js
+│   ├── supabase.js           # ⚠️ Supabase instance and image transformation helpers
 │   └── worker.js
 ├── pages/
 │   ├── AdminPage.jsx

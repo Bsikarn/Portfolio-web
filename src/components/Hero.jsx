@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, ArrowDown, User, Trophy, Activity, Code2, Heart } from "lucide-react";
+import { FileText, ArrowDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
-export default function Hero({ setPage, isPdfOpen, setIsPdfOpen, setContactOpen }) {
+export default function Hero({ setPage, isPdfOpen, setIsPdfOpen, setContactOpen, scrollToSection }) {
   const [links, setLinks] = useState({ resume: "", portfolio: "" });
   const [showHeroControls, setShowHeroControls] = useState(true);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -142,28 +142,36 @@ export default function Hero({ setPage, isPdfOpen, setIsPdfOpen, setContactOpen 
               </AnimatePresence>
             </motion.div>
 
-            {/* Scroll Indicator */}
+            {/* Shortcuts Indicator Container */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-col items-center gap-[8px]"
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col items-center gap-[12px] pointer-events-auto"
             >
-              <div className="font-sans text-[12px] font-semibold text-brand-muted uppercase tracking-[1px] flex items-center gap-[6px]">
-                Scroll down
-                <span className="flex items-center gap-[4px] ml-[2px] opacity-70">
-                  <User size={12} />
-                  <Trophy size={12} />
-                  <Activity size={12} />
-                  <Code2 size={12} />
-                  <Heart size={12} />
-                </span>
+              <div className="flex flex-row flex-wrap justify-center gap-[10px] max-w-[90vw]">
+                {[
+                  { id: "about-me", label: "About Me", icon: "▼" },
+                  { id: "achievements", label: "Certificate", icon: "▼" },
+                  { id: "activities", label: "Activities", icon: "▼" }
+                ].map((btn) => (
+                  <motion.button
+                    key={btn.id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => scrollToSection && scrollToSection(btn.id)}
+                    className="px-[18px] py-[9px] rounded-full bg-white/60 backdrop-blur-[10px] border border-[#eef3ff] text-[#4a6a8a] hover:text-brand-primary font-sans font-bold text-[12px] cursor-pointer shadow-[0_4px_16px_rgba(13,110,253,0.04)] hover:shadow-[0_6px_20px_rgba(13,110,253,0.09)] transition-all duration-200 flex items-center gap-[5px]"
+                  >
+                    <span className="text-[9px] opacity-70">{btn.icon}</span>
+                    {btn.label}
+                  </motion.button>
+                ))}
               </div>
               <motion.div
                 animate={{ y: [0, 8, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                className="text-brand-primary flex items-center justify-center"
+                className="text-brand-primary flex items-center justify-center mt-[4px] pointer-events-none"
                 style={{ willChange: "transform" }}
               >
                 <ArrowDown size={20} />

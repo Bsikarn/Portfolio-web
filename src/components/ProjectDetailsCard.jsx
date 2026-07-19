@@ -2,6 +2,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Github, ExternalLink, Play, CheckCircle2, Code2, Trophy, Image as ImageIcon, Target, Lightbulb, UserCog, Wrench, TrendingUp, BookOpen, Languages } from "lucide-react";
 import { styles } from "../styles/ProjectsPage.styles";
+import { getTransformedUrl } from "../lib/supabase";
 
 // Check if a link is valid (not empty or placeholder)
 const isValidUrl = (url) => url && url !== "#" && url !== "";
@@ -162,11 +163,23 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
             <h3 style={styles.subHeadingStyle}><ImageIcon size={20} color="#0D6EFD" /> Project Gallery</h3>
             <div style={{ ...styles.galleryGrid, gridTemplateColumns: selected.gallery.length === 1 ? "1fr" : "1fr 1fr" }}>
               <div onClick={() => openGalleryLightbox(0)} style={{ ...styles.galleryLargeItem, height: selected.gallery.length === 1 ? 400 : 250 }}>
-                <motion.img whileHover={{ scale: 1.05 }} src={selected.gallery[0]} style={{ ...styles.galleryImage, aspectRatio: "16/9" }} />
+                <motion.img 
+                  whileHover={{ scale: 1.05 }} 
+                  src={getTransformedUrl(selected.gallery[0], { width: 800 })} 
+                  loading="lazy" 
+                  onError={(e) => { e.target.src = selected.gallery[0]; }}
+                  style={{ ...styles.galleryImage, aspectRatio: "16/9" }} 
+                />
               </div>
               {selected.gallery.length > 1 && (
                 <div onClick={() => openGalleryLightbox(1)} style={styles.gallerySmallItem}>
-                  <motion.img whileHover={{ scale: selected.gallery.length > 2 ? 1 : 1.05 }} src={selected.gallery[1]} style={{ ...styles.galleryImage, aspectRatio: "16/9" }} />
+                  <motion.img 
+                    whileHover={{ scale: selected.gallery.length > 2 ? 1 : 1.05 }} 
+                    src={getTransformedUrl(selected.gallery[1], { width: 600 })} 
+                    loading="lazy" 
+                    onError={(e) => { e.target.src = selected.gallery[1]; }}
+                    style={{ ...styles.galleryImage, aspectRatio: "16/9" }} 
+                  />
                   {selected.gallery.length > 2 && <div style={styles.galleryOverlay}>+{selected.gallery.length - 2}</div>}
                 </div>
               )}
@@ -189,7 +202,13 @@ export default function ProjectDetailsCard({ selected, nav, openVideoLightbox, o
               style={{ ...styles.awardImageSide, background: selected.award.image_url ? "transparent" : "#ffe58f", cursor: selected.award.image_url ? "pointer" : "default" }}
             >
               {selected.award.image_url
-                ? <img src={selected.award.image_url} alt="Award" style={{ ...styles.coverImage, aspectRatio: "16/9" }} />
+                ? <img 
+                    src={getTransformedUrl(selected.award.image_url, { width: 600 })} 
+                    alt="Award" 
+                    loading="lazy" 
+                    onError={(e) => { e.target.src = selected.award.image_url; }}
+                    style={{ ...styles.coverImage, aspectRatio: "16/9" }} 
+                  />
                 : <><ImageIcon size={32} style={styles.placeholderIcon} /><span style={styles.placeholderText}>Event Photo</span></>
               }
             </motion.div>
