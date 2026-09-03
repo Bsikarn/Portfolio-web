@@ -10,17 +10,23 @@ jobs:
     name: Ping Supabase REST API
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST Root Endpoint
+      - name: Ping Supabase Endpoint
         run: |
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+          # ตัด trailing slash ออกเพื่อความปลอดภัยของ URL
+          BASE_URL=$(echo "${{ secrets.SUPABASE_URL }}" | sed 's:/*$::')
+
+          # ยิง ping ไปที่ health check หรือ rest table โดยตรง
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$BASE_URL/auth/v1/health" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/")
-          
-          echo "Supabase REST API Response Status: $STATUS_CODE"
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+
+          echo "Supabase Response Status: $STATUS_CODE"
+
+          # 200 หรือ 204 หรือ 404 (ถ้า table ว่างแต่ request เข้าถึง DB สำเร็จ) ถือว่าเคาะ DB ตื่นแล้ว
           if [ "$STATUS_CODE" -ge 200 ] && [ "$STATUS_CODE" -lt 400 ]; then
-            echo "Successfully pinged Supabase REST API! Keep-alive active."
+            echo "Successfully pinged Supabase! Keep-alive active."
+            exit 0
           else
-            echo "Supabase ping returned status code $STATUS_CODE"
+            echo "Ping failed with status code $STATUS_CODE"
             exit 1
           fi
