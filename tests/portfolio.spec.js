@@ -71,7 +71,7 @@ test.describe('Portfolio E2E Core Tests', () => {
     await chatbotToggle.click();
 
     // Verify Chatbot container header is visible
-    const chatTitle = page.getByText("Sikarn's AI Assistant");
+    const chatTitle = page.getByText("RAG Portfolio Assistant");
     await expect(chatTitle).toBeVisible();
 
     // Toggle again to close
@@ -91,6 +91,16 @@ test.describe('Portfolio E2E Core Tests', () => {
     // Check if there's any visible projects in the grid
     const selectProjectTitle = page.getByText('Select Project');
     await expect(selectProjectTitle).toBeVisible();
+  });
+
+  test('Experiences page loads and shows container', async ({ page }) => {
+    // Navigate to Experiences page
+    await page.getByRole('button', { name: 'Experiences', exact: true }).click();
+
+    // Wait for experiences container
+    const expContainer = page.getByTestId('experiences-container');
+    await expContainer.waitFor({ state: 'visible', timeout: 20000 });
+    await expect(expContainer).toBeVisible();
   });
 
 });

@@ -109,32 +109,54 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
         </div>
       </nav>
 
-      {/* Mobile Dropdown */}
+      {/* Mobile Menu Backdrop Gradient Blur Overlay (Top Blur -> Bottom Transparent) */}
       <AnimatePresence>
         {isMobile && menuOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-[64px] left-0 right-0 bg-white border-b border-brand-secondary/25 shadow-[0_10px_25px_rgba(13,110,253,0.1)] z-[999] flex flex-col p-[16px]"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 z-[990] pointer-events-auto backdrop-blur-[16px] [mask-image:linear-gradient(to_bottom,black_0%,black_35%,transparent_85%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_35%,transparent_85%)] bg-gradient-to-b from-white/70 via-white/30 to-transparent cursor-pointer"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Capsule Menu Dropdown (Right-Aligned Floating Pills) */}
+      <AnimatePresence>
+        {isMobile && menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -24 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="fixed top-[72px] right-[24px] z-[999] flex flex-col items-end gap-[10px] pointer-events-auto"
           >
             {["Home", "Experiences", "Projects"].map((p) => (
-              <button
+              <motion.button
                 key={p}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => handleNavClick(p)}
-                className={`p-[16px] border-none rounded-[12px] text-center text-[16px] font-sans mb-[8px] ${
-                  page === p ? "bg-brand-primary/10 text-brand-primary font-bold" : "bg-transparent text-[#4a6a8a] font-medium"
+                className={`px-[24px] py-[10px] rounded-[50px] font-sans font-bold text-[14px] cursor-pointer transition-all border shadow-[0_4px_16px_rgba(13,110,253,0.1)] backdrop-blur-[12px] ${
+                  page === p
+                    ? "bg-gradient-to-r from-[#2b7fff] to-[#0D6EFD] text-white border-transparent shadow-[0_4px_14px_rgba(13,110,253,0.3)]"
+                    : "bg-white/95 text-[#4a6a8a] border-[#eef3ff] hover:text-brand-primary hover:border-brand-primary/40"
                 }`}
               >
                 {p}
-              </button>
+              </motion.button>
             ))}
-            <button
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleNavClick("Contact")}
-              className="p-[14px] rounded-[12px] text-center text-[16px] font-sans font-bold border border-brand-primary text-brand-primary bg-white/50 hover:bg-brand-primary hover:text-white transition-all cursor-pointer shadow-[0_2px_8px_rgba(13,110,253,0.05)]"
+              className="px-[26px] py-[10px] rounded-[50px] font-sans font-bold text-[14px] cursor-pointer transition-all border border-brand-primary text-brand-primary bg-white/95 backdrop-blur-[12px] shadow-[0_4px_16px_rgba(13,110,253,0.12)] hover:bg-brand-primary hover:text-white"
             >
               Contact
-            </button>
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>

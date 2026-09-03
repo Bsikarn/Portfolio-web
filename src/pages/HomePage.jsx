@@ -1,43 +1,115 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, GraduationCap, Languages, Award, User, Heart, Users, Trophy, Activity, Image as ImageIcon, FileBadge } from "lucide-react";
+import { Code2, Heart, Users, Trophy, Activity, Image as ImageIcon, FileBadge, Terminal, Database, Palette, Atom, Layers, Server, Sparkles, Boxes, Zap, GitBranch, Code, Send, Container, Figma, Wrench } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 import Hero from "../components/Hero";
-import LoadingPage from "../components/LoadingPage";
-import { ABOUT_ME } from "../data/constants";
+import { HomeSkeleton } from "../components/SkeletonLoader";
+import HiddenContentModal from "../components/HiddenContentModal";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 import { useBackgroundBlur } from "../context/BackgroundBlurContext";
 
-// Helper: merge DB about_me with constants fallback
-const getAbout = (dbAbout) => dbAbout || ABOUT_ME;
-
 // Helper: build stat card data array
 const STAT_TEMPLATE = (pCount, views, cheers) => [
-  { icon: <Code2 size={24} />, label: "Total Projects", value: pCount || 0 },
-  { icon: <Users size={24} />, label: "Profile Views", value: views.toLocaleString() },
-  { icon: <Heart size={24} />, label: "Cheer Ups", value: cheers.toLocaleString() },
+  { icon: <Code2 size={16} />, label: "Total Projects", value: pCount || 0 },
+  { icon: <Users size={16} />, label: "Profile Views", value: views.toLocaleString() },
+  { icon: <Heart size={16} />, label: "Cheer Ups", value: cheers.toLocaleString() },
 ];
 
-const TagButton = ({ tag, index, activeTag, setActiveTag, techCounts }) => (
+// Helper: determine if a list item should be hidden
+const isItemHidden = (item) => item.is_hidden === true || (Array.isArray(item.tags) && item.tags.includes("__hidden__"));
+
+// Helper: Get Icon component matching tech/language/tool name
+function getTechIcon(name) {
+  const norm = (name || "").toLowerCase().trim();
+  
+  if (norm.includes("javascript") || norm === "js") {
+    return <span className="w-[18px] h-[18px] rounded-[4px] bg-[#f7df1e] text-black font-black text-[9px] flex items-center justify-center shrink-0 leading-none">JS</span>;
+  }
+  if (norm.includes("typescript") || norm === "ts") {
+    return <span className="w-[18px] h-[18px] rounded-[4px] bg-[#3178c6] text-white font-black text-[9px] flex items-center justify-center shrink-0 leading-none">TS</span>;
+  }
+  if (norm.includes("python")) return <Terminal size={16} className="text-[#3776ab] shrink-0" />;
+  if (norm.includes("c++") || norm.includes("cpp") || norm.includes("c#") || norm === "c") return <Code2 size={16} className="text-[#00599c] shrink-0" />;
+  if (norm.includes("sql") || norm.includes("postgres") || norm.includes("mysql")) return <Database size={16} className="text-[#336791] shrink-0" />;
+  if (norm.includes("html")) return <Code2 size={16} className="text-[#e34f26] shrink-0" />;
+  if (norm.includes("css")) return <Palette size={16} className="text-[#1572b6] shrink-0" />;
+  if (norm.includes("react")) return <Atom size={16} className="text-[#61dafb] shrink-0" />;
+  if (norm.includes("next")) return <Layers size={16} className="text-[#000000] shrink-0" />;
+  if (norm.includes("node")) return <Server size={16} className="text-[#339933] shrink-0" />;
+  if (norm.includes("express")) return <Server size={16} className="text-[#64748b] shrink-0" />;
+  if (norm.includes("tailwind")) return <Sparkles size={16} className="text-[#06b6d4] shrink-0" />;
+  if (norm.includes("three") || norm.includes("3d")) return <Boxes size={16} className="text-[#000000] shrink-0" />;
+  if (norm.includes("framer") || norm.includes("motion")) return <Zap size={16} className="text-[#0055ff] shrink-0" />;
+  if (norm.includes("git")) return <GitBranch size={16} className="text-[#f05032] shrink-0" />;
+  if (norm.includes("code") || norm.includes("vs")) return <Code size={16} className="text-[#007acc] shrink-0" />;
+  if (norm.includes("supabase")) return <Database size={16} className="text-[#3ecf8e] shrink-0" />;
+  if (norm.includes("postman")) return <Send size={16} className="text-[#ff6c37] shrink-0" />;
+  if (norm.includes("docker")) return <Container size={16} className="text-[#2496ed] shrink-0" />;
+  if (norm.includes("figma")) return <Figma size={16} className="text-[#f24e1e] shrink-0" />;
+  if (norm.includes("vite")) return <Zap size={16} className="text-[#646cff] shrink-0" />;
+  
+  return <Wrench size={16} className="text-[#0D6EFD] shrink-0" />;
+}
+
+// Static Non-clickable Tech Badge with crisp icon
+const TechBadge = ({ tag }) => (
+  <div className="inline-flex items-center gap-[8px] px-[16px] py-[9px] rounded-[50px] bg-white/90 backdrop-blur-[8px] border border-[#eef3ff] shadow-[0_2px_8px_rgba(13,110,253,0.04)] font-sans font-semibold text-[13px] text-[#334155] select-none hover:shadow-[0_4px_12px_rgba(13,110,253,0.08)] transition-all">
+    {getTechIcon(tag)}
+    <span>{tag}</span>
+  </div>
+);
+
+const TagButton = ({ tag, activeTag, setActiveTag, techCounts }) => (
   <motion.button
     type="button"
     onClick={() => setActiveTag(activeTag === tag ? null : tag)}
     onMouseLeave={() => setActiveTag(null)}
-    initial={{ opacity: 0 }}
-    whileInView={{ opacity: 1 }}
-    viewport={{ once: true }}
-    transition={{ delay: index * 0.03 }}
-    whileHover={{ background: "#0D6EFD", color: "white" }}
+    whileHover={{ background: "linear-gradient(135deg, #2b7fff 0%, #0D6EFD 100%)", color: "white" }}
+    whileTap={{ scale: 0.96 }}
     animate={activeTag === tag
-      ? { background: "#0D6EFD", color: "white" }
-      : { background: "rgba(255,255,255,0.9)", color: "#4a6a8a" }
+      ? { background: "linear-gradient(135deg, #2b7fff 0%, #0D6EFD 100%)", color: "white" }
+      : { background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,246,255,0.85) 100%)", color: "#4a6a8a" }
     }
-    className="inline-block px-[20px] py-[10px] rounded-[50px] border border-[#eef3ff] shadow-[0_4px_12px_rgba(13,110,253,0.04)] font-sans font-semibold text-[13px] cursor-pointer transition-colors duration-200"
+    className="inline-block px-[20px] py-[10px] rounded-[50px] border border-[#eef3ff] shadow-clay-pill font-sans font-semibold text-[13px] cursor-pointer transition-colors duration-200"
   >
     {activeTag === tag ? `${techCounts[tag] || 0} projects` : tag}
   </motion.button>
 );
+
+// Reusable section card for Achievements and Activities with visible/hidden split
+const ContentSection = ({ id, icon, iconBg, iconColor, title, items, setPreviewImage, setPage, setHiddenModal, modalTitle, isMobile }) => {
+  const visible = items.filter((a) => !isItemHidden(a));
+  const hidden = items.filter((a) => isItemHidden(a));
+  const cardPad = isMobile ? "p-[32px_24px] gap-[24px]" : "p-[48px] gap-[32px]";
+  return (
+    <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
+      <ScrollSection id={id} rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+        <div className="flex items-center gap-[16px]">
+          <div className={`w-[48px] h-[48px] rounded-[16px] flex items-center justify-center shrink-0 ${iconBg}`} style={{ color: iconColor }}>{icon}</div>
+          <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">{title}</h2>
+        </div>
+        <div className="flex flex-col gap-[20px]">
+          {visible.length > 0
+            ? visible.map((item) => <MediaRow key={item.id} item={item} setPreviewImage={setPreviewImage} setPage={setPage} />)
+            : <div className="text-brand-muted text-[14px]">No {title.toLowerCase()} added yet.</div>
+          }
+        </div>
+        {hidden.length > 0 && (
+          <div className="flex justify-center -mt-[16px] mb-[-16px]">
+            <button
+              type="button"
+              onClick={() => setHiddenModal({ isOpen: true, title: modalTitle, items: hidden })}
+              className="px-[16px] py-[6px] rounded-[50px] bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] hover:text-[#334155] border border-[#cbd5e1] text-[13px] font-semibold transition-all cursor-pointer flex items-center gap-[6px] shadow-sm"
+            >
+              more
+            </button>
+          </div>
+        )}
+      </ScrollSection>
+    </section>
+  );
+};
 
 const MediaRow = ({ item, setPreviewImage, setPage }) => (
   <div className="flex flex-col md:flex-row md:items-center justify-between gap-[16px] p-[20px] bg-[#f8fbff] rounded-[16px] border border-[#eef3ff]">
@@ -96,9 +168,42 @@ export default function HomePage({ setPage, setContactOpen }) {
   const [portfolioTags, setPortfolioTags] = useState([]);
   const [portfolioTools, setPortfolioTools] = useState([]);
   const [activeTag, setActiveTag] = useState(null);
+  const [hiddenModal, setHiddenModal] = useState({ isOpen: false, title: "", items: [] });
 
   const projectCountRef = useRef(0);
   const workerRef = useRef(null);
+  const heroRef = useRef(null);
+
+  const [curtainTopSpacer, setCurtainTopSpacer] = useState(0);
+  const [stickyTopValue, setStickyTopValue] = useState("64px");
+
+  const updateHeroLayout = useCallback(() => {
+    if (!heroRef.current) return;
+    const h = heroRef.current.offsetHeight || heroRef.current.clientHeight;
+    const v = window.innerHeight;
+    const nav = 64;
+
+    if (h + nav <= v) {
+      // Large PC: Hero fits inside viewport height
+      setStickyTopValue("64px");
+      setCurtainTopSpacer(0);
+    } else {
+      // Laptop / Mobile / Short screen: Hero is taller than viewport height
+      const extraScroll = h + nav - v + 32; // Extra distance needed to scroll to bottom of Hero
+      setStickyTopValue(`calc(100dvh - ${h}px)`);
+      setCurtainTopSpacer(extraScroll);
+    }
+  }, []);
+
+  useEffect(() => {
+    updateHeroLayout();
+    window.addEventListener("resize", updateHeroLayout, { passive: true });
+    const timer = setTimeout(updateHeroLayout, 400);
+    return () => {
+      window.removeEventListener("resize", updateHeroLayout);
+      clearTimeout(timer);
+    };
+  }, [updateHeroLayout, realStats, isLoading]);
 
   // Close PDF viewer on scroll
   useEffect(() => {
@@ -114,45 +219,49 @@ export default function HomePage({ setPage, setContactOpen }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Initialize Web Worker for tag processing
-  useEffect(() => {
-    workerRef.current = new Worker(new URL("../lib/worker.js", import.meta.url), { type: "module" });
-    workerRef.current.onmessage = (e) => {
-      const { type, payload } = e.data;
-      if (type === "PROCESS_PROJECT_TAGS_RESULT") {
-        setTechCounts(payload.counts);
-        setPortfolioLanguages(payload.portfolioLanguages);
-        setPortfolioTags(payload.portfolioTags);
-        setPortfolioTools(payload.portfolioTools);
-      }
-    };
-    return () => workerRef.current?.terminate();
-  }, []);
-
   // Fetch all dashboard data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Increment views and fetch stats in parallel
-        const [, { count: projectCount }, { data: statsData }, { data: settingsData }, { data: actsData }, { data: allProjectsData }] = await Promise.all([
+        const [, { count: projectCount }, { data: statsData }, { data: settingsData }, { data: actsData }] = await Promise.all([
           supabase.rpc("increment_views"),
           supabase.from("projects").select("*", { count: "exact", head: true }).neq("category", "Achievement").neq("category", "Activity").neq("category", "Experience"),
           supabase.from("site_stats").select("*").eq("id", 1).single(),
           supabase.from("portfolio_settings").select("about_me").eq("id", 1).single(),
           supabase.from("projects").select("*").in("category", ["Achievement", "Activity", "Experience"]).order("year", { ascending: false }).order("id", { ascending: false }),
-          supabase.from("projects").select("tags, tools, languages").neq("category", "Achievement").neq("category", "Activity").neq("category", "Experience"),
         ]);
 
         projectCountRef.current = projectCount || 0;
 
         if (statsData) setRealStats(STAT_TEMPLATE(projectCountRef.current, statsData.views, statsData.cheer_ups));
-        if (settingsData?.about_me) setAboutMe(settingsData.about_me);
+        if (settingsData?.about_me) {
+          setAboutMe(settingsData.about_me);
+
+          const manualLangs = Array.isArray(settingsData.about_me.coding_languages) && settingsData.about_me.coding_languages.length > 0
+            ? settingsData.about_me.coding_languages
+            : ["JavaScript", "TypeScript", "Python", "SQL", "HTML/CSS"];
+
+          const manualTechs = Array.isArray(settingsData.about_me.technologies) && settingsData.about_me.technologies.length > 0
+            ? settingsData.about_me.technologies
+            : ["React.js", "Next.js", "Node.js", "Express", "Tailwind CSS", "Three.js", "Framer Motion"];
+
+          const manualTools = Array.isArray(settingsData.about_me.tools) && settingsData.about_me.tools.length > 0
+            ? settingsData.about_me.tools
+            : ["Git", "GitHub", "VS Code", "Supabase", "Postman", "Docker", "Figma"];
+
+          setPortfolioLanguages(manualLangs);
+          setPortfolioTags(manualTechs);
+          setPortfolioTools(manualTools);
+        } else {
+          setPortfolioLanguages(["JavaScript", "TypeScript", "Python", "SQL", "HTML/CSS"]);
+          setPortfolioTags(["React.js", "Next.js", "Node.js", "Express", "Tailwind CSS", "Three.js", "Framer Motion"]);
+          setPortfolioTools(["Git", "GitHub", "VS Code", "Supabase", "Postman", "Docker", "Figma"]);
+        }
+
         if (actsData) {
           setAchievements(actsData.filter((d) => d.category === "Achievement"));
           setActivities(actsData.filter((d) => d.category === "Activity"));
-        }
-        if (allProjectsData && workerRef.current) {
-          workerRef.current.postMessage({ type: "PROCESS_PROJECT_TAGS", payload: allProjectsData });
         }
       } catch (error) {
         console.error("Error fetching homepage data:", error);
@@ -163,7 +272,6 @@ export default function HomePage({ setPage, setContactOpen }) {
 
     fetchData();
 
-    // Realtime subscription for live stats updates
     const subscription = supabase
       .channel("site_stats_channel")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "site_stats", filter: "id=eq.1" }, (payload) => {
@@ -175,7 +283,7 @@ export default function HomePage({ setPage, setContactOpen }) {
     return () => supabase.removeChannel(subscription);
   }, []);
 
-  const homeSections = ["about-me", "achievements", "activities", "technologies-and-tools", "dashboard-overview"];
+  const homeSections = ["achievements", "activities", "technologies-and-tools"];
   const currentActiveSection = homeSections.slice().reverse().find(id => activeSections?.has(id));
   const activeIndex = homeSections.indexOf(currentActiveSection) + 1;
   const totalSections = homeSections.length;
@@ -193,125 +301,72 @@ export default function HomePage({ setPage, setContactOpen }) {
   };
 
   const sectionLabels = {
-    "about-me": "About Me",
     "achievements": "Achievements",
     "activities": "Activities",
-    "technologies-and-tools": "Skills",
-    "dashboard-overview": "Dashboard"
+    "technologies-and-tools": "Skills"
   };
 
-  if (isLoading) return <LoadingPage />;
+  if (isLoading) return <HomeSkeleton />;
 
-  const about = getAbout(aboutMe);
   const sectionPad = isMobile ? "p-[40px_24px]" : "p-[40px_48px]";
-  const cardPad = isMobile ? "p-[32px_24px] gap-[24px]" : "p-[48px] gap-[32px]";
 
   return (
-    <div className="pt-[64px]">
-      <Hero setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} setContactOpen={setContactOpen} scrollToSection={scrollToSection} />
+    <div className="pt-[64px] relative">
+      <div
+        ref={heroRef}
+        className="sticky z-[1] flex flex-col justify-center transition-[top] duration-150"
+        style={{ top: stickyTopValue }}
+      >
+        <Hero realStats={realStats} setPage={setPage} isPdfOpen={isPdfOpen} setIsPdfOpen={setIsPdfOpen} setContactOpen={setContactOpen} scrollToSection={scrollToSection} />
+      </div>
 
-      <div className="relative z-[2]">
+      {curtainTopSpacer > 0 && <div style={{ height: `${curtainTopSpacer}px` }} className="pointer-events-none" />}
+
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ amount: 0.01 }}
+        transition={{ duration: 1.0, ease: "easeOut" }}
+        className="relative z-[10] backdrop-blur-[16px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_150px)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_150px)] pt-[150px]"
+      >
         <div className="flex flex-col gap-0">
+          {/* Achievements Section */}
+          <ContentSection
+            id="achievements"
+            icon={<Trophy size={24} />}
+            iconBg="bg-gradient-to-br from-[#fff0f4] to-[#ffe4e6]"
+            iconColor="#ff6b6b"
+            title="Achievements"
+            items={achievements}
+            setPreviewImage={setPreviewImage}
+            setPage={setPage}
+            setHiddenModal={setHiddenModal}
+            modalTitle="More Achievements"
+            isMobile={isMobile}
+          />
 
-          {/* About Me */}
-          <section className={`max-w-[1440px] mx-auto ${sectionPad}`}>
-            <ScrollSection id="about-me" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
-              <div className={`flex ${isMobile ? "flex-col text-center items-center gap-[16px]" : "flex-row items-center gap-[32px]"}`}>
-                <div className="w-[120px] h-[120px] rounded-[24px] bg-gradient-to-br from-[#e0f2fe] to-[#fce7f3] flex items-center justify-center text-[48px] shrink-0 shadow-[inset_0_0_0_1px_rgba(163,216,244,0.5)] overflow-hidden">
-                  {about?.image_url ? (
-                    <img 
-                      src={getTransformedUrl(about.image_url, { width: 240 })} 
-                      alt={about?.name || "Profile"} 
-                      loading="lazy" 
-                      onError={(e) => { e.target.src = about.image_url; }}
-                      className="w-full h-full object-cover" 
-                    />
-                  ) : (
-                    <User size={56} color="#A3D8F4" />
-                  )}
-                </div>
-                <div>
-                  <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0 mb-[4px]">{about?.name}</h2>
-                  <div className="font-sans text-[15px] text-brand-primary font-semibold mb-[12px]">{about?.role}</div>
-                  <p className="font-sans text-brand-muted text-[14px] leading-[1.7] m-0 max-w-[800px]">{about?.intro}</p>
-                </div>
-              </div>
+          {/* Activities Section */}
+          <ContentSection
+            id="activities"
+            icon={<Activity size={24} />}
+            iconBg="bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7]"
+            iconColor="#10b981"
+            title="Activities"
+            items={activities}
+            setPreviewImage={setPreviewImage}
+            setPage={setPage}
+            setHiddenModal={setHiddenModal}
+            modalTitle="More Activities"
+            isMobile={isMobile}
+          />
 
-              <hr className="border-none border-t border-dashed border-[#eef3ff]" />
-
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-[24px]">
-                {/* Education */}
-                <div className="flex gap-[16px]">
-                  <div className="w-[44px] h-[44px] rounded-[12px] flex items-center justify-center shrink-0 bg-[#f0f6ff] text-brand-primary"><GraduationCap size={20} /></div>
-                  <div>
-                    <div className="font-sans font-bold text-[14px] text-brand-dark">Education</div>
-                    <div className="font-sans text-[13px] text-brand-muted mt-[4px]">{about?.education}</div>
-                  </div>
-                </div>
-                {/* GPA */}
-                <div className="flex gap-[16px]">
-                  <div className="w-[44px] h-[44px] rounded-[12px] flex items-center justify-center shrink-0 bg-[#fff0f4] text-[#ff6b6b]"><Award size={20} /></div>
-                  <div>
-                    <div className="font-sans font-bold text-[14px] text-brand-dark">GPA</div>
-                    <div className="font-sans text-[13px] text-brand-muted mt-[4px]">{about?.gpa}</div>
-                  </div>
-                </div>
-                {/* Languages */}
-                <div className="flex gap-[16px]">
-                  <div className="w-[44px] h-[44px] rounded-[12px] flex items-center justify-center shrink-0 bg-[#f0fdf4] text-[#22c55e]"><Languages size={20} /></div>
-                  <div>
-                    <div className="font-sans font-bold text-[14px] text-brand-dark">Languages</div>
-                    <div className="flex flex-wrap gap-[8px] mt-[4px]">
-                      {(Array.isArray(about?.languages) ? about.languages : (about?.languages || "").split(",").map((s) => s.trim()).filter(Boolean)).map((lang) => (
-                        <span key={lang} className="inline-block px-[12px] py-[4px] rounded-[50px] bg-[#f0fdf4]/60 border border-[#bbf7d0] font-sans font-semibold text-[12px] text-[#16a34a]">{lang}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ScrollSection>
-          </section>
-
-          {/* Achievements */}
-          <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
-            <ScrollSection id="achievements" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
-              <div className="flex items-center gap-[16px]">
-                <div className="w-[48px] h-[48px] rounded-[16px] bg-gradient-to-br from-[#fff0f4] to-[#ffe4e6] flex items-center justify-center text-[#ff6b6b] shrink-0"><Trophy size={24} /></div>
-                <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Achievements</h2>
-              </div>
-              <div className="flex flex-col gap-[20px]">
-                {achievements.length > 0
-                  ? achievements.map((ach) => <MediaRow key={ach.id} item={ach} setPreviewImage={setPreviewImage} setPage={setPage} />)
-                  : <div className="text-brand-muted text-[14px]">No achievements added yet.</div>
-                }
-              </div>
-            </ScrollSection>
-          </section>
-
-          {/* Activities */}
-          <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
-            <ScrollSection id="activities" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
-              <div className="flex items-center gap-[16px]">
-                <div className="w-[48px] h-[48px] rounded-[16px] bg-gradient-to-br from-[#f0fdf4] to-[#dcfce7] flex items-center justify-center text-[#10b981] shrink-0"><Activity size={24} /></div>
-                <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">Activities</h2>
-              </div>
-              <div className="flex flex-col gap-[20px]">
-                {activities.length > 0
-                  ? activities.map((act) => <MediaRow key={act.id} item={act} setPreviewImage={setPreviewImage} setPage={setPage} />)
-                  : <div className="text-brand-muted text-[14px]">No activities added yet.</div>
-                }
-              </div>
-            </ScrollSection>
-          </section>
-
-          {/* Technologies & Tools */}
           <section className={`max-w-[1440px] mx-auto ${sectionPad}`}>
             <ScrollSection id="technologies-and-tools" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
               {portfolioLanguages.length > 0 && (
                 <>
                   <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">LANGUAGES</h2>
                   <div className="flex flex-wrap justify-center gap-[12px] mb-[32px]">
-                    {portfolioLanguages.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
+                    {portfolioLanguages.map((tag) => <TechBadge key={tag} tag={tag} />)}
                   </div>
                 </>
               )}
@@ -320,7 +375,7 @@ export default function HomePage({ setPage, setContactOpen }) {
                 <>
                   <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">Technologies</h2>
                   <div className="flex flex-wrap justify-center gap-[12px] mb-[32px]">
-                    {portfolioTags.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
+                    {portfolioTags.map((tag) => <TechBadge key={tag} tag={tag} />)}
                   </div>
                 </>
               )}
@@ -329,37 +384,24 @@ export default function HomePage({ setPage, setContactOpen }) {
                 <>
                   <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center mt-[16px]">Tools</h2>
                   <div className="flex flex-wrap justify-center gap-[12px]">
-                    {portfolioTools.map((tag, i) => <TagButton key={tag} tag={tag} index={i} activeTag={activeTag} setActiveTag={setActiveTag} techCounts={techCounts} />)}
+                    {portfolioTools.map((tag) => <TechBadge key={tag} tag={tag} />)}
                   </div>
                 </>
               )}
             </ScrollSection>
           </section>
-
-          {/* Dashboard Stats */}
-          <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[40px_24px_80px]" : "p-[40px_48px_100px]"}`}>
-            <ScrollSection id="dashboard-overview" rootMargin="-25% 0px -25% 0px" className={`bg-gradient-to-b from-white/80 to-[#f8fbff]/80 backdrop-blur-[16px] rounded-[32px] shadow-card-base border border-brand-secondary/30 ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
-              <div className="text-center mb-[32px]">
-                <h2 className="font-sans font-extrabold text-[24px] text-brand-dark m-0">Dashboard Overview</h2>
-              </div>
-              <div className={`grid gap-[24px] ${isMobile ? "grid-cols-1" : "grid-cols-3"}`}>
-                {realStats.map((s) => (
-                  <motion.div
-                    key={s.label}
-                    whileHover={{ y: -5, boxShadow: "0 12px 24px rgba(13,110,253,0.12)" }}
-                    className="bg-white/80 rounded-[24px] p-[32px_24px] shadow-[0_4px_16px_rgba(13,110,253,0.05)] text-center border border-[#eef3ff]"
-                  >
-                    <div className="w-[64px] h-[64px] rounded-full bg-[#f0f6ff] text-brand-primary flex items-center justify-center mx-auto mb-[16px]">{s.icon}</div>
-                    <div className="font-sans font-extrabold text-[36px] text-brand-dark leading-none">{s.value}</div>
-                    <div className="font-sans text-[13px] text-brand-muted-light font-semibold uppercase tracking-[1px] mt-[12px]">{s.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </ScrollSection>
-          </section>
-
         </div>
-      </div>
+      </motion.div>
+
+      {/* Hidden Content Modal */}
+      <HiddenContentModal
+        isOpen={hiddenModal.isOpen}
+        onClose={() => setHiddenModal({ ...hiddenModal, isOpen: false })}
+        title={hiddenModal.title}
+        items={hiddenModal.items}
+        setPreviewImage={setPreviewImage}
+        setPage={setPage}
+      />
 
       {/* Image Preview Modal */}
       {typeof document !== "undefined" && createPortal(

@@ -42,11 +42,10 @@ export default function ScrollSection({ id, children, className = "", style = {}
     <motion.div
       ref={elementRef}
       id={id}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isVisible ? 1 : 0 }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
       className={className}
-      style={{ ...style, willChange: "opacity" }}
+      style={style}
     >
       {children}
     </motion.div>

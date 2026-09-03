@@ -4,14 +4,15 @@
 
 @layer base {
   body {
-    @apply m-0 p-0 min-h-screen bg-gradient-to-br from-[#f0f8ff] to-[#fef6fb] font-sans;
+    @apply m-0 p-0 min-h-screen bg-[#faf7f2] text-[#0d1b2a] font-sans;
   }
 }
 
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #f0f8ff 0%, #fef6fb 100%);
+  background: linear-gradient(135deg, #faf7f2 0%, #fdfbf7 50%, #f7f4ee 100%);
+  color: #0d1b2a;
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
 }
@@ -26,9 +27,46 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f0f6ff;
+  background: #faf7f2;
 }
 ::-webkit-scrollbar-thumb {
   background: #A3D8F4;
   border-radius: 10px;
+}
+
+/* White Sweep Shimmer Loading Animation */
+@keyframes shimmerWave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer-card {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(226, 238, 255, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(238, 243, 255, 0.8);
+}
+
+.shimmer-card::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 20%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.35) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmerWave 1.6s infinite ease-in-out;
+  content: '';
 }

@@ -1,4 +1,3 @@
-
 import { supabase } from "./lib/supabase";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,14 +5,13 @@ import Navbar from "./components/Navbar";
 import { useBackgroundBlur } from "./context/BackgroundBlurContext";
 import FallingEmoji from "./components/FallingEmoji";
 import MeshGradientBackground from "./components/MeshGradientBackground";
+import RainbowSprinkles from "./components/RainbowSprinkles";
 import { EMOJIS } from "./data/constants";
 import { ChevronsUp } from "lucide-react";
 
 import { lazy, Suspense } from "react";
-import ThreeDPreloader from "./components/ThreeDPreloader";
 
 // Lazy loading pages to improve performance by loading them only when needed
-const Background3DScene = lazy(() => import("./components/Background3DScene"));
 const ChatBot = lazy(() => import("./components/ChatBot"));
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ExperiencesPage = lazy(() => import("./pages/ExperiencesPage"));
@@ -126,6 +124,8 @@ export default function App() {
   }, []);
 
   const { blurAmount } = useBackgroundBlur();
+  // Disable background blur on Projects and Experiences pages
+  const effectiveBlur = (page === "Projects" || page === "Experiences") ? 0 : blurAmount;
 
   return (
     <>
@@ -140,7 +140,7 @@ export default function App() {
           height: "100vh",
           zIndex: 0,
           pointerEvents: "none",
-          filter: `blur(${blurAmount}px)`,
+          filter: `blur(${effectiveBlur}px)`,
           transition: "filter 0.5s ease-out",
           willChange: "filter",
         }}
@@ -164,11 +164,10 @@ export default function App() {
             filter: "blur(40px)",
           }}
         />
-        {/* Code-split and lazy-loaded 3D background with Glassmorphism preloader */}
-        <Suspense fallback={<ThreeDPreloader />}>
-          <Background3DScene page={page} blurAmount={blurAmount} />
-        </Suspense>
       </div>
+
+      {/* Crisp unblurred Rainbow Sprinkles Layer */}
+      <RainbowSprinkles />
 
       {/* Render the falling emojis */}
       {emojis.map((e) => (

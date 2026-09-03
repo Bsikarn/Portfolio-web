@@ -1,31 +1,45 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ArrowDown } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 // Background blur managed inside ScrollSection wrapper
 import ProjectMiniCard from "../components/ProjectMiniCard";
 import ProjectDetailsCard from "../components/ProjectDetailsCard";
-import LoadingPage from "../components/LoadingPage";
+import { ProjectsSkeleton } from "../components/SkeletonLoader";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 import { styles } from "../styles/ProjectsPage.styles";
 
-// Sort projects: awards first → recommended → alphabetical
+function getSortOrder(p) {
+  if (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
+    return Number(p.sort_order);
+  }
+  const orderTag = (p.tags || []).find((t) => typeof t === "string" && t.startsWith("__order:"));
+  if (orderTag) {
+    const num = parseInt(orderTag.replace("__order:", "").replace("__", ""));
+    if (!isNaN(num)) return num;
+  }
+  return 999;
+}
+
+// Sort projects: custom sort_order first → awards → recommended → alphabetical
 function sortProjects(projects) {
   return [...projects].sort((a, b) => {
+    const orderA = getSortOrder(a);
+    const orderB = getSortOrder(b);
+    if (orderA !== orderB) return orderA - orderB;
     if (!!b.award !== !!a.award) return !!b.award - !!a.award;
     if (!!b.is_recommended !== !!a.is_recommended) return !!b.is_recommended - !!a.is_recommended;
     return a.title.localeCompare(b.title);
   });
 }
 
-
-
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
   const [projectsData, setProjectsData] = useState([]);
   const [categoriesData, setCategoriesData] = useState(["All"]);
@@ -61,7 +75,6 @@ export default function ProjectsPage() {
     }
   }, [currentImageLoaded, lightboxIndex, lightboxItems, lightboxOpen]);
 
-  // Handled automatically via ScrollSection components
 
   // Drag-to-scroll state
   const scrollContainerRef = useRef(null);
@@ -74,10 +87,24 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    const handleScroll = () => {
+      const detailsEl = document.getElementById("project-details");
+      if (detailsEl) {
+        const rect = detailsEl.getBoundingClientRect();
+        setShowScrollIndicator(rect.top > window.innerHeight - 100);
+      } else {
+        setShowScrollIndicator(window.scrollY < 120);
+      }
+    };
+    handleScroll();
 
+    window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   // Fetch categories and projects from DB
   useEffect(() => {
     const fetchData = async () => {
@@ -190,15 +217,13 @@ export default function ProjectsPage() {
     }
   };
 
-  if (isLoading) return <LoadingPage />;
+  if (isLoading) return <ProjectsSkeleton />;
 
   return (
     <div data-testid="projects-container" style={styles.pageContainer}>
-
-
-      {/* Filter Bar and Project Scroll List */}
-      <div style={{ maxWidth: 1440, margin: "0 auto", width: "100%" }}>
-        <ScrollSection id="project-selector" className="flex flex-col w-full overflow-hidden">
+      {/* Sticky Project Selector Background */}
+      <div className="sticky top-[64px] z-[1] min-h-[calc(100dvh-64px)] flex flex-col justify-center w-full max-w-[1440px] mx-auto">
+        <ScrollSection id="project-selector" className="w-full overflow-hidden relative">
           <div style={styles.filterContainer}>
             {/* Search */}
             <div style={styles.searchBarWrap}>
@@ -222,7 +247,9 @@ export default function ProjectsPage() {
                   ...styles.filterTab,
                   background: activeFilter === f ? "#0D6EFD" : "white",
                   color: activeFilter === f ? "white" : "#4a6a8a",
-                  boxShadow: activeFilter === f ? "0 4px 12px rgba(13,110,253,0.3)" : "0 2px 8px rgba(0,0,0,0.05)",
+                  boxShadow: activeFilter === f 
+                    ? "6px 10px 22px rgba(13,110,253,0.32), inset 2px 2px 4px rgba(255,255,255,0.4)" 
+                    : "4px 6px 14px rgba(13,110,253,0.05), -3px -3px 8px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)",
                 }}
               >
                 {f}
@@ -266,29 +293,39 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
+
+
         </ScrollSection>
       </div>
 
-      {/* Project Detail Card */}
-      <div style={styles.mainContentWrapper}>
-        <div style={{ ...styles.detailsOuterContainer, padding: isMobile ? "0 16px" : styles.detailsOuterContainer.padding }}>
-          <ScrollSection id="project-details" className="w-full" threshold={isMobile ? 0.08 : 0.25}>
-            <AnimatePresence mode="wait">
-              {selected && (
-                <ProjectDetailsCard
-                  selected={selected}
-                  nav={nav}
-                  openVideoLightbox={openVideoLightbox}
-                  openAwardLightbox={openAwardLightbox}
-                  openGalleryLightbox={openGalleryLightbox}
-                  handleLinkClick={handleLinkClick}
-                  isMobile={isMobile}
-                />
-              )}
-            </AnimatePresence>
-          </ScrollSection>
+      {/* Sliding Curtain Overlay containing Project Detail Card with smooth Fade in-out */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ amount: 0.01 }}
+        transition={{ duration: 1.0, ease: "easeOut" }}
+        className="relative z-[10] backdrop-blur-[16px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_150px)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_150px)] pt-[150px] pb-[80px]"
+      >
+        <div style={styles.mainContentWrapper}>
+          <div style={{ ...styles.detailsOuterContainer, padding: isMobile ? "0 16px" : styles.detailsOuterContainer.padding }}>
+            <ScrollSection id="project-details" className="w-full" threshold={isMobile ? 0.08 : 0.25}>
+              <AnimatePresence mode="wait">
+                {selected && (
+                  <ProjectDetailsCard
+                    selected={selected}
+                    nav={nav}
+                    openVideoLightbox={openVideoLightbox}
+                    openAwardLightbox={openAwardLightbox}
+                    openGalleryLightbox={openGalleryLightbox}
+                    handleLinkClick={handleLinkClick}
+                    isMobile={isMobile}
+                  />
+                )}
+              </AnimatePresence>
+            </ScrollSection>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
 
 
@@ -307,14 +344,14 @@ export default function ProjectsPage() {
               )}
               <div onClick={(e) => e.stopPropagation()} style={styles.lightboxContent}>
                 {lightboxItems[lightboxIndex].type === "image"
-                  ? <img 
-                      src={getTransformedUrl(lightboxItems[lightboxIndex].url, { width: 1200 })} 
-                      alt="Gallery" 
-                      loading="lazy" 
-                      onLoad={() => setCurrentImageLoaded(true)} 
-                      onError={(e) => { e.target.src = lightboxItems[lightboxIndex].url; }}
-                      style={{ ...styles.lightboxImage, aspectRatio: "16/9" }} 
-                    />
+                  ? <img
+                    src={getTransformedUrl(lightboxItems[lightboxIndex].url, { width: 1200 })}
+                    alt="Gallery"
+                    loading="lazy"
+                    onLoad={() => setCurrentImageLoaded(true)}
+                    onError={(e) => { e.target.src = lightboxItems[lightboxIndex].url; }}
+                    style={{ ...styles.lightboxImage, aspectRatio: "16/9" }}
+                  />
                   : <iframe src={lightboxItems[lightboxIndex].url} allowFullScreen style={{ ...styles.lightboxVideo, aspectRatio: "16/9" }} title="Video Player" />
                 }
               </div>
@@ -324,9 +361,56 @@ export default function ProjectsPage() {
         document.body
       )}
 
-
-
+      {/* Scroll Down Indicator */}
+      <AnimatePresence>
+        {showScrollIndicator && (
+          <div style={{
+            position: "fixed",
+            bottom: 24,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 100,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 6,
+            pointerEvents: "none"
+          }}>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 6
+              }}
+            >
+              <div style={{
+                fontSize: 11,
+                fontFamily: "inherit",
+                fontWeight: 600,
+                color: "#4a6a8a",
+                textTransform: "uppercase",
+                letterSpacing: "1px"
+              }}>
+                Scroll down for details
+              </div>
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                style={{ willChange: "transform", color: "#0D6EFD" }}
+              >
+                <ArrowDown size={20} />
+              </motion.div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
 }
+

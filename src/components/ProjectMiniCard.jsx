@@ -13,12 +13,15 @@ export default function ProjectMiniCard({ project, selectedId, isDragging, handl
             animate={{ opacity: 1, scale: 1 }} // Target state when component mounts
             exit={{ opacity: 0, scale: 0.9 }} // Ending state when component unmounts
             onClick={() => handleCardClick(project.id)} // Notify parent component of selection
-            whileHover={{ y: isDragging ? 0 : -5 }} // Slight hover lift effect, disabled during drag
+            whileHover={{ y: isDragging ? 0 : -4 }}
+            whileTap={{ scale: 0.96 }}
             style={{
                 ...styles.projectMiniCard,
-                // Highlight the card with a blue border if it is the currently selected project
-                border: selectedId === project.id ? "2px solid #0D6EFD" : "1px solid #eef3ff",
-                boxShadow: selectedId === project.id ? "0 8px 24px rgba(13,110,253,0.15)" : "0 4px 16px rgba(13,110,253,0.05)"
+                borderRadius: 18,
+                border: selectedId === project.id ? "2px solid #0D6EFD" : "1px solid rgba(238, 243, 255, 0.9)",
+                boxShadow: selectedId === project.id 
+                  ? "8px 12px 24px rgba(13,110,253,0.18), inset 2px 2px 4px rgba(255,255,255,0.9)" 
+                  : "6px 8px 18px rgba(13,110,253,0.05), -4px -4px 12px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)"
             }}
         >
             {project.award && (

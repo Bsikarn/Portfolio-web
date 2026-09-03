@@ -4,6 +4,9 @@ import { styles } from "../styles/AdminPage.styles";
 import LoadingPage from "../components/LoadingPage";
 import SettingsPanel from "../components/admin/SettingsPanel";
 import CategoryManager from "../components/admin/CategoryManager";
+import ContentForm from "../components/admin/ContentForm";
+import ProjectList from "../components/admin/ProjectList";
+import { isSpecialType, sortByOrder, filterByContentType, parseLanguages } from "../lib/adminHelpers";
 
 // Default form state for a new project
 const INITIAL_FORM = {
@@ -12,12 +15,21 @@ const INITIAL_FORM = {
   my_role: "", problem: "", solution: "", results_impact: "", key_learnings: "",
   languages: "", video_url: "", gallery_urls: "", certificate_url: "", activity_url: "",
   has_award: false, award_title: "", award_description: "", award_competition: "", award_image_url: "",
-  is_recommended: false,
+  is_recommended: false, sort_order: 0, is_hidden: false,
 };
 
 // Parse a project from DB back to form-compatible shape
 function projectToForm(project) {
   const cats = (project.category || "").split(",").map((c) => c.trim());
+  const isHidden = typeof project.is_hidden === "boolean"
+    ? project.is_hidden
+    : (Array.isArray(project.tags) && project.tags.includes("__hidden__"));
+  const userTags = (project.tags || []).filter((t) => typeof t === "string" && t !== "__hidden__" && !t.startsWith("__order:"));
+
+  const sortOrder = (project.sort_order !== undefined && project.sort_order !== null && !isNaN(Number(project.sort_order)))
+    ? Number(project.sort_order)
+    : 0;
+
   return {
     title: project.title || "",
     category: cats[0] || "Frontend",
@@ -32,7 +44,7 @@ function projectToForm(project) {
     solution: project.solution || "",
     results_impact: project.results_impact || "",
     key_learnings: project.key_learnings || "",
-    tags: project.tags?.join(", ") || "",
+    tags: userTags.join(", "),
     tools: project.tools?.join(", ") || "",
     features: project.features?.join("\n") || "",
     languages: project.languages?.map((l) => `${l.name}:${l.percent}:${l.color}`).join(", ") || "",
@@ -46,16 +58,25 @@ function projectToForm(project) {
     award_competition: project.award?.competition || "",
     award_image_url: project.award?.image_url || "",
     is_recommended: project.is_recommended || false,
+    sort_order: sortOrder,
+    is_hidden: isHidden,
   };
 }
 
 // Build the Supabase payload from form data
 function buildPayload(formData, contentType) {
-  const isSpecial = contentType === "Achievement" || contentType === "Activity" || contentType === "Experience";
   const selectedCats = [formData.category, formData.category2].filter(Boolean);
+
+  let parsedTags = formData.tags
+    ? formData.tags.split(",").map((t) => t.trim()).filter((t) => Boolean(t) && t !== "__hidden__" && !t.startsWith("__order:"))
+    : [];
+  if (formData.is_hidden) parsedTags.push("__hidden__");
+  const sortVal = Number(formData.sort_order) || 0;
+  parsedTags.push(`__order:${sortVal}__`);
+
   return {
     title: formData.title,
-    category: isSpecial ? contentType : selectedCats.join(", "),
+    category: isSpecialType(contentType) ? contentType : selectedCats.join(", "),
     description: formData.description,
     image_icon: formData.image_icon,
     year: formData.year,
@@ -66,37 +87,29 @@ function buildPayload(formData, contentType) {
     solution: formData.solution,
     results_impact: formData.results_impact,
     key_learnings: formData.key_learnings,
-    tags: formData.tags ? formData.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+    tags: parsedTags,
     tools: formData.tools ? formData.tools.split(",").map((t) => t.trim()).filter(Boolean) : [],
     features: formData.features ? formData.features.split("\n").map((f) => f.trim()).filter(Boolean) : [],
-    languages: formData.languages
-      ? (() => {
-          const parts = formData.languages.split(",").map((l) => l.trim()).filter(Boolean);
-          const isSimple = parts.some(p => !p.includes(":"));
-          if (isSimple) {
-            return parts.map((name) => ({
-              name,
-              percent: 0,
-              color: "#888"
-            }));
-          } else {
-            return parts.map((l) => {
-              const [name, percent, color] = l.split(":");
-              return { name: name?.trim(), percent: Number(percent) || 0, color: color?.trim() || "#ccc" };
-            });
-          }
-        })()
-      : [],
+    languages: parseLanguages(formData.languages),
     video_url: formData.video_url,
-    gallery: isSpecial
+    gallery: isSpecialType(contentType)
       ? [formData.activity_url?.trim() || "", formData.certificate_url?.trim() || ""]
       : (formData.gallery_urls ? formData.gallery_urls.split(",").map((u) => u.trim()).filter(Boolean) : []),
     award: formData.has_award
       ? { title: formData.award_title, description: formData.award_description, competition: formData.award_competition, image_url: formData.award_image_url }
       : null,
     is_recommended: formData.is_recommended,
+    sort_order: sortVal,
+    is_hidden: !!formData.is_hidden,
   };
 }
+
+// GitHub language colors map
+const LANG_COLORS = {
+  JavaScript: "#f1e05a", TypeScript: "#3178c6", HTML: "#e34c26", CSS: "#563d7c",
+  Python: "#3572A5", Go: "#00ADD8", Rust: "#dea584", "C++": "#f34b7d",
+  Java: "#b07219", "C#": "#178600", PHP: "#4F5D95", Ruby: "#701516", Shell: "#89e051",
+};
 
 export default function AdminPage({ setPage }) {
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -109,11 +122,28 @@ export default function AdminPage({ setPage }) {
   const [editId, setEditId] = useState(null);
   const [contentType, setContentType] = useState("Project");
   const [adminTab, setAdminTab] = useState("Content");
+  const [isFormOpen, setIsFormOpen] = useState(true);
+  const [isExistingOpen, setIsExistingOpen] = useState(true);
+
+  // Batch pending states
+  const [pendingProjectIds, setPendingProjectIds] = useState(new Set());
+  const [pendingCategoryActions, setPendingCategoryActions] = useState([]);
+  const [isSavingBatch, setIsSavingBatch] = useState(false);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState("");
 
   const fetchProjects = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase.from("projects").select("*").order("id", { ascending: false });
-    if (data) setProjectsList(data);
+    const { data, error } = await supabase.from("projects").select("*");
+    if (data) {
+      const mapped = data.map((p) => ({
+        ...p,
+        sort_order: (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order)))
+          ? Number(p.sort_order)
+          : 0,
+        is_hidden: p.is_hidden === true || (Array.isArray(p.tags) && p.tags.includes("__hidden__")),
+      }));
+      setProjectsList(mapped.sort(sortByOrder));
+    }
     if (error) console.error("Error fetching projects:", error);
     setIsLoading(false);
   };
@@ -123,7 +153,7 @@ export default function AdminPage({ setPage }) {
     if (data) {
       const sorted = [...data].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
       setCategoriesList(sorted);
-      // Set default category to first available if not already edited
+      // Set default category to first available if not yet changed
       if (sorted.length > 0 && formData.category === "Frontend") {
         setFormData((prev) => ({ ...prev, category: sorted[0].name }));
       }
@@ -136,11 +166,106 @@ export default function AdminPage({ setPage }) {
     fetchCategories();
   }, []);
 
+  const handleToggleHide = (project) => {
+    const newHidden = !project.is_hidden;
+    setProjectsList((prev) =>
+      prev.map((p) => {
+        if (p.id !== project.id) return p;
+        const currentTags = Array.isArray(p.tags) ? p.tags : [];
+        const newTags = newHidden
+          ? [...currentTags.filter((t) => t !== "__hidden__"), "__hidden__"]
+          : currentTags.filter((t) => t !== "__hidden__");
+        return { ...p, is_hidden: newHidden, tags: newTags };
+      })
+    );
+    setPendingProjectIds((prev) => new Set(prev).add(project.id));
+  };
+
+  const handleProjectOrderChange = (id, newOrder) => {
+    const parsed = parseInt(newOrder) || 0;
+    setProjectsList((prev) =>
+      [...prev.map((p) => {
+        if (p.id !== id) return p;
+        const currentTags = Array.isArray(p.tags) ? p.tags : [];
+        const cleanTags = currentTags.filter((t) => typeof t === "string" && !t.startsWith("__order:"));
+        cleanTags.push(`__order:${parsed}__`);
+        return { ...p, sort_order: parsed, tags: cleanTags };
+      })].sort(sortByOrder)
+    );
+    setPendingProjectIds((prev) => new Set(prev).add(id));
+  };
+
+  const handleMoveProject = (id, direction) => {
+    const currentFiltered = filterByContentType(projectsList, contentType);
+    const index = currentFiltered.findIndex((p) => p.id === id);
+    if (index === -1) return;
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= currentFiltered.length) return;
+
+    const currentItem = currentFiltered[index];
+    const targetItem = currentFiltered[targetIndex];
+    const currentOrder = currentItem.sort_order || (index + 1);
+    const targetOrder = targetItem.sort_order || (targetIndex + 1);
+
+    let newCurrentOrder = targetOrder;
+    let newTargetOrder = currentOrder;
+    if (currentOrder === targetOrder) {
+      newCurrentOrder = direction === "up" ? targetOrder - 1 : targetOrder + 1;
+    }
+
+    handleProjectOrderChange(currentItem.id, newCurrentOrder);
+    handleProjectOrderChange(targetItem.id, newTargetOrder);
+  };
+
+  const handleSaveAllBatch = async () => {
+    const hasProjectChanges = pendingProjectIds.size > 0;
+    const hasCategoryChanges = pendingCategoryActions.length > 0;
+    if (!hasProjectChanges && !hasCategoryChanges) { alert("No unsaved changes!"); return; }
+
+    setIsSavingBatch(true);
+    setSaveSuccessMsg("");
+    try {
+      const promises = [];
+
+      // Save modified projects
+      for (const id of pendingProjectIds) {
+        const targetProject = projectsList.find((p) => p.id === id);
+        if (!targetProject) continue;
+        const pCategory = isSpecialType(targetProject.category) ? targetProject.category : "Project";
+        const payload = buildPayload(projectToForm(targetProject), pCategory);
+        promises.push(supabase.rpc("admin_update_project", { p_id: id, payload }));
+      }
+
+      // Save category actions
+      for (const action of pendingCategoryActions) {
+        if (action.type === "add") {
+          promises.push(supabase.rpc("admin_insert_category", { p_name: action.name }));
+        } else if (action.type === "delete" && typeof action.id === "number") {
+          promises.push(supabase.rpc("admin_delete_category", { p_id: action.id }));
+        } else if (action.type === "reorder" && typeof action.id === "number") {
+          promises.push(supabase.rpc("admin_update_category_order", { p_id: action.id, p_sort_order: action.sort_order }));
+        }
+      }
+
+      await Promise.all(promises);
+      setPendingProjectIds(new Set());
+      setPendingCategoryActions([]);
+      setSaveSuccessMsg("✅ All changes saved successfully!");
+      setTimeout(() => setSaveSuccessMsg(""), 4000);
+    } catch (err) {
+      console.error("Batch save error:", err);
+      alert("Error saving changes: " + err.message);
+    } finally {
+      setIsSavingBatch(false);
+      fetchProjects();
+      fetchCategories();
+    }
+  };
+
   // Generic form field change handler
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
-      // Ensure has_award and is_recommended are mutually exclusive
       if (name === "has_award" && checked) return setFormData((p) => ({ ...p, has_award: true, is_recommended: false }));
       if (name === "is_recommended" && checked) return setFormData((p) => ({ ...p, is_recommended: true, has_award: false }));
       return setFormData((p) => ({ ...p, [name]: checked }));
@@ -151,7 +276,6 @@ export default function AdminPage({ setPage }) {
   // Sync language usage from GitHub API
   const handleSyncGithub = async () => {
     if (!formData.github_url) return alert("Please enter a GitHub URL first.");
-
     const match = formData.github_url.match(/github\.com\/([^/]+)\/([^/]+)/);
     if (!match) return alert("Invalid GitHub URL format. Should be https://github.com/owner/repo");
 
@@ -159,16 +283,12 @@ export default function AdminPage({ setPage }) {
     try {
       const res = await fetch(`https://api.github.com/repos/${match[1]}/${match[2]}/languages`);
       if (!res.ok) throw new Error("Failed to fetch language data from GitHub.");
-
       const data = await res.json();
       const totalBytes = Object.values(data).reduce((sum, b) => sum + b, 0);
       if (!totalBytes) return alert("No language data found for this repository.");
-
-      const LANG_COLORS = { JavaScript: "#f1e05a", TypeScript: "#3178c6", HTML: "#e34c26", CSS: "#563d7c", Python: "#3572A5", Go: "#00ADD8", Rust: "#dea584", "C++": "#f34b7d", Java: "#b07219", "C#": "#178600", PHP: "#4F5D95", Ruby: "#701516", Shell: "#89e051" };
       const formatted = Object.entries(data)
         .map(([lang, bytes]) => `${lang}:${((bytes / totalBytes) * 100).toFixed(1)}:${LANG_COLORS[lang] || "#888"}`)
         .join(", ");
-
       setFormData((p) => ({ ...p, languages: formatted }));
       alert("Languages synced successfully!");
     } catch (error) {
@@ -182,7 +302,6 @@ export default function AdminPage({ setPage }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = buildPayload(formData, contentType);
-
     if (isEditing) {
       const { error } = await supabase.rpc("admin_update_project", { p_id: editId, payload });
       if (error) return alert("Error updating project: " + error.message);
@@ -192,15 +311,15 @@ export default function AdminPage({ setPage }) {
       if (error) return alert("Error adding project: " + error.message);
       alert("Project added successfully!");
     }
-
     resetForm();
     fetchProjects();
   };
 
   const handleEdit = (project) => {
     setIsEditing(true);
+    setIsFormOpen(true);
     setEditId(project.id);
-    setContentType(project.category === "Achievement" || project.category === "Activity" || project.category === "Experience" ? project.category : "Project");
+    setContentType(isSpecialType(project.category) ? project.category : "Project");
     setFormData(projectToForm(project));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -220,251 +339,149 @@ export default function AdminPage({ setPage }) {
     setContentType("Project");
   };
 
+  const hasPendingChanges = pendingProjectIds.size > 0 || pendingCategoryActions.length > 0;
+
   return (
     <div style={styles.pageContainer}>
       {isLoading && <LoadingPage />}
 
-      {/* Main Tabs */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "10px", position: "relative", zIndex: 10 }}>
-        {["Content", "Settings"].map((tab) => (
+      <div style={{ maxWidth: 920, margin: "0 auto 20px" }}>
+        {/* Top Header Row */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <div>
+            <h1 style={{ fontSize: "24px", fontWeight: "800", color: "#0f172a", margin: 0 }}>⚙️ Admin Panel</h1>
+            <p style={{ fontSize: "14px", color: "#64748b", margin: "4px 0 0 0" }}>Manage projects, content categories, and site settings</p>
+          </div>
           <button
-            key={tab}
-            onClick={() => setAdminTab(tab)}
-            style={{ flex: 1, padding: "16px", borderRadius: "16px", fontWeight: "bold", cursor: "pointer", border: "none", background: adminTab === tab ? "#0f172a" : "#f8fafc", color: adminTab === tab ? "white" : "#475569" }}
+            onClick={async () => { await supabase.auth.signOut(); setPage?.("Home"); }}
+            style={{ padding: "8px 16px", background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "10px", cursor: "pointer", fontWeight: "600", fontSize: "13px" }}
           >
-            {tab === "Content" ? "📝 Manage Content" : "⚙️ Personal Info & Links"}
+            🚪 Sign Out
           </button>
-        ))}
-      </div>
+        </div>
 
-      {/* Sign Out */}
-      <div style={{ position: "relative", zIndex: 10, display: "flex", justifyContent: "flex-end", paddingBottom: 20 }}>
-        <button onClick={async () => { await supabase.auth.signOut(); setPage?.("Home"); }} style={{ padding: "10px 20px", background: "#ef4444", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: "bold", boxShadow: "0 4px 12px rgba(239,68,68,0.3)" }}>
-          🚪 Sign Out
-        </button>
+        {/* Main Navigation Tabs */}
+        <div style={{ display: "flex", gap: "8px", background: "#ffffff", padding: "6px", borderRadius: "14px", border: "1px solid #e2e8f0", marginBottom: "24px" }}>
+          {["Content", "Settings"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setAdminTab(tab)}
+              style={{
+                flex: 1, padding: "12px 20px", borderRadius: "10px", fontWeight: "700", fontSize: "14px",
+                cursor: "pointer", border: "none",
+                background: adminTab === tab ? "#0D6EFD" : "transparent",
+                color: adminTab === tab ? "#ffffff" : "#64748b",
+                transition: "all 0.15s ease",
+              }}
+            >
+              {tab === "Content" ? "📝 Manage Content" : "⚙️ Personal Info & Links"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {adminTab === "Content" ? (
         <>
-          <div style={{ position: "relative", zIndex: 1, marginBottom: 40 }}>
-            <CategoryManager categoriesList={categoriesList} setCategoriesList={setCategoriesList} fetchCategories={fetchCategories} />
-
-            <div style={styles.cardContainer}>
-              {/* Form Header */}
-              <div style={styles.headerRow}>
-                <h1 style={styles.pageTitle}>{isEditing ? "✏️ Edit Project" : "🛠️ Add New Project"}</h1>
-                {isEditing && <button onClick={resetForm} style={styles.cancelBtn}>Cancel Edit</button>}
-              </div>
-
-              {/* Project Form */}
-              <form onSubmit={handleSubmit} style={styles.formContainer}>
-
-                {/* Content Type Selector */}
-                <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-                  {["Project", "Achievement", "Activity", "Experience"].map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setContentType(type)}
-                      style={{ flex: 1, padding: "12px", borderRadius: "12px", fontWeight: "bold", cursor: "pointer", border: "none", background: contentType === type ? "#0D6EFD" : "#eef3ff", color: contentType === type ? "white" : "#3b82f6", boxShadow: contentType === type ? "0 4px 12px rgba(13,110,253,0.3)" : "none" }}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Basic Info */}
-                <div style={styles.sectionStyle}>
-                  <h3 style={styles.sectionHeading}>📌 Basic Info</h3>
-                  <div style={styles.gridContainer}>
-                    <div><label style={styles.labelStyle}>Project Title</label><input type="text" name="title" value={formData.title} onChange={handleChange} required style={styles.inputStyle} /></div>
-                    <div style={styles.flexRow}>
-                      {contentType === "Project" && (
-                        <>
-                          <div style={styles.flex1}>
-                            <label style={styles.labelStyle}>Category 1</label>
-                            <select name="category" value={formData.category} onChange={handleChange} style={styles.inputStyle}>
-                              {categoriesList.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-                            </select>
-                          </div>
-                          <div style={styles.flex1}>
-                            <label style={styles.labelStyle}>Category 2</label>
-                            <select name="category2" value={formData.category2} onChange={handleChange} style={styles.inputStyle}>
-                              <option value="">None</option>
-                              {categoriesList.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-                            </select>
-                          </div>
-                        </>
-                      )}
-                      <div style={styles.flex1}><label style={styles.labelStyle}>Year</label><input type="text" name="year" value={formData.year} onChange={handleChange} style={styles.inputStyle} /></div>
-                      <div style={styles.flex1}><label style={styles.labelStyle}>Icon</label><input type="text" name="image_icon" value={formData.image_icon} onChange={handleChange} style={styles.inputStyle} /></div>
-                    </div>
-                    <div><label style={styles.labelStyle}>Short Description</label><textarea name="description" value={formData.description} onChange={handleChange} rows="2" required style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
-                  </div>
-                </div>
-
-                {contentType === "Project" && (
-                  <>
-                    {/* Problem & Solution */}
-                    <div style={styles.sectionStyle}>
-                      <h3 style={{ ...styles.sectionHeading, color: "#ef4444" }}>⚠️ The Problem & Solution</h3>
-                      <div style={styles.gridContainer}>
-                        <div><label style={styles.labelStyle}>The Problem</label><textarea name="problem" value={formData.problem} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Problem encountered..." /></div>
-                        <div><label style={styles.labelStyle}>The Solution</label><textarea name="solution" value={formData.solution} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} placeholder="Solution implemented..." /></div>
-                      </div>
-                    </div>
-
-                    {/* Role, Tech & Tools */}
-                    <div style={styles.sectionStyle}>
-                      <h3 style={{ ...styles.sectionHeading, color: "#3b82f6" }}>⚙️ Role, Tech Stack & Tools</h3>
-                      <div style={styles.gridContainer}>
-                        <div><label style={styles.labelStyle}>My Role</label><input type="text" name="my_role" value={formData.my_role} onChange={handleChange} style={styles.inputStyle} placeholder="e.g. Lead Developer" /></div>
-                        <div><label style={styles.labelStyle}>Tech Stack (Comma-separated)</label><input type="text" name="tags" value={formData.tags} onChange={handleChange} style={styles.inputStyle} placeholder="React, Node.js" /></div>
-                        <div><label style={styles.labelStyle}>Tools (Comma-separated)</label><input type="text" name="tools" value={formData.tools} onChange={handleChange} style={styles.inputStyle} placeholder="Figma, Docker, Postman" /></div>
-                      </div>
-                    </div>
-
-                    {/* Features */}
-                    <div style={styles.sectionStyle}>
-                      <h3 style={{ ...styles.sectionHeading, color: "#10b981" }}>✨ Key Features</h3>
-                      <div><label style={styles.labelStyle}>Features (Each feature on a new line)</label><textarea name="features" value={formData.features} onChange={handleChange} rows="4" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
-                    </div>
-
-                    {/* Results & Learnings */}
-                    <div style={styles.sectionStyle}>
-                      <h3 style={{ ...styles.sectionHeading, color: "#f59e0b" }}>📈 Results & Learnings</h3>
-                      <div style={styles.gridContainer}>
-                        <div><label style={styles.labelStyle}>Results & Impact</label><textarea name="results_impact" value={formData.results_impact} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
-                        <div><label style={styles.labelStyle}>Key Learnings</label><textarea name="key_learnings" value={formData.key_learnings} onChange={handleChange} rows="3" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Media & Links */}
-                <div style={styles.sectionStyle}>
-                  <h3 style={{ ...styles.sectionHeading, color: "#6366f1" }}>🌍 Media & Links</h3>
-                  <div style={styles.gridContainer}>
-                    <div style={styles.flexRow}>
-                      {(contentType === "Achievement" || contentType === "Activity" || contentType === "Experience")
-                        ? <div style={styles.flex1}><label style={styles.labelStyle}>Linked Project ID</label><input type="text" name="link_url" value={formData.link_url} onChange={handleChange} style={styles.inputStyle} placeholder="e.g. 12" /></div>
-                        : <div style={styles.flex1}><label style={styles.labelStyle}>Live Link</label><input type="url" name="link_url" value={formData.link_url} onChange={handleChange} style={styles.inputStyle} /></div>
-                      }
-                      <div style={styles.flex1}><label style={styles.labelStyle}>GitHub</label><input type="url" name="github_url" value={formData.github_url} onChange={handleChange} style={styles.inputStyle} /></div>
-                    </div>
-                    {contentType === "Project" && <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>}
-                    {contentType === "Project"
-                      ? <div><label style={styles.labelStyle}>Gallery URLs (Comma-separated)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
-                      : <>
-                          <div>
-                            <label style={styles.labelStyle}>Certificate/Verification Image URL</label>
-                            <input type="url" name="activity_url" value={formData.activity_url} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/certificate.jpg" />
-                          </div>
-                          <div>
-                            <label style={styles.labelStyle}>Activity/Participation Photo URL</label>
-                            <input type="url" name="certificate_url" value={formData.certificate_url} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/activity.jpg" />
-                          </div>
-                        </>
-                    }
-                  </div>
-                </div>
-
-                {contentType === "Project" && (
-                  <>
-                    {/* Languages */}
-                    <div style={styles.sectionStyle}>
-                      <h3 style={{ ...styles.sectionHeading, color: "#8b5cf6" }}>📊 Languages Used</h3>
-                      <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                        <div style={{ flex: 1 }}>
-                          <label style={styles.labelStyle}>Languages (Name:Percent:Color, comma-separated)</label>
-                          <input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" />
-                        </div>
-                        <button type="button" onClick={handleSyncGithub} disabled={isSyncingGithub} style={{ ...styles.submitBtn, padding: "10px", marginTop: "25px", backgroundColor: isSyncingGithub ? "#ccc" : "#0f172a", whiteSpace: "nowrap" }}>
-                          {isSyncingGithub ? "Syncing..." : "🔄 Sync from GitHub"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Award */}
-                    <div style={{ ...styles.sectionStyle, background: formData.has_award ? "#fffcf0" : "#f9fafb" }}>
-                      <label style={{ ...styles.awardCheckboxLabel, color: formData.has_award ? "#874d00" : "#333" }}>
-                        <input type="checkbox" name="has_award" checked={formData.has_award} onChange={handleChange} style={styles.checkbox} />
-                        🏆 This project received an award
-                      </label>
-                      {formData.has_award && (
-                        <div style={styles.awardFields}>
-                          <div><label style={styles.labelStyle}>Award Title</label><input type="text" name="award_title" value={formData.award_title} onChange={handleChange} style={styles.inputStyle} /></div>
-                          <div><label style={styles.labelStyle}>Competition</label><input type="text" name="award_competition" value={formData.award_competition} onChange={handleChange} style={styles.inputStyle} /></div>
-                          <div><label style={styles.labelStyle}>Description</label><textarea name="award_description" value={formData.award_description} onChange={handleChange} rows="2" style={styles.inputStyle} /></div>
-                          <div><label style={styles.labelStyle}>Image URL</label><input type="url" name="award_image_url" value={formData.award_image_url} onChange={handleChange} style={styles.inputStyle} /></div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Recommended */}
-                    <div style={{ ...styles.sectionStyle, background: formData.is_recommended ? "#f0fdfa" : "#f9fafb", marginTop: "16px" }}>
-                      <label style={{ ...styles.awardCheckboxLabel, color: formData.is_recommended ? "#0f766e" : "#333" }}>
-                        <input type="checkbox" name="is_recommended" checked={formData.is_recommended} onChange={handleChange} style={styles.checkbox} />
-                        ⭐ Recommend this project
-                      </label>
-                    </div>
-                  </>
-                )}
-
-                <button type="submit" style={{ ...styles.submitBtn, backgroundColor: isEditing ? "#10b981" : "#0D6EFD" }}>
-                  {isEditing ? "✅ Update Project" : "💾 Save Project"}
+          <div style={{ maxWidth: 920, margin: "0 auto 40px" }}>
+            {/* Global Content Type Selector Bar */}
+            <div style={{ display: "flex", gap: "8px", marginBottom: "20px", background: "#ffffff", padding: "6px", borderRadius: "14px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)" }}>
+              {["Project", "Achievement", "Activity", "Experience"].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setContentType(type)}
+                  style={{
+                    flex: 1, padding: "12px 16px", borderRadius: "10px", fontWeight: "700", fontSize: "14px",
+                    cursor: "pointer", border: "none",
+                    background: contentType === type ? "#0D6EFD" : "transparent",
+                    color: contentType === type ? "#ffffff" : "#475569",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {type}s
                 </button>
-              </form>
+              ))}
             </div>
-          </div>
 
-          {/* Existing Content List */}
-          <div style={{ position: "relative", zIndex: 2 }}>
-            <div style={styles.cardContainer}>
-              <h2 style={styles.existingProjectsTitle}>📋 Existing Content</h2>
+            {/* 1. Add / Edit Content Form */}
+            <ContentForm
+              formData={formData}
+              setFormData={setFormData}
+              isEditing={isEditing}
+              contentType={contentType}
+              categoriesList={categoriesList}
+              isSyncingGithub={isSyncingGithub}
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+              handleSyncGithub={handleSyncGithub}
+              resetForm={resetForm}
+              setIsFormOpen={setIsFormOpen}
+              isFormOpen={isFormOpen}
+            />
 
-              {/* Content Type Filter */}
-              <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-                {["Project", "Achievement", "Activity", "Experience"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setContentType(type)}
-                    style={{ padding: "8px 16px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", border: "none", background: contentType === type ? "#0D6EFD" : "#eef3ff", color: contentType === type ? "white" : "#3b82f6" }}
-                  >
-                    {type}s
-                  </button>
-                ))}
-              </div>
+            {/* 2. Existing Content List */}
+            <ProjectList
+              projectsList={projectsList}
+              contentType={contentType}
+              handleProjectOrderChange={handleProjectOrderChange}
+              handleMoveProject={handleMoveProject}
+              handleToggleHide={handleToggleHide}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              isExistingOpen={isExistingOpen}
+              setIsExistingOpen={setIsExistingOpen}
+            />
 
-              <div style={styles.projectListContainer}>
-                {projectsList
-                  .filter((p) => contentType === "Project" ? p.category !== "Achievement" && p.category !== "Activity" && p.category !== "Experience" : p.category === contentType)
-                  .map((project) => (
-                    <div key={project.id} style={styles.projectListItem}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                        <div style={{ ...styles.projectIcon, background: "linear-gradient(135deg,#f0f6ff,#e0f2fe)", borderRadius: "12px", padding: "8px", width: "40px", height: "40px", display: "flex", justifyContent: "center", alignItems: "center" }}>{project.image_icon}</div>
-                        <div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <div style={styles.projectTitleText}>{project.title}</div>
-                            {project.award && <span style={{ fontSize: "12px", background: "#fef08a", color: "#854d0e", padding: "2px 6px", borderRadius: "12px" }}>🏆 Award</span>}
-                            {project.is_recommended && <span style={{ fontSize: "12px", background: "#ccfbf1", color: "#0f766e", padding: "2px 6px", borderRadius: "12px" }}>⭐ Recommend</span>}
-                          </div>
-                          <div style={styles.projectCategoryText}>{project.category}</div>
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <button onClick={() => handleEdit(project)} style={styles.editBtn}>Edit</button>
-                        <button onClick={() => handleDelete(project.id, project.title)} style={styles.deleteBtn}>Del</button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
+            {/* 3. Manage Categories */}
+            <CategoryManager
+              categoriesList={categoriesList}
+              setCategoriesList={setCategoriesList}
+              fetchCategories={fetchCategories}
+              setPendingCategoryActions={setPendingCategoryActions}
+            />
           </div>
         </>
       ) : (
         <SettingsPanel />
       )}
+
+      {/* Floating Fixed Save Button at Bottom-Left */}
+      <div style={{ position: "fixed", bottom: "24px", left: "24px", zIndex: 9999, display: "flex", alignItems: "center", gap: "12px" }}>
+        <button
+          type="button"
+          onClick={handleSaveAllBatch}
+          disabled={isSavingBatch}
+          style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            padding: "12px 22px", borderRadius: "50px",
+            background: hasPendingChanges ? "linear-gradient(135deg, #0D6EFD 0%, #2563eb 100%)" : "#0f172a",
+            color: "#ffffff", fontWeight: "700", fontSize: "14px",
+            border: hasPendingChanges ? "2px solid #60a5fa" : "1px solid #334155",
+            boxShadow: hasPendingChanges
+              ? "0 10px 25px -5px rgba(13, 110, 253, 0.5), 0 0 15px rgba(96, 165, 250, 0.3)"
+              : "0 4px 12px rgba(0,0,0,0.15)",
+            cursor: isSavingBatch ? "not-allowed" : "pointer",
+            transition: "all 0.2s ease",
+            transform: hasPendingChanges ? "scale(1.04)" : "scale(1)",
+          }}
+        >
+          <span style={{ fontSize: "16px" }}>{isSavingBatch ? "⏳" : "💾"}</span>
+          <span>
+            {isSavingBatch
+              ? "Saving..."
+              : hasPendingChanges
+                ? `Save All Changes (${pendingProjectIds.size + pendingCategoryActions.length})`
+                : "Save All Changes"
+            }
+          </span>
+        </button>
+
+        {saveSuccessMsg && (
+          <div style={{ background: "#10b981", color: "white", padding: "8px 16px", borderRadius: "30px", fontSize: "13px", fontWeight: "bold", boxShadow: "0 4px 12px rgba(16,185,129,0.3)" }}>
+            {saveSuccessMsg}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

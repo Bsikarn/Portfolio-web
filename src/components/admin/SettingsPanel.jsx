@@ -10,6 +10,15 @@ function flattenSettings(data) {
     languages: Array.isArray(data.about_me?.languages)
       ? data.about_me.languages.join(", ")
       : (data.about_me?.languages || ""),
+    coding_languages: Array.isArray(data.about_me?.coding_languages)
+      ? data.about_me.coding_languages.join(", ")
+      : (data.about_me?.coding_languages || ""),
+    technologies: Array.isArray(data.about_me?.technologies)
+      ? data.about_me.technologies.join(", ")
+      : (data.about_me?.technologies || ""),
+    tools: Array.isArray(data.about_me?.tools)
+      ? data.about_me.tools.join(", ")
+      : (data.about_me?.tools || ""),
   };
 }
 
@@ -18,8 +27,11 @@ function buildPayload(s) {
   return {
     about_me: {
       name: s.name, role: s.role, intro: s.intro, gpa: s.gpa, education: s.education,
-      languages: s.languages ? s.languages.split(",").map((l) => l.trim()).filter(Boolean) : [],
       image_url: s.image_url || "",
+      languages: s.languages ? s.languages.split(",").map((l) => l.trim()).filter(Boolean) : [],
+      coding_languages: s.coding_languages ? s.coding_languages.split(",").map((l) => l.trim()).filter(Boolean) : [],
+      technologies: s.technologies ? s.technologies.split(",").map((t) => t.trim()).filter(Boolean) : [],
+      tools: s.tools ? s.tools.split(",").map((t) => t.trim()).filter(Boolean) : [],
     },
     contact_links: {
       email: s.email, github_handle: s.github_handle, github_url: s.github_url,
@@ -30,7 +42,7 @@ function buildPayload(s) {
 }
 
 const INITIAL_SETTINGS = {
-  name: "", role: "", intro: "", gpa: "", education: "", languages: "", image_url: "",
+  name: "", role: "", intro: "", gpa: "", education: "", languages: "", coding_languages: "", technologies: "", tools: "", image_url: "",
   email: "", github_handle: "", github_url: "", linkedin_handle: "", linkedin_url: "", resume_url: "", cv_url: "", portfolio_url: "",
 };
 
@@ -89,9 +101,19 @@ export default function SettingsPanel() {
               <Field label="Education" name="education" />
               <div style={styles.flexRow}>
                 <div style={styles.flex1}><Field label="GPA" name="gpa" /></div>
-                <div style={styles.flex1}><Field label="Languages" name="languages" placeholder="Thai (Native), English (Professional)" /></div>
+                <div style={styles.flex1}><Field label="Spoken Languages (About Me Card)" name="languages" placeholder="Thai (Native), English (Professional)" /></div>
               </div>
               <Field label="Profile Image URL" name="image_url" type="url" placeholder="https://..." />
+            </div>
+          </div>
+
+          {/* Skills, Technologies & Tools (Manual Entry) */}
+          <div style={styles.sectionStyle}>
+            <h3 style={styles.sectionHeading}>🛠️ Skills, Technologies & Tools (Manual Entry)</h3>
+            <div style={styles.gridContainer}>
+              <Field label="Programming Languages (Coding)" name="coding_languages" placeholder="JavaScript, TypeScript, Python, C++, SQL, HTML, CSS" />
+              <Field label="Technologies & Frameworks (Comma separated)" name="technologies" placeholder="React.js, Next.js, Node.js, Express, Tailwind CSS, Three.js, Framer Motion" />
+              <Field label="Tools & Platforms (Comma separated)" name="tools" placeholder="Git, GitHub, VS Code, Supabase, Postman, Docker, Figma" />
             </div>
           </div>
 

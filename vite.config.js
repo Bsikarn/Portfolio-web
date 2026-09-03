@@ -16,7 +16,6 @@ export default defineConfig({
         // Implement code splitting to reduce the initial bundle load time
         manualChunks: {
           vendor: ['react', 'react-dom', 'framer-motion'], // Core UI dependencies
-          three: ['three', '@react-three/fiber'], // 3D graphics and rendering tools
         }
       }
     }

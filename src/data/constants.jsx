@@ -8,15 +8,5 @@ export const ABOUT_ME = {
   languages: ["Thai (Native)", "English (Professional)"]
 };
 
-// Core technologies used in this portfolio
-export const TECHNOLOGIES_TAGS = [
-  "React.js", "Vite", "Supabase", "PostgreSQL"
-];
-
-// Tools used
-export const TOOLS_TAGS = [
-  "Framer Motion", "Three.js", "React Three Fiber", "Lucide React", "Git"
-];
-
 // Available emojis for the falling animation effect
 export const EMOJIS = ["🌟", "✨", "🎉", "💙", "🚀", "🌈", "⭐", "🎊", "💫", "🌸"];

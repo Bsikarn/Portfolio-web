@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageIcon } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
-import LoadingPage from "../components/LoadingPage";
+import { ExperiencesSkeleton } from "../components/SkeletonLoader";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 
 export default function ExperiencesPage({ setPage }) {
@@ -38,14 +38,13 @@ export default function ExperiencesPage({ setPage }) {
     fetchExperiences();
   }, []);
 
-  if (isLoading) return <LoadingPage />;
+  if (isLoading) return <ExperiencesSkeleton />;
 
   const sectionPad = isMobile ? "p-[40px_24px_80px]" : "p-[40px_48px_100px]";
 
   return (
     <div data-testid="experiences-container" className="pt-[64px] min-h-[calc(100vh-64px)] max-w-[1440px] mx-auto relative z-[1]">
       <section className={sectionPad}>
-
 
         {/* Experience List */}
         <div className="flex flex-col gap-[24px] max-w-[1000px] mx-auto">
