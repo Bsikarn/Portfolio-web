@@ -224,7 +224,7 @@ export default function HomePage({ setPage, setContactOpen }) {
   // Fetch all dashboard data on mount
   useEffect(() => {
     // Increment page views asynchronously without blocking critical rendering queries
-    supabase.rpc("increment_views").catch(() => {});
+    Promise.resolve(supabase.rpc("increment_views")).catch(() => {});
 
     const fetchData = async () => {
       try {
