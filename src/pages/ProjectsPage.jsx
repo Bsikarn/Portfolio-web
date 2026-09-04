@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ArrowDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ArrowDown, Minimize2 } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 // Background blur managed inside ScrollSection wrapper
 import ProjectMiniCard from "../components/ProjectMiniCard";
@@ -11,32 +11,94 @@ import { supabase, getTransformedUrl } from "../lib/supabase";
 import { styles } from "../styles/ProjectsPage.styles";
 
 function getSortOrder(p) {
+  if (Array.isArray(p.tags)) {
+    const orderTag = p.tags.find((t) => typeof t === "string" && t.startsWith("__order:"));
+    if (orderTag) {
+      const match = orderTag.match(/__order:(\d+)__/);
+      if (match) return Number(match[1]);
+    }
+  }
   if (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
     return Number(p.sort_order);
-  }
-  const orderTag = (p.tags || []).find((t) => typeof t === "string" && t.startsWith("__order:"));
-  if (orderTag) {
-    const num = parseInt(orderTag.replace("__order:", "").replace("__", ""));
-    if (!isNaN(num)) return num;
   }
   return 999;
 }
 
-// Sort projects: custom sort_order first → awards → recommended → alphabetical
+// Sort projects: strictly by sort_order / __order tag first, then by id
 function sortProjects(projects) {
   return [...projects].sort((a, b) => {
     const orderA = getSortOrder(a);
     const orderB = getSortOrder(b);
     if (orderA !== orderB) return orderA - orderB;
-    if (!!b.award !== !!a.award) return !!b.award - !!a.award;
-    if (!!b.is_recommended !== !!a.is_recommended) return !!b.is_recommended - !!a.is_recommended;
-    return a.title.localeCompare(b.title);
+    return a.id - b.id;
   });
+}
+
+// Helper function to normalize strings for robust fuzzy comparison (handles URLs, titles, IDs, slugs)
+function cleanStr(str) {
+  if (!str || (typeof str !== "string" && typeof str !== "number")) return "";
+  return String(str)
+    .toLowerCase()
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/+$/, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+// Robust multi-pass project matching helper
+function findMatchedProject(rawTarget, projects) {
+  if (!rawTarget || !projects || projects.length === 0) return null;
+
+  const targetStr = String(rawTarget).trim();
+  const targetClean = cleanStr(targetStr);
+  const targetNum = Number(targetStr);
+
+  // 1. Direct Numeric ID match
+  if (!isNaN(targetNum) && targetNum > 0) {
+    const byId = projects.find((p) => Number(p.id) === targetNum);
+    if (byId) return byId;
+  }
+
+  // 2. String ID match
+  const byStringId = projects.find((p) => String(p.id) === targetStr);
+  if (byStringId) return byStringId;
+
+  // 3. Clean Normalized Match (Title, Link URL, GitHub URL)
+  if (targetClean) {
+    const byClean = projects.find((p) => {
+      if (cleanStr(p.title) === targetClean) return true;
+      if (p.link_url && cleanStr(p.link_url) === targetClean) return true;
+      if (p.github_url && cleanStr(p.github_url) === targetClean) return true;
+      return false;
+    });
+    if (byClean) return byClean;
+  }
+
+  // 4. Clean Substring / Partial Match
+  if (targetClean.length >= 2) {
+    const bySubstring = projects.find((p) => {
+      const pTitleClean = cleanStr(p.title);
+      const pLinkClean = cleanStr(p.link_url);
+      const pGitClean = cleanStr(p.github_url);
+      return (
+        (pTitleClean && (pTitleClean.includes(targetClean) || targetClean.includes(pTitleClean))) ||
+        (pLinkClean && (pLinkClean.includes(targetClean) || targetClean.includes(pLinkClean))) ||
+        (pGitClean && (pGitClean.includes(targetClean) || targetClean.includes(pGitClean)))
+      );
+    });
+    if (bySubstring) return bySubstring;
+  }
+
+  return null;
 }
 
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
+
   const [selectedId, setSelectedId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
@@ -49,6 +111,22 @@ export default function ProjectsPage() {
   const [lightboxItems, setLightboxItems] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [currentImageLoaded, setCurrentImageLoaded] = useState(false);
+
+  // Toggle filter logic: unselect if clicked again (except 'All')
+  const handleFilterClick = (f) => {
+    localStorage.removeItem("targetProjectId");
+    const nextFilter = activeFilter === f && f !== "All" ? "All" : f;
+    setActiveFilter(nextFilter);
+    const newFiltered = projectsData.filter((p) => {
+      const cats = p.category ? p.category.split(",").map((c) => c.trim()) : [];
+      const matchCat = nextFilter === "All" || cats.includes(nextFilter);
+      const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchCat && matchSearch;
+    });
+    if (newFiltered.length > 0 && !newFiltered.some((p) => p.id === selectedId)) {
+      setSelectedId(newFiltered[0].id);
+    }
+  };
 
   // Reset image loaded state when lightbox index changes
   useEffect(() => {
@@ -83,8 +161,6 @@ export default function ProjectsPage() {
   const [scrollLeft, setScrollLeft] = useState(0);
   const dragDistance = useRef(0);
 
-
-
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     const handleScroll = () => {
@@ -105,6 +181,7 @@ export default function ProjectsPage() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
   // Fetch categories and projects from DB
   useEffect(() => {
     const fetchData = async () => {
@@ -123,16 +200,21 @@ export default function ProjectsPage() {
         if (projData) {
           const visible = projData.filter((p) => p.category !== "Achievement" && p.category !== "Activity" && p.category !== "Experience");
           const sorted = sortProjects(visible);
-          setProjectsData(sorted);
 
-          // Auto-select from localStorage or default to first
-          const targetId = localStorage.getItem("targetProjectId");
-          if (targetId) {
-            setSelectedId(Number(targetId));
-            localStorage.removeItem("targetProjectId");
-          } else if (sorted.length > 0) {
-            setSelectedId(sorted[0].id);
+          // Smart auto-select from localStorage or default to first
+          const rawTarget = localStorage.getItem("targetProjectId");
+          const matchedProject = findMatchedProject(rawTarget, sorted);
+
+          const initialSelectedId = matchedProject ? matchedProject.id : (sorted.length > 0 ? sorted[0].id : null);
+
+          if (matchedProject) {
+            setActiveFilter("All");
+            setSearchQuery("");
           }
+
+          // Batch state updates together so React renders the correct selected project on the very first frame
+          setSelectedId(initialSelectedId);
+          setProjectsData(sorted);
         }
       } catch (error) {
         console.error("Error fetching projects:", error.message);
@@ -154,15 +236,23 @@ export default function ProjectsPage() {
 
   const selected = filtered.find((p) => p.id === selectedId) || filtered[0] || null;
 
-  // Reset selection when filter changes and current project is not in filtered list
+  // Instant horizontal auto-scroll before paint to center the selected project card in the selector container
   useEffect(() => {
-    if (filtered.length > 0 && !filtered.find((p) => p.id === selectedId)) {
-      setSelectedId(filtered[0].id);
+    if (!isLoading && selectedId && scrollContainerRef.current) {
+      const cardEl = scrollContainerRef.current.querySelector(`[data-project-id="${selectedId}"]`);
+      if (cardEl) {
+        const container = scrollContainerRef.current;
+        const cardLeft = cardEl.offsetLeft;
+        const cardWidth = cardEl.offsetWidth;
+        const containerWidth = container.clientWidth;
+        container.scrollLeft = cardLeft - (containerWidth / 2) + (cardWidth / 2);
+      }
     }
-  }, [activeFilter, searchQuery]);
+  }, [selectedId, isLoading]);
 
   // Navigate between projects
   const nav = (dir) => {
+    localStorage.removeItem("targetProjectId");
     const idx = filtered.findIndex((p) => p.id === selectedId);
     setSelectedId(filtered[(idx + dir + filtered.length) % filtered.length].id);
   };
@@ -184,7 +274,12 @@ export default function ProjectsPage() {
     scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     dragDistance.current = Math.abs(walk);
   };
-  const handleCardClick = (id) => { if (dragDistance.current <= 10) setSelectedId(id); };
+  const handleCardClick = (id) => {
+    if (dragDistance.current <= 10) {
+      localStorage.removeItem("targetProjectId");
+      setSelectedId(id);
+    }
+  };
 
   // Lightbox openers
   const openGalleryLightbox = (startIndex) => {
@@ -225,36 +320,133 @@ export default function ProjectsPage() {
       <div className="sticky top-[64px] z-[1] min-h-[calc(100dvh-64px)] flex flex-col justify-center w-full max-w-[1440px] mx-auto">
         <ScrollSection id="project-selector" className="w-full overflow-hidden relative">
           <div style={styles.filterContainer}>
-            {/* Search */}
-            <div style={styles.searchBarWrap}>
-              <Search size={18} style={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search project name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={styles.searchInput}
-              />
-            </div>
-            {/* Category Tabs */}
-            {categoriesData.map((f) => (
-              <motion.button
-                key={f}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setActiveFilter(f)}
-                style={{
-                  ...styles.filterTab,
-                  background: activeFilter === f ? "#0D6EFD" : "white",
-                  color: activeFilter === f ? "white" : "#4a6a8a",
-                  boxShadow: activeFilter === f 
-                    ? "6px 10px 22px rgba(13,110,253,0.32), inset 2px 2px 4px rgba(255,255,255,0.4)" 
-                    : "4px 6px 14px rgba(13,110,253,0.05), -3px -3px 8px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)",
-                }}
-              >
-                {f}
-              </motion.button>
-            ))}
+            {/* Expandable Search Box */}
+            <motion.div
+              initial={false}
+              animate={{
+                width: isSearchOpen ? (isMobile ? "100%" : 310) : 42,
+                borderRadius: isSearchOpen ? 50 : 14,
+              }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              onClick={() => {
+                if (!isSearchOpen) {
+                  setIsSearchOpen(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 100);
+                }
+              }}
+              style={{
+                ...styles.searchBarWrap,
+                cursor: isSearchOpen ? "text" : "pointer",
+                justifyContent: isSearchOpen ? "flex-start" : "center",
+                border: searchQuery ? "1px solid #0D6EFD" : styles.searchBarWrap.border,
+              }}
+              title={!isSearchOpen ? (searchQuery ? `Search active: "${searchQuery}". Click to expand` : "Click to search projects") : undefined}
+            >
+              <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                <Search size={18} style={{ ...styles.searchIcon, color: searchQuery ? "#0D6EFD" : "#8aabcc" }} />
+                {!isSearchOpen && searchQuery && (
+                  <span style={{ position: "absolute", top: -2, right: -2, width: 8, height: 8, borderRadius: "50%", background: "#0D6EFD" }} />
+                )}
+              </div>
+              
+              {isSearchOpen && (
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search project name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ ...styles.searchInput, paddingRight: searchQuery ? "64px" : "38px" }}
+                />
+              )}
+
+              {/* Action Buttons Right Side */}
+              {isSearchOpen && (
+                <div style={{ position: "absolute", right: 10, display: "flex", alignItems: "center", gap: 4 }}>
+                  {/* Clear Button (Only when there is search text) */}
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSearchQuery("");
+                        searchInputRef.current?.focus();
+                      }}
+                      style={{
+                        background: "#f1f5f9",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: 22,
+                        height: 22,
+                        cursor: "pointer",
+                        color: "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 0,
+                      }}
+                      title="Clear search text"
+                      aria-label="Clear search text"
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+
+                  {/* Fold / Minimize Button (Always visible when expanded) */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsSearchOpen(false);
+                    }}
+                    style={{
+                      background: "#eef3ff",
+                      border: "1px solid #d0e8ff",
+                      borderRadius: "50%",
+                      width: 26,
+                      height: 26,
+                      cursor: "pointer",
+                      color: "#0D6EFD",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 0,
+                    }}
+                    title="Fold search bar (keep search text)"
+                    aria-label="Fold search bar"
+                  >
+                    <Minimize2 size={13} />
+                  </button>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Category Filter Tabs - Hidden when search is expanded */}
+            <AnimatePresence>
+              {!isSearchOpen &&
+                categoriesData.map((f) => (
+                  <motion.button
+                    key={f}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.85 }}
+                    transition={{ duration: 0.18 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleFilterClick(f)}
+                    style={{
+                      ...styles.filterTab,
+                      background: activeFilter === f ? "#0D6EFD" : "white",
+                      color: activeFilter === f ? "white" : "#4a6a8a",
+                      boxShadow: activeFilter === f
+                        ? "6px 10px 22px rgba(13,110,253,0.32), inset 2px 2px 4px rgba(255,255,255,0.4)"
+                        : "4px 6px 14px rgba(13,110,253,0.05), -3px -3px 8px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)",
+                    }}
+                  >
+                    {f}
+                  </motion.button>
+                ))}
+            </AnimatePresence>
           </div>
 
           {/* Project Scroll List */}
@@ -273,7 +465,11 @@ export default function ProjectsPage() {
                     onMouseLeave={handleMouseLeave}
                     onMouseUp={handleMouseUp}
                     onMouseMove={handleMouseMove}
-                    style={{ ...styles.scrollRow, scrollSnapType: isDragging ? "none" : "x mandatory", cursor: isDragging ? "grabbing" : "grab" }}
+                    style={{
+                      ...styles.scrollRow,
+                      scrollSnapType: isDragging ? "none" : "x mandatory",
+                      cursor: isDragging ? "grabbing" : "grab",
+                    }}
                   >
                     <AnimatePresence>
                       {filtered.map((p) => (
@@ -337,8 +533,8 @@ export default function ProjectsPage() {
               <X onClick={() => setLightboxOpen(false)} style={styles.lightboxClose} size={36} />
               {lightboxItems.length > 1 && (
                 <>
-                  <button type="button" onClick={prevLightbox} style={styles.lightboxLeftBtn}><ChevronLeft size={32} /></button>
-                  <button type="button" onClick={nextLightbox} style={styles.lightboxRightBtn}><ChevronRight size={32} /></button>
+                  <button type="button" onClick={prevLightbox} aria-label="Previous image" style={styles.lightboxLeftBtn}><ChevronLeft size={32} /></button>
+                  <button type="button" onClick={nextLightbox} aria-label="Next image" style={styles.lightboxRightBtn}><ChevronRight size={32} /></button>
                   <div style={styles.lightboxCounter}>{lightboxIndex + 1} / {lightboxItems.length}</div>
                 </>
               )}

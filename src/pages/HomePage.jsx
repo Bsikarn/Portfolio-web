@@ -120,7 +120,7 @@ const MediaRow = ({ item, setPreviewImage, setPage }) => (
         {item.link_url && (
           <button
             type="button"
-            onClick={() => { localStorage.setItem("targetProjectId", item.link_url); setPage("Projects"); }}
+            onClick={() => { localStorage.setItem("targetProjectId", item.link_url || item.id || item.title); setPage("Projects"); }}
             className="ml-[12px] bg-[#eef3ff] text-[#0D6EFD] text-[12px] font-semibold px-[12px] py-[4px] rounded-full hover:bg-[#0D6EFD] hover:text-white transition-colors cursor-pointer"
           >
             Project
@@ -134,6 +134,7 @@ const MediaRow = ({ item, setPreviewImage, setPage }) => (
         type="button"
         onClick={() => item.gallery?.[0] && setPreviewImage(item.gallery[0])}
         disabled={!item.gallery?.[0]}
+        aria-label="View Certificate"
         className={`w-[44px] h-[44px] rounded-[12px] border border-[#eef3ff] flex items-center justify-center shadow-[0_2px_8px_rgba(13,110,253,0.05)] transition-colors ${item.gallery?.[0] ? "bg-white text-brand-primary hover:bg-[#0D6EFD] hover:text-white cursor-pointer" : "bg-[#e0e0e0] text-[#9e9e9e] cursor-not-allowed opacity-50"}`}
         title="View Certificate"
       >
@@ -143,6 +144,7 @@ const MediaRow = ({ item, setPreviewImage, setPage }) => (
         type="button"
         onClick={() => item.gallery?.[1] && setPreviewImage(item.gallery[1])}
         disabled={!item.gallery?.[1]}
+        aria-label="View Activity Picture"
         className={`w-[44px] h-[44px] rounded-[12px] border border-[#eef3ff] flex items-center justify-center shadow-[0_2px_8px_rgba(16,185,129,0.05)] transition-colors ${item.gallery?.[1] ? "bg-white text-[#10b981] hover:bg-[#10b981] hover:text-white cursor-pointer" : "bg-[#e0e0e0] text-[#9e9e9e] cursor-not-allowed opacity-50"}`}
         title="View Activity Picture"
       >
@@ -224,12 +226,13 @@ export default function HomePage({ setPage, setContactOpen }) {
     const fetchData = async () => {
       try {
         // Increment views and fetch stats in parallel
-        const [, { count: projectCount }, { data: statsData }, { data: settingsData }, { data: actsData }] = await Promise.all([
+        const [, { count: projectCount }, { data: statsData }, { data: settingsData }, { data: achData }, { data: actData }] = await Promise.all([
           supabase.rpc("increment_views"),
-          supabase.from("projects").select("*", { count: "exact", head: true }).neq("category", "Achievement").neq("category", "Activity").neq("category", "Experience"),
+          supabase.from("projects").select("*", { count: "exact", head: true }),
           supabase.from("site_stats").select("*").eq("id", 1).single(),
           supabase.from("portfolio_settings").select("about_me").eq("id", 1).single(),
-          supabase.from("projects").select("*").in("category", ["Achievement", "Activity", "Experience"]).order("year", { ascending: false }).order("id", { ascending: false }),
+          supabase.from("achievements").select("*").order("year", { ascending: false }).order("id", { ascending: false }),
+          supabase.from("activities").select("*").order("year", { ascending: false }).order("id", { ascending: false }),
         ]);
 
         projectCountRef.current = projectCount || 0;
@@ -259,10 +262,8 @@ export default function HomePage({ setPage, setContactOpen }) {
           setPortfolioTools(["Git", "GitHub", "VS Code", "Supabase", "Postman", "Docker", "Figma"]);
         }
 
-        if (actsData) {
-          setAchievements(actsData.filter((d) => d.category === "Achievement"));
-          setActivities(actsData.filter((d) => d.category === "Activity"));
-        }
+        if (achData) setAchievements(achData);
+        if (actData) setActivities(actData);
       } catch (error) {
         console.error("Error fetching homepage data:", error);
       } finally {
@@ -428,6 +429,7 @@ export default function HomePage({ setPage, setContactOpen }) {
               />
               <button
                 onClick={() => setPreviewImage(null)}
+                aria-label="Close preview"
                 className="absolute top-[24px] right-[24px] w-[44px] h-[44px] rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
               >
                 ✕
@@ -439,7 +441,6 @@ export default function HomePage({ setPage, setContactOpen }) {
       )}
 
       {/* Active Section Indicator Float Box */}
-      {/* Active Section Indicator Float Box & Shortcuts */}
       <AnimatePresence>
         {currentActiveSection && sectionLabels[currentActiveSection] && (
           <div
@@ -451,99 +452,37 @@ export default function HomePage({ setPage, setContactOpen }) {
               zIndex: 1000,
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              pointerEvents: "auto"
+              pointerEvents: "none"
             }}
           >
-            {/* Prev Section Button */}
-            {prevSectionId && (
-              <motion.button
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -15 }}
-                onClick={() => scrollToSection(prevSectionId)}
-                style={{
-                  pointerEvents: "auto",
-                  background: "rgba(255, 255, 255, 0.65)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255, 255, 255, 0.4)",
-                  padding: "8px 14px",
-                  boxShadow: "0 8px 32px rgba(13, 110, 253, 0.1)",
-                  fontFamily: "'Poppins', sans-serif",
-                  fontWeight: 600,
-                  fontSize: "12px",
-                  color: "#4a6a8a",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                ▲ {sectionLabels[prevSectionId]}
-              </motion.button>
-            )}
-
             {/* Current Active Indicator Box */}
             <motion.div
               key={currentActiveSection}
               initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 0.7, y: 0 }}
               exit={{ opacity: 0, y: 15 }}
               style={{
-                background: "rgba(255, 255, 255, 0.65)",
+                background: "rgba(255, 255, 255, 0.22)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
                 borderRadius: "16px",
-                border: "1px solid rgba(255, 255, 255, 0.4)",
-                padding: "10px 20px",
-                boxShadow: "0 8px 32px rgba(13, 110, 253, 0.15)",
+                border: "1px solid rgba(255, 255, 255, 0.25)",
+                padding: "8px 18px",
+                boxShadow: "0 4px 16px rgba(13, 110, 253, 0.04)",
                 fontFamily: "'Poppins', sans-serif",
                 fontWeight: 700,
                 fontSize: "13px",
                 color: "#0D6EFD",
                 display: "flex",
                 alignItems: "center",
-                whiteSpace: "nowrap",
-                pointerEvents: "none"
+                whiteSpace: "nowrap"
               }}
             >
               {sectionLabels[currentActiveSection]}
-              <span style={{ color: "#8aabcc", fontWeight: 500, marginLeft: "6px" }}>
+              <span style={{ color: "#7a9abc", fontWeight: 500, marginLeft: "6px" }}>
                 ({activeIndex} / {totalSections})
               </span>
             </motion.div>
-
-            {/* Next Section Button */}
-            {nextSectionId && (
-              <motion.button
-                initial={{ opacity: 0, x: 15 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 15 }}
-                onClick={() => scrollToSection(nextSectionId)}
-                style={{
-                  pointerEvents: "auto",
-                  background: "rgba(255, 255, 255, 0.65)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255, 255, 255, 0.4)",
-                  padding: "8px 14px",
-                  boxShadow: "0 8px 32px rgba(13, 110, 253, 0.1)",
-                  fontFamily: "'Poppins', sans-serif",
-                  fontWeight: 600,
-                  fontSize: "12px",
-                  color: "#4a6a8a",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                {sectionLabels[nextSectionId]} ▼
-              </motion.button>
-            )}
           </div>
         )}
       </AnimatePresence>

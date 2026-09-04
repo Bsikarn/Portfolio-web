@@ -11,9 +11,8 @@ test.describe('Portfolio E2E Core Tests', () => {
 
   test('Navbar links navigation & brand logo presence', async ({ page }) => {
     // Verify brand logo exists
-    const logo = page.locator('div[title="Beaut.Portfolio"]');
+    const logo = page.getByText('Beaut.Portfolio');
     await expect(logo).toBeVisible();
-    await expect(logo).toHaveText('Beaut.Portfolio');
 
     // Navigation buttons check
     const homeBtn = page.getByRole('button', { name: 'Home', exact: true });
@@ -32,6 +31,7 @@ test.describe('Portfolio E2E Core Tests', () => {
 
     // Navigate to Projects
     await projectsBtn.click();
+    await page.getByTitle('Click to search projects').click();
     await page.getByPlaceholder('Search project name...').waitFor({ state: 'visible', timeout: 20000 });
 
     // Trigger Contact Popup
@@ -40,13 +40,13 @@ test.describe('Portfolio E2E Core Tests', () => {
     await expect(page.getByText("Let's work")).toBeVisible();
 
     // Close Contact Popup
-    await page.locator('button:has(.lucide-x)').click({ force: true });
+    await page.getByLabel('Close modal').click({ force: true });
     await page.waitForTimeout(1000);
     await expect(page.getByText("Let's work")).toBeHidden();
 
     // Navigate back to Home
     await homeBtn.click();
-    await expect(page.locator('div[title="Beaut.Portfolio"]')).toBeVisible();
+    await expect(logo).toBeVisible();
   });
 
   test('Interactive Cheer Up button triggers emojis', async ({ page }) => {
@@ -82,8 +82,7 @@ test.describe('Portfolio E2E Core Tests', () => {
   test('Projects filtering and selection logic', async ({ page }) => {
     // Switch to Projects page
     await page.getByRole('button', { name: 'Projects', exact: true }).click();
-    await page.getByPlaceholder('Search project name...').waitFor({ state: 'visible', timeout: 20000 });
-
+    
     // Validate 'All' filter button is default
     const allFilterBtn = page.getByRole('button', { name: 'All', exact: true });
     await expect(allFilterBtn).toBeVisible();

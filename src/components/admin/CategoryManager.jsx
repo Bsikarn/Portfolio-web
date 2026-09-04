@@ -84,17 +84,19 @@ export default function CategoryManager({ categoriesList, setCategoriesList, fet
           {/* Category List */}
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {categoriesList.map((cat) => (
-              <div key={cat.id} style={{ display: "flex", alignItems: "center", background: "#f8fafc", padding: "10px 16px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "14px", color: "#0f172a" }}>
-                <span style={{ flex: 1, fontWeight: "600" }}>{cat.name}</span>
-                <span style={{ fontSize: "12px", color: "#64748b", marginRight: "6px" }}>Sort Order:</span>
-                <input
-                  type="number"
-                  value={cat.sort_order || 0}
-                  onChange={(e) => handleOrderChange(cat.id, e.target.value)}
-                  style={{ width: "55px", padding: "4px 6px", marginRight: "16px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "13px", fontWeight: "bold", textAlign: "center" }}
-                  title="Sort Order (Lower is first)"
-                />
-                <button onClick={() => handleDelete(cat.id, cat.name)} style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626", padding: "4px 10px", borderRadius: "6px", cursor: "pointer", fontWeight: "600", fontSize: "12px" }}>Delete</button>
+              <div key={cat.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", background: "#f8fafc", padding: "10px 14px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "14px", color: "#0f172a" }}>
+                <span style={{ flex: "1 1 120px", fontWeight: "600", minWidth: 0 }}>{cat.name}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "auto" }}>
+                  <span style={{ fontSize: "12px", color: "#64748b" }}>Sort Order:</span>
+                  <input
+                    type="number"
+                    value={cat.sort_order || 0}
+                    onChange={(e) => handleOrderChange(cat.id, e.target.value)}
+                    style={{ width: "48px", padding: "4px 4px", border: "1px solid #cbd5e1", borderRadius: "6px", fontSize: "13px", fontWeight: "bold", textAlign: "center" }}
+                    title="Sort Order (Lower is first)"
+                  />
+                  <button onClick={() => handleDelete(cat.id, cat.name)} style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626", padding: "4px 10px", borderRadius: "6px", cursor: "pointer", fontWeight: "600", fontSize: "12px" }}>Delete</button>
+                </div>
               </div>
             ))}
           </div>

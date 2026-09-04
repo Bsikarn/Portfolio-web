@@ -21,9 +21,8 @@ export default function ExperiencesPage({ setPage }) {
     const fetchExperiences = async () => {
       try {
         const { data, error } = await supabase
-          .from("projects")
+          .from("experiences")
           .select("*")
-          .eq("category", "Experience")
           .order("year", { ascending: false })
           .order("id", { ascending: false });
 
@@ -65,7 +64,7 @@ export default function ExperiencesPage({ setPage }) {
                         <button
                           type="button"
                           onClick={() => {
-                            localStorage.setItem("targetProjectId", exp.link_url);
+                            localStorage.setItem("targetProjectId", exp.link_url || exp.id || exp.title);
                             setPage("Projects");
                           }}
                           className="ml-[12px] bg-[#eef3ff] text-[#0D6EFD] text-[12px] font-semibold px-[12px] py-[4px] rounded-full hover:bg-[#0D6EFD] hover:text-white transition-colors cursor-pointer"

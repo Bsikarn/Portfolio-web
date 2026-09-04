@@ -1,12 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { Bot, X, Send, Sparkles, RefreshCw } from "lucide-react";
+import { X, Send, Sparkles, RefreshCw } from "lucide-react";
 import { processPortfolioChat } from "../lib/portfolioChat";
 
-const INITIAL_MESSAGES = [
+const INITIAL_MESSAGES_EN = [
   {
     role: "assistant",
-    content: "สวัสดีค่ะ! หนูเป็นผู้ช่วย AI ประจำ Portfolio ของคุณสิการย์ สามารถสอบถามเกี่ยวกับผลงาน ทักษะ (Tech Stack) หรือประสบการณ์ทำงานได้เลยนะคะ 😊",
+    content: "Hello! I'm an AI Assistant for Sikarn's Portfolio. Feel free to ask me anything in English! 😊",
+  },
+];
+
+const INITIAL_MESSAGES_TH = [
+  {
+    role: "assistant",
+    content: "สวัสดีค่ะ! หนูเป็นผู้ช่วย AI ประจำ Portfolio ของพี่ศิริ์กาญจน์ (บิ๊วท์) สอบถามข้อมูลเกี่ยวกับผลงาน ประวัติ หรือทักษะได้เลยนะคะ 😊",
   },
 ];
 
@@ -34,16 +41,28 @@ const S = {
     userSelect: "none",
   },
   headerInfo: { display: "flex", alignItems: "center", gap: 10 },
-  botIcon: {
-    width: 36,
-    height: 36,
-    background: "rgba(255, 255, 255, 0.85)",
-    borderRadius: "50%",
+  langToggleWrap: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0 2px 8px rgba(13,110,253,0.15)",
+    background: "rgba(255, 255, 255, 0.85)",
+    borderRadius: 18,
+    padding: 2,
+    boxShadow: "0 2px 8px rgba(13, 110, 253, 0.15)",
+    border: "1px solid rgba(13, 110, 253, 0.25)",
+    userSelect: "none",
   },
+  langBtn: (active) => ({
+    padding: "3px 8px",
+    borderRadius: 14,
+    fontSize: 11,
+    fontWeight: 700,
+    border: "none",
+    cursor: "pointer",
+    background: active ? "linear-gradient(135deg, #0D6EFD 0%, #4d9fff 100%)" : "transparent",
+    color: active ? "#ffffff" : "#5a6e85",
+    transition: "all 0.2s ease",
+    boxShadow: active ? "0 2px 6px rgba(13,110,253,0.3)" : "none",
+  }),
   botName: { fontWeight: 700, fontSize: 14, color: "#1a2a4a" },
   botStatus: { fontSize: 11, color: "#0D6EFD", fontWeight: 500, display: "flex", alignItems: "center", gap: 4 },
   headerActions: { display: "flex", alignItems: "center", gap: 6 },
@@ -129,7 +148,9 @@ const S = {
 };
 
 export default function ChatBot({ isOpen, onClose }) {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [lang, setLang] = useState("EN");
+  const [messagesEN, setMessagesEN] = useState(INITIAL_MESSAGES_EN);
+  const [messagesTH, setMessagesTH] = useState(INITIAL_MESSAGES_TH);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -137,36 +158,52 @@ export default function ChatBot({ isOpen, onClose }) {
   const messagesEndRef = useRef(null);
   const dragControls = useDragControls();
 
+  const currentMessages = lang === "EN" ? messagesEN : messagesTH;
+  const setCurrentMessages = lang === "EN" ? setMessagesEN : setMessagesTH;
+
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [currentMessages, loading]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [isOpen]);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
     const userText = input.trim();
-    setMessages((prev) => [...prev, { role: "user", content: userText }]);
+    const currentLang = lang;
+    setCurrentMessages((prev) => [...prev, { role: "user", content: userText }]);
     setInput("");
     setLoading(true);
 
     try {
-      const response = await processPortfolioChat(userText);
-      const replyText = response?.reply || "ขออภัยด้วยนะคะ ไม่สามารถประมวลผลคำตอบได้ในขณะนี้";
+      const response = await processPortfolioChat(userText, currentLang);
+      const fallbackErrorMsg = currentLang === "EN" 
+        ? "Sorry, I couldn't process your request right now." 
+        : "ขออภัยด้วยนะคะ ไม่สามารถประมวลผลคำตอบได้ในขณะนี้";
+      const replyText = response?.reply || fallbackErrorMsg;
 
-      setMessages((prev) => [...prev, { role: "assistant", content: replyText }]);
+      setCurrentMessages((prev) => [...prev, { role: "assistant", content: replyText }]);
     } catch (err) {
       console.error("PortfolioChat send error:", err);
-      setMessages((prev) => [
+      const catchErrorMsg = currentLang === "EN"
+        ? "Sorry, an error occurred while processing. Please try again."
+        : "ขออภัยด้วยนะคะ เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้งนะคะ";
+      setCurrentMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "ขออภัยด้วยนะคะ เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้งนะคะ",
+          content: catchErrorMsg,
         },
       ]);
     } finally {
@@ -175,7 +212,11 @@ export default function ChatBot({ isOpen, onClose }) {
   };
 
   const handleResetHistory = () => {
-    setMessages(INITIAL_MESSAGES);
+    if (lang === "EN") {
+      setMessagesEN(INITIAL_MESSAGES_EN);
+    } else {
+      setMessagesTH(INITIAL_MESSAGES_TH);
+    }
   };
 
   const ChatCard = (
@@ -186,26 +227,44 @@ export default function ChatBot({ isOpen, onClose }) {
         style={{ ...S.header, cursor: isMobile ? "default" : "grab" }}
       >
         <div style={S.headerInfo}>
-          <div style={S.botIcon}>
-            <Bot size={20} color="#0D6EFD" />
+          {/* Top Left Language Toggle (Replacing Robot Icon) */}
+          <div style={S.langToggleWrap} onPointerDown={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setLang("EN")}
+              style={S.langBtn(lang === "EN")}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang("TH")}
+              aria-label="Switch to Thai"
+              style={S.langBtn(lang === "TH")}
+            >
+              TH
+            </button>
           </div>
+
           <div>
             <div style={S.botName}>RAG Portfolio Assistant</div>
             <div style={S.botStatus}>
-              <Sparkles size={11} color="#0D6EFD" /> Powered by Gemini 1.5 Flash
+              <Sparkles size={11} color="#0D6EFD" /> {lang === "EN" ? "Powered by OpenRouter" : "ขับเคลื่อนด้วย OpenRouter"}
             </div>
           </div>
         </div>
+
         <div style={S.headerActions}>
           <button
             onClick={handleResetHistory}
             style={S.iconBtn}
-            title="Reset Conversation"
+            title={lang === "EN" ? "Reset Conversation" : "ล้างประวัติการสนทนา"}
+            aria-label="Reset Conversation"
             type="button"
           >
             <RefreshCw size={13} color="#4a6a8a" />
           </button>
-          <button onClick={onClose} style={S.iconBtn} title="Close" type="button">
+          <button onClick={onClose} style={S.iconBtn} title="Close" aria-label="Close ChatBot" type="button">
             <X size={14} color="#4a6a8a" />
           </button>
         </div>
@@ -213,12 +272,12 @@ export default function ChatBot({ isOpen, onClose }) {
 
       {/* Messages Scroll Area */}
       <div style={S.chatArea}>
-        {messages.map((m, i) => (
+        {currentMessages.map((m, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15 }}
             style={{
               display: "flex",
               justifyContent: m.role === "user" ? "flex-end" : "flex-start",
@@ -250,7 +309,7 @@ export default function ChatBot({ isOpen, onClose }) {
         {loading && (
           <div style={S.loadingWrap}>
             <span style={{ fontSize: 11, color: "#0D6EFD", fontWeight: 500, marginRight: 4 }}>
-              กำลังค้นหาข้อมูลและประมวลผล...
+              {lang === "EN" ? "thinking..." : "กำลังคิดคำตอบ..."}
             </span>
             {[0, 1, 2].map((i) => (
               <motion.div
@@ -272,13 +331,14 @@ export default function ChatBot({ isOpen, onClose }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="สอบถามเกี่ยวกับทักษะ, ผลงาน, ประวัติ..."
+            placeholder={lang === "EN" ? "Ask me something..." : "พิมพ์คำถามที่นี่..."}
             maxLength={500}
             style={S.input}
           />
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
+            aria-label="Send message"
             style={{
               ...S.sendBtn,
               background:
@@ -301,28 +361,32 @@ export default function ChatBot({ isOpen, onClose }) {
 
   return (
     <AnimatePresence>
-      {isMobile ? (
-        <div style={S.mobileOverlay}>
+      {isOpen && (
+        isMobile ? (
+          <div style={S.mobileOverlay}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {ChatCard}
+            </motion.div>
+          </div>
+        ) : (
           <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.85, opacity: 0 }}
+            drag
+            dragControls={dragControls}
+            dragMomentum={false}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={S.desktopFloat}
           >
             {ChatCard}
           </motion.div>
-        </div>
-      ) : (
-        <motion.div
-          drag
-          dragControls={dragControls}
-          dragMomentum={false}
-          initial={{ opacity: 0, scale: 0.85, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.85, y: 20 }}
-          style={S.desktopFloat}
-        >
-          {ChatCard}
-        </motion.div>
+        )
       )}
     </AnimatePresence>
   );

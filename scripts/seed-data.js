@@ -67,7 +67,7 @@ function buildDocuments(projects, settings) {
         `Role: ${about.role || ""}`,
         `Intro: ${about.intro || ""}`,
         `Education: ${about.education || ""}`,
-        `GPA: ${about.gpa || ""}`,
+        `GPAX: ${about.gpax || about.gpa || ""}`,
         `Languages: ${Array.isArray(about.languages) ? about.languages.join(", ") : (about.languages || "")}`,
       ].filter((l) => !l.endsWith(": ")).join("\n"),
     });

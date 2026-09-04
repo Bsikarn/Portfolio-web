@@ -23,7 +23,7 @@ export default function ContentForm({
         onClick={() => setIsFormOpen(!isFormOpen)}
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", userSelect: "none", marginBottom: isFormOpen ? 16 : 0, paddingBottom: isFormOpen ? 16 : 0, borderBottom: isFormOpen ? "1px solid #f1f5f9" : "none" }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <h1 style={{ ...styles.pageTitle, margin: 0 }}>
             {isEditing ? `✏️ Edit ${contentType}` : `🛠️ Add New ${contentType}`}
           </h1>
@@ -62,7 +62,6 @@ export default function ContentForm({
                   </>
                 )}
                 <div style={styles.flex1}><label style={styles.labelStyle}>Year</label><input type="text" name="year" value={formData.year} onChange={handleChange} style={styles.inputStyle} /></div>
-                <div style={styles.flex1}><label style={styles.labelStyle}>Icon</label><input type="text" name="image_icon" value={formData.image_icon} onChange={handleChange} style={styles.inputStyle} /></div>
                 {contentType === "Project" && (
                   <div style={styles.flex1}><label style={styles.labelStyle}>Sort Order</label><input type="number" name="sort_order" value={formData.sort_order} onChange={handleChange} style={styles.inputStyle} title="Lower number appears first" /></div>
                 )}
@@ -142,12 +141,12 @@ export default function ContentForm({
               {/* Languages */}
               <div style={styles.sectionStyle}>
                 <h3 style={{ ...styles.sectionHeading, color: "#8b5cf6" }}>📊 Languages Used</h3>
-                <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                  <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", gap: "10px", alignItems: "flex-end", flexWrap: "wrap" }}>
+                  <div style={{ flex: "1 1 200px" }}>
                     <label style={styles.labelStyle}>Languages (Name:Percent:Color, comma-separated)</label>
                     <input type="text" name="languages" value={formData.languages} onChange={handleChange} style={styles.inputStyle} placeholder="JavaScript:80:#f7df1e, HTML:20:#e34c26" />
                   </div>
-                  <button type="button" onClick={handleSyncGithub} disabled={isSyncingGithub} style={{ ...styles.submitBtn, padding: "10px", marginTop: "25px", backgroundColor: isSyncingGithub ? "#ccc" : "#0f172a", whiteSpace: "nowrap" }}>
+                  <button type="button" onClick={handleSyncGithub} disabled={isSyncingGithub} style={{ ...styles.submitBtn, padding: "10px 14px", backgroundColor: isSyncingGithub ? "#ccc" : "#0f172a", whiteSpace: "nowrap" }}>
                     {isSyncingGithub ? "Syncing..." : "🔄 Sync from GitHub"}
                   </button>
                 </div>

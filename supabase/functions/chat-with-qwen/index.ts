@@ -16,6 +16,30 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function cleanAiResponse(text: string): string {
+  if (!text) return "";
+  let cleaned = text;
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "");
+  if (/here'?s\s+a\s+thinking\s+process/i.test(cleaned) || /^thinking\s+process:/i.test(cleaned)) {
+    const thaiMatch = cleaned.match(/([\u0E00-\u0E7F][\s\S]*)$/);
+    if (thaiMatch && thaiMatch[1].trim()) {
+      cleaned = thaiMatch[1].trim();
+    } else {
+      const lines = cleaned.split("\n");
+      const filtered = lines.filter((line) => {
+        const l = line.trim();
+        if (/^here'?s\s+a\s+thinking\s+process/i.test(l)) return false;
+        if (/^\d+\.\s*\*\*/i.test(l)) return false;
+        if (/^-\s*(user|language|context|persona|must|if info)/i.test(l)) return false;
+        return true;
+      });
+      cleaned = filtered.join("\n").trim();
+    }
+  }
+  cleaned = cleaned.replace(/^(user\s*safety|safety\s*status):\s*(safe|ok|passed)\s*/gi, "");
+  return cleaned.trim();
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders, status: 204 });
@@ -83,9 +107,10 @@ Deno.serve(async (req) => {
     // Free models on OpenRouter can be temporarily rate-limited (429).
     // We try each model in order until one succeeds.
     const FREE_MODELS = [
+      "openrouter/free",
+      "google/gemma-4-31b-it:free",
       "google/gemma-4-26b-a4b-it:free",
-      "nvidia/nemotron-3-super-120b-a12b:free",
-      "minimax/minimax-m2.5:free",
+      "meta-llama/llama-3.3-70b-instruct:free",
     ];
 
     const systemPrompt = `You are an AI assistant acting as the personal representative of a Computer Engineering student at KMUTNB.
@@ -97,9 +122,10 @@ IDENTITY:
 - Nickname (English): Beaut
 
 LANGUAGE RULES:
-- Default to English. Reply in English unless the user writes in Thai.
-- When responding in ENGLISH: use "I", refer to yourself as "Beaut" if name is asked, and use the full name "Sikarn Pattarasirimongkol".
-- When responding in THAI: use "หนู", feminine particles (ค่ะ/คะ), and use the full name "ศิริ์กาญจน์ ภัทรสิริมงคล" and nickname "บิ๊วท์". Project names and tool names can remain in English.
+- Detect user's language:
+  - If the user asks in Thai, reply in Thai (use "หนู", feminine polite particles "ค่ะ/คะ", full name "ศิริ์กาญจน์ ภัทรสิริมงคล", nickname "บิ๊วท์").
+  - If the user asks in English, reply in English (use "I", "Beaut", full name "Sikarn Pattarasirimongkol").
+- Exceptions for English: Technical terms, technology names (React, Supabase, Python, etc.), project titles, or proper nouns that look/sound better in English should remain in English.
 
 PERSONALITY RULES:
 - You represent this person directly — say "I built..." / "My project..." not "Beaut's project..."
@@ -143,8 +169,14 @@ ${contextText}`;
       }
 
       const chatData = await chatRes.json();
-      reply = chatData.choices?.[0]?.message?.content ?? null;
-      if (reply) break; // Success — stop trying
+      const rawReply = chatData.choices?.[0]?.message?.content ?? null;
+      if (rawReply) {
+        const cleaned = cleanAiResponse(rawReply);
+        if (cleaned) {
+          reply = cleaned;
+          break; // Success — stop trying
+        }
+      }
     }
 
     if (!reply) throw new Error("All free models are currently unavailable. Please try again later.");

@@ -4,6 +4,14 @@
 export const isSpecialType = (type) =>
   type === "Achievement" || type === "Activity" || type === "Experience";
 
+// Map contentType to Supabase table name
+export const getTableName = (type) => {
+  if (type === "Achievement") return "achievements";
+  if (type === "Activity") return "activities";
+  if (type === "Experience") return "experiences";
+  return "projects";
+};
+
 // Sort comparator for projects by sort_order, then by id desc
 export function sortByOrder(a, b) {
   const orderA = a.sort_order !== undefined && a.sort_order !== null ? a.sort_order : 999;

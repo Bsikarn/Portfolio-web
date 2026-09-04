@@ -9,6 +9,7 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
   const [aboutData, setAboutData] = useState(ABOUT_ME);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [showArrow, setShowArrow] = useState(true);
+  const [isEduHovered, setIsEduHovered] = useState(false);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -45,6 +46,11 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
   const languagesList = Array.isArray(aboutData?.languages)
     ? aboutData.languages
     : (aboutData?.languages || "").split(",").map((s) => s.trim()).filter(Boolean);
+
+  const eduLogos = (aboutData?.education_logo_url || "")
+    .split(",")
+    .map((u) => u.trim())
+    .filter(Boolean);
 
   return (
     <section className="min-h-[calc(100dvh-64px)] flex flex-col items-center justify-center px-[24px] md:px-[48px] pt-[32px] pb-[40px] max-w-[1280px] mx-auto relative z-[1] text-center">
@@ -115,21 +121,59 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
         >
           {/* Education */}
           <div
-            style={{
-              boxShadow: "0 4px 16px rgba(13,110,253,0.03), inset 1px 1px 2px rgba(255,255,255,0.6)"
+            onMouseEnter={() => setIsEduHovered(true)}
+            onMouseLeave={() => setIsEduHovered(false)}
+            onClick={() => {
+              if (aboutData?.education_url) {
+                window.open(aboutData.education_url, "_blank", "noopener,noreferrer");
+              }
             }}
-            className="flex gap-[14px] items-center p-[16px_20px] rounded-[18px] bg-white/70 backdrop-blur-[12px] border border-[#eef3ff]/80 hover:border-[#0D6EFD]/40 hover:bg-white/85 hover:shadow-[0_6px_20px_rgba(13,110,253,0.08)] transition-all select-none"
+            style={{
+              boxShadow: "0 4px 16px rgba(13,110,253,0.03), inset 1px 1px 2px rgba(255,255,255,0.6)",
+              cursor: aboutData?.education_url ? "pointer" : "default"
+            }}
+            className="relative flex gap-[14px] items-center p-[16px_20px] rounded-[18px] bg-white/70 backdrop-blur-[12px] border border-[#eef3ff]/80 hover:border-[#0D6EFD]/40 hover:bg-white/90 hover:shadow-[0_6px_20px_rgba(13,110,253,0.12)] transition-all select-none overflow-hidden group"
           >
-            <div className="w-[44px] h-[44px] rounded-[14px] flex items-center justify-center shrink-0 bg-[#f0f6ff]/90 text-brand-primary shadow-inner">
-              <GraduationCap size={22} />
+            {/* Always render Education Text in the flow to establish natural box height */}
+            <div className={`flex gap-[14px] items-center w-full transition-opacity duration-200 ${isEduHovered && eduLogos.length > 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+              <div className="w-[44px] h-[44px] rounded-[14px] flex items-center justify-center shrink-0 bg-[#f0f6ff]/90 text-brand-primary shadow-inner">
+                <GraduationCap size={22} />
+              </div>
+              <div>
+                <div className="font-sans font-bold text-[13px] text-[#0d1b2a]">Education</div>
+                <div className="font-sans text-[12px] text-[#475569] font-medium mt-[2px] leading-tight">{aboutData?.education}</div>
+              </div>
             </div>
-            <div>
-              <div className="font-sans font-bold text-[13px] text-[#0d1b2a]">Education</div>
-              <div className="font-sans text-[12px] text-[#475569] font-medium mt-[2px] leading-tight">{aboutData?.education}</div>
-            </div>
+
+            {/* Overlay logos when hovered */}
+            <AnimatePresence>
+              {isEduHovered && eduLogos.length > 0 && (
+                <motion.div
+                  key="logo-overlay"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute inset-0 z-10 flex items-center justify-center gap-[8px] p-[6px_14px] bg-white/95 backdrop-blur-[12px] rounded-[18px] overflow-hidden"
+                >
+                  {eduLogos.map((url, idx) => {
+                    const maxWClass = eduLogos.length === 1 ? "max-w-[85%]" : eduLogos.length === 2 ? "max-w-[44%]" : "max-w-[28%]";
+                    return (
+                      <img
+                        key={idx}
+                        src={getTransformedUrl(url, { height: 200 })}
+                        alt={`Education Logo ${idx + 1}`}
+                        onError={(e) => { e.target.src = url; }}
+                        className={`max-h-[88%] ${maxWClass} w-auto object-contain shrink min-w-0 drop-shadow-sm`}
+                      />
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* GPA */}
+          {/* GPAX */}
           <div
             style={{
               boxShadow: "0 4px 16px rgba(13,110,253,0.03), inset 1px 1px 2px rgba(255,255,255,0.6)"
@@ -140,8 +184,8 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
               <Award size={22} />
             </div>
             <div>
-              <div className="font-sans font-bold text-[13px] text-[#0d1b2a]">GPA</div>
-              <div className="font-sans font-bold text-[14px] text-[#0d1b2a] mt-[2px]">{aboutData?.gpa}</div>
+              <div className="font-sans font-bold text-[13px] text-[#0d1b2a]">GPAX</div>
+              <div className="font-sans font-bold text-[14px] text-[#0d1b2a] mt-[2px]">{aboutData?.gpax || aboutData?.gpa}</div>
             </div>
           </div>
 

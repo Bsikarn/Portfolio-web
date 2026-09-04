@@ -64,6 +64,7 @@ export default function ContactPopup({ isOpen, onClose }) {
           </h3>
           <button
             onClick={onClose}
+            aria-label="Close modal"
             className="w-[32px] h-[32px] rounded-full bg-[#f0f6ff] hover:bg-[#e0eeff] flex items-center justify-center border-none text-[#4a6a8a] hover:text-brand-primary cursor-pointer transition-colors"
           >
             <X size={16} />

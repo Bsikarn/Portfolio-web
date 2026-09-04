@@ -1,9 +1,19 @@
 export const styles = {
     pageContainer: { paddingTop: 64, minHeight: "100vh", position: "relative" },
     filterContainer: { padding: "24px 48px 16px", display: "flex", flexWrap: "wrap", gap: 10, maxWidth: 1440, margin: "0 auto", alignItems: "center" },
-    searchBarWrap: { flex: "1 1 min-content", minWidth: 200, position: "relative", display: "flex", alignItems: "center" },
-    searchIcon: { position: "absolute", left: 16, color: "#8aabcc" },
-    searchInput: { width: "100%", padding: "10px 16px 10px 44px", borderRadius: 50, border: "1px solid rgba(226, 232, 240, 0.8)", fontFamily: "'Poppins',sans-serif", fontSize: 14, outline: "none", transition: "all 0.2s", background: "rgba(255,255,255,0.95)", color: "#0d1b2a", boxShadow: "inset 3px 3px 8px rgba(13,110,253,0.06), inset -3px -3px 8px rgba(255,255,255,0.9)" },
+    searchBarWrap: { 
+      height: 42, 
+      borderRadius: 50, 
+      position: "relative", 
+      display: "flex", 
+      alignItems: "center",
+      background: "rgba(255,255,255,0.95)",
+      boxShadow: "4px 6px 14px rgba(13,110,253,0.06), -3px -3px 8px rgba(255,255,255,0.9)",
+      border: "1px solid rgba(226, 232, 240, 0.8)",
+      boxSizing: "border-box"
+    },
+    searchIcon: { color: "#0D6EFD", flexShrink: 0 },
+    searchInput: { width: "100%", height: "100%", padding: "0 36px 0 40px", borderRadius: 50, border: "none", fontFamily: "'Poppins',sans-serif", fontSize: 14, outline: "none", background: "transparent", color: "#0d1b2a", boxSizing: "border-box" },
     filterTab: { padding: "8px 20px", borderRadius: 50, border: "none", cursor: "pointer", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 13, transition: "all 0.2s" },
     mainContentWrapper: { maxWidth: 1440, margin: "0 auto", paddingBottom: 80, width: "100%", overflow: "hidden" },
     selectionSection: { padding: "0 24px", marginBottom: 32 },

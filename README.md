@@ -35,15 +35,17 @@ A personal portfolio website for Sikarn Pattarasirimongkol, a Full-Stack Develop
 - **Sticky Hero Layout** — Hero stays sticky while content scrolls beneath with blur mask gradient
 - **Achievements & Activities** — Card list with certificate/photo lightbox; hidden items accessible via "more" popup
 - **Technologies & Tools** — Manual skill badges grouped by Languages / Technologies / Tools
-- **Projects Page** — Category filter bar, search, drag-scroll selector, full detail card with gallery, award, video, language bar
-- **Experiences Page** — Timeline-style list with photo lightbox
-- **Admin Panel** — CRUD for all content types (Project, Achievement, Activity, Experience), Settings, Category Manager, batch save
+- **Projects Page** — Expandable search box (hides category filters when active), filter unselect support, drag-scroll selector, full detail card with gallery, award, video, language bar; deep-link via `localStorage.targetProjectId` to auto-select a specific project on page load
+- **Fluid Typography** — Responsive font scaling across all devices using `clamp()` based on PC 1440px reference width with minimum limits
+- **Navbar Interactions** — Glassmorphism bar with single click (Home) and double click (Admin) logo navigation; mobile capsule menu with blur gradient backdrop
+- **Experiences Page** — Timeline-style list fetched directly from dedicated `experiences` table
+- **Admin Panel** — CRUD across separated tables (`projects`, `achievements`, `activities`, `experiences`), Settings, Category Manager, batch save
 - **Sorting** — Projects ordered by `sort_order` DB column; Admin has order input + ▲▼ move buttons
 - **ChatBot** — RAG AI assistant (Gemini 1.5 Flash) draggable on desktop, modal on mobile
 - **Realtime Stats** — Live view/cheer counts via Supabase Realtime subscription
 - **Skeleton Loaders** — Shimmer placeholders for all data-loading states
 - **Scroll Progress Bar** — Gradient progress bar at bottom with section tick marks
-- **Mobile Hamburger Menu** — Capsule pill buttons, right-aligned, with blur gradient backdrop
+- **Cute Spoon Cursor** — Custom CSS spoon cursor 🥄; rotates 35° when hovering clickable elements
 - **Back-to-Top Button** — Floating button appears after 300px scroll
 
 ---
@@ -93,8 +95,9 @@ portfolio-web/
 │   │   ├── LoginPage.jsx        # Admin login page
 │   │   └── ProjectsPage.jsx     # Projects selector + detail view page
 │   └── styles/
-│       ├── AdminPage.styles.js  # Inline style object map for AdminPage components
-│       └── ProjectsPage.styles.js  # Inline style object map for ProjectsPage components
+│       ├── AdminPage.styles.js   # Inline style object map for AdminPage components
+│       ├── LoginPage.styles.js   # Inline style object map for LoginPage components
+│       └── ProjectsPage.styles.js # Inline style object map for ProjectsPage components
 ├── supabase/                   # ⚠️ DO NOT TOUCH — Supabase migration files
 ├── tests/
 │   └── portfolio.spec.js       # Playwright E2E tests

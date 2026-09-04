@@ -26,7 +26,9 @@ function flattenSettings(data) {
 function buildPayload(s) {
   return {
     about_me: {
-      name: s.name, role: s.role, intro: s.intro, gpa: s.gpa, education: s.education,
+      name: s.name, role: s.role, intro: s.intro, gpa: s.gpax || s.gpa, gpax: s.gpax || s.gpa, education: s.education,
+      education_logo_url: s.education_logo_url || "",
+      education_url: s.education_url || "",
       image_url: s.image_url || "",
       languages: s.languages ? s.languages.split(",").map((l) => l.trim()).filter(Boolean) : [],
       coding_languages: s.coding_languages ? s.coding_languages.split(",").map((l) => l.trim()).filter(Boolean) : [],
@@ -42,7 +44,7 @@ function buildPayload(s) {
 }
 
 const INITIAL_SETTINGS = {
-  name: "", role: "", intro: "", gpa: "", education: "", languages: "", coding_languages: "", technologies: "", tools: "", image_url: "",
+  name: "", role: "", intro: "", gpa: "", gpax: "", education: "", education_logo_url: "", education_url: "", languages: "", coding_languages: "", technologies: "", tools: "", image_url: "",
   email: "", github_handle: "", github_url: "", linkedin_handle: "", linkedin_url: "", resume_url: "", cv_url: "", portfolio_url: "",
 };
 
@@ -100,7 +102,11 @@ export default function SettingsPanel() {
               </div>
               <Field label="Education" name="education" />
               <div style={styles.flexRow}>
-                <div style={styles.flex1}><Field label="GPA" name="gpa" /></div>
+                <div style={styles.flex1}><Field label="Education Institution Logo URL (Supabase Storage)" name="education_logo_url" type="url" placeholder="https://..." /></div>
+                <div style={styles.flex1}><Field label="Education Institution Website Link" name="education_url" type="url" placeholder="https://..." /></div>
+              </div>
+              <div style={styles.flexRow}>
+                <div style={styles.flex1}><Field label="GPAX" name="gpa" /></div>
                 <div style={styles.flex1}><Field label="Spoken Languages (About Me Card)" name="languages" placeholder="Thai (Native), English (Professional)" /></div>
               </div>
               <Field label="Profile Image URL" name="image_url" type="url" placeholder="https://..." />

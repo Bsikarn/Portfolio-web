@@ -6,6 +6,7 @@ import { useBackgroundBlur } from "./context/BackgroundBlurContext";
 import FallingEmoji from "./components/FallingEmoji";
 import MeshGradientBackground from "./components/MeshGradientBackground";
 import RainbowSprinkles from "./components/RainbowSprinkles";
+import SpoonCursor from "./components/SpoonCursor";
 import { EMOJIS } from "./data/constants";
 import { ChevronsUp } from "lucide-react";
 
@@ -129,6 +130,9 @@ export default function App() {
 
   return (
     <>
+      {/* Interactive Cute Spoon Cursor */}
+      <SpoonCursor />
+
       {/* Global Background Container containing Mesh Gradient and 3D Scene */}
       <div
         id="global-background-container"
@@ -213,14 +217,10 @@ export default function App() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Render AI Chatbot overlay if chat is open */}
-      <AnimatePresence>
-        {chatOpen ? (
-          <Suspense fallback={null}>
-            <ChatBot isOpen={chatOpen} onClose={() => setChatOpen(false)} />
-          </Suspense>
-        ) : null}
-      </AnimatePresence>
+      {/* Render AI Chatbot overlay (Keeps in-session chat history when toggled) */}
+      <Suspense fallback={null}>
+        <ChatBot isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+      </Suspense>
 
       {/* Render Contact Popup Modal */}
       <AnimatePresence>

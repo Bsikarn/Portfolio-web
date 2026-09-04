@@ -26,7 +26,7 @@ export function HomeSkeleton() {
         {/* Intro Box */}
         <SkeletonBox className="w-full max-w-[720px] h-[90px] rounded-[20px]" />
 
-        {/* 3 About Me Cards (Education, GPA, Languages) */}
+        {/* 3 About Me Cards (Education, GPAX, Languages) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px] w-full mt-[8px]">
           <SkeletonBox className="h-[76px] rounded-[18px]" />
           <SkeletonBox className="h-[76px] rounded-[18px]" />

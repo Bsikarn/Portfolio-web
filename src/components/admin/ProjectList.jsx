@@ -49,35 +49,32 @@ export default function ProjectList({
                   background: (project.is_hidden && (contentType === "Achievement" || contentType === "Activity")) ? "#fffbf5" : "#ffffff",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ ...styles.projectIcon, background: "linear-gradient(135deg,#f0f6ff,#e0f2fe)", borderRadius: "12px", padding: "8px", width: "40px", height: "40px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    {project.image_icon}
-                  </div>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 220px", minWidth: 0 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                       <div style={styles.projectTitleText}>{project.title}</div>
-                      {project.award && <span style={{ fontSize: "12px", background: "#fef08a", color: "#854d0e", padding: "2px 6px", borderRadius: "12px" }}>🏆 Award</span>}
-                      {project.is_recommended && <span style={{ fontSize: "12px", background: "#ccfbf1", color: "#0f766e", padding: "2px 6px", borderRadius: "12px" }}>⭐ Recommend</span>}
-                      {project.is_hidden && (contentType === "Achievement" || contentType === "Activity") && <span style={{ fontSize: "12px", background: "#ffedd5", color: "#c2410c", padding: "2px 6px", borderRadius: "12px", fontWeight: "bold" }}>👁️ Hidden</span>}
+                      {project.award && <span style={{ fontSize: "11px", background: "#fef08a", color: "#854d0e", padding: "2px 6px", borderRadius: "12px", whiteSpace: "nowrap" }}>🏆 Award</span>}
+                      {project.is_recommended && <span style={{ fontSize: "11px", background: "#ccfbf1", color: "#0f766e", padding: "2px 6px", borderRadius: "12px", whiteSpace: "nowrap" }}>⭐ Recommend</span>}
+                      {project.is_hidden && (contentType === "Achievement" || contentType === "Activity") && <span style={{ fontSize: "11px", background: "#ffedd5", color: "#c2410c", padding: "2px 6px", borderRadius: "12px", fontWeight: "bold", whiteSpace: "nowrap" }}>👁️ Hidden</span>}
                     </div>
                     <div style={styles.projectCategoryText}>{project.category} {project.year ? `(${project.year})` : ""}</div>
                   </div>
                 </div>
 
                 {/* Action Controls */}
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginLeft: "auto" }}>
                   {contentType === "Project" && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "#f8fafc", padding: "4px 8px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                      <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>Order:</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "#f8fafc", padding: "4px 6px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                      <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>Order:</span>
                       <input
                         type="number"
                         value={project.sort_order || 0}
                         onChange={(e) => handleProjectOrderChange(project.id, e.target.value)}
-                        style={{ width: "50px", padding: "2px 4px", border: "1px solid #cbd5e1", borderRadius: "4px", fontSize: "13px", fontWeight: "bold", textAlign: "center" }}
+                        style={{ width: "42px", padding: "2px 4px", border: "1px solid #cbd5e1", borderRadius: "4px", fontSize: "12px", fontWeight: "bold", textAlign: "center" }}
                         title="Display Order (Lower appears first)"
                       />
-                      <button type="button" onClick={() => handleMoveProject(project.id, "up")} style={{ padding: "2px 6px", background: "#eef3ff", border: "1px solid #d0e8ff", color: "#0D6EFD", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }} title="Move Up">▲</button>
-                      <button type="button" onClick={() => handleMoveProject(project.id, "down")} style={{ padding: "2px 6px", background: "#eef3ff", border: "1px solid #d0e8ff", color: "#0D6EFD", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }} title="Move Down">▼</button>
+                      <button type="button" onClick={() => handleMoveProject(project.id, "up")} style={{ padding: "2px 5px", background: "#eef3ff", border: "1px solid #d0e8ff", color: "#0D6EFD", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }} title="Move Up">▲</button>
+                      <button type="button" onClick={() => handleMoveProject(project.id, "down")} style={{ padding: "2px 5px", background: "#eef3ff", border: "1px solid #d0e8ff", color: "#0D6EFD", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }} title="Move Down">▼</button>
                     </div>
                   )}
                   {(contentType === "Achievement" || contentType === "Activity") && (

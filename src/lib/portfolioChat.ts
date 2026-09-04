@@ -66,14 +66,43 @@ async function getQueryEmbedding(query: string, apiKey: string): Promise<number[
   throw new Error("Gemini Embedding API unavailable or rate-limited.");
 }
 
+export function cleanAiResponse(text: string): string {
+  if (!text) return "";
+  let cleaned = text;
+
+  // 1. Remove <think>...</think> tags and contents
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "");
+
+  // 2. Remove "Here's a thinking process:" / Chain of thought preamble
+  if (/here'?s\s+a\s+thinking\s+process/i.test(cleaned) || /^thinking\s+process:/i.test(cleaned)) {
+    const thaiMatch = cleaned.match(/([\u0E00-\u0E7F][\s\S]*)$/);
+    if (thaiMatch && thaiMatch[1].trim()) {
+      cleaned = thaiMatch[1].trim();
+    } else {
+      const lines = cleaned.split("\n");
+      const filtered = lines.filter((line) => {
+        const l = line.trim();
+        if (/^here'?s\s+a\s+thinking\s+process/i.test(l)) return false;
+        if (/^\d+\.\s*\*\*/i.test(l)) return false;
+        if (/^-\s*(user|language|context|persona|must|if info)/i.test(l)) return false;
+        return true;
+      });
+      cleaned = filtered.join("\n").trim();
+    }
+  }
+
+  // 3. Remove User Safety / Safety Status prefixes
+  cleaned = cleaned.replace(/^(user\s*safety|safety\s*status):\s*(safe|ok|passed)\s*/gi, "");
+
+  return cleaned.trim();
+}
+
 async function generateWithOpenRouter(systemPrompt: string, userQuery: string, apiKey: string): Promise<string> {
   const freeModels = [
     "openrouter/free",
     "google/gemma-4-31b-it:free",
     "google/gemma-4-26b-a4b-it:free",
-    "inclusionai/ling-3.0-flash-fin:free",
-    "z-ai/glm-5.2:free",
-    "minimax/minimax-m3:free"
+    "meta-llama/llama-3.3-70b-instruct:free",
   ];
 
   for (const modelName of freeModels) {
@@ -102,7 +131,10 @@ async function generateWithOpenRouter(systemPrompt: string, userQuery: string, a
       const data = await res.json();
       const choice = data?.choices?.[0]?.message?.content;
       if (choice && choice.trim()) {
-        return choice.trim();
+        const cleaned = cleanAiResponse(choice);
+        if (cleaned) {
+          return cleaned;
+        }
       }
     } catch {
       // Try next free model
@@ -133,15 +165,19 @@ export interface ProcessChatResponse {
   sources?: { file_name: string; header_path: string; similarity: number }[];
 }
 
-export async function processPortfolioChat(userQuery: string): Promise<ProcessChatResponse> {
+export const FALLBACK_MESSAGE_TH = `ขออภัยด้วยนะคะ ในส่วนนี้หนูยังไม่มีข้อมูลเชิงลึก สามารถติดต่อสอบถามคุณ ${OWNER_NAME} โดยตรงได้ที่ ${OWNER_EMAIL} ได้เลยค่ะ`;
+export const FALLBACK_MESSAGE_EN = `I'm sorry, I don't have detailed information on this topic yet. Feel free to contact ${OWNER_NAME} directly at ${OWNER_EMAIL}!`;
+
+export async function processPortfolioChat(userQuery: string, lang: "EN" | "TH" = "EN"): Promise<ProcessChatResponse> {
+  const fallbackMsg = lang === "TH" ? FALLBACK_MESSAGE_TH : FALLBACK_MESSAGE_EN;
   const sanitized = sanitizeQuery(userQuery);
   if (!sanitized) {
-    return { reply: "กรุณาระบุคำถามที่ต้องการสอบถามหนูได้เลยนะคะ" };
+    return { reply: lang === "TH" ? "กรุณาระบุคำถามที่ต้องการสอบถามหนูได้เลยนะคะ" : "Please enter a question you'd like to ask!" };
   }
 
   if (!SUPABASE_URL) {
     console.error("Missing SUPABASE_URL configuration.");
-    return { reply: FALLBACK_MESSAGE };
+    return { reply: fallbackMsg };
   }
 
   let contextBlocks: string[] = [];
@@ -187,20 +223,28 @@ export async function processPortfolioChat(userQuery: string): Promise<ProcessCh
   }
 
   if (contextBlocks.length === 0) {
-    return { reply: FALLBACK_MESSAGE };
+    return { reply: fallbackMsg };
   }
 
   const contextText = contextBlocks.join("\n\n---\n\n");
 
-  const systemPrompt = `คุณคือผู้ช่วย AI สาวสุดน่ารัก สุภาพ เป็นกันเอง ประจำ Portfolio ของคุณ ${OWNER_NAME}
-จงตอบคำถามผู้ใช้โดยอ้างอิงเฉพาะจากบริบท (Context) ที่กำหนดให้ด้านล่างนี้เท่านั้น
+  const langInstruction = lang === "TH"
+    ? `กฎการใช้ภาษา (LANGUAGE RULES):
+1. ผู้ใช้เลือกระบบภาษาไทย: ให้ตอบกลับเป็นภาษาไทย (ใช้สรรพนามแทนตัวเองว่า "หนู" และลงท้ายประโยคด้วย "คะ" หรือ "ค่ะ", ชื่อเต็ม "ศิริ์กาญจน์ ภัทรสิริมงคล", ชื่อเล่น "บิ๊วท์")
+2. ข้อยกเว้น: ศัพท์เทคนิค, ชื่อเทคโนโลยี (React, Supabase, Python, ฯลฯ), ชื่อผลงาน (Project Titles) ให้คงไว้เป็นภาษาอังกฤษตามต้นฉบับ`
+    : `LANGUAGE RULES:
+1. User selected ENGLISH mode: Respond strictly in English. Use "I" or "Beaut" to refer to yourself, and full name "Sikarn Pattarasirimongkol".
+2. Technical terms, technology names (React, Supabase, Python, etc.), and project titles should remain in English.`;
 
-ข้อบังคับสำคัญที่ต้องปฏิบัติตามอย่างเคร่งครัด:
-1. ตอบเป็นภาษาไทยด้วยน้ำเสียงน่ารัก สุภาพ เป็นกันเอง และเป็นมืออาชีพ
-2. ใช้สรรพนามแทนตัวเองว่า "หนู" เสมอ และลงท้ายประโยคด้วยคำว่า "คะ" หรือ "ค่ะ" อย่างถูกต้องตามหลักภาษาไทยเสมอ
-3. ตอบเฉพาะข้อมูลที่มีระบุไว้ในบริบท (Context) เท่านั้น ห้ามเดาหรือสร้างข้อมูลที่ไม่ปรากฏในบริบทโดยเด็ดขาด
-4. หากบริบทที่ให้ไว้ไม่มีข้อมูลเพียงพอที่จะตอบคำถาม ให้ตอบด้วยข้อความต่อไปนี้ทันทีโดยไม่ต้องเพิ่มคำอื่น:
-"${FALLBACK_MESSAGE}"
+  const systemPrompt = `You are an AI assistant acting as the personal representative of ${OWNER_NAME}.
+Answer the user's question referencing ONLY the context below.
+
+${langInstruction}
+
+MANDATORY RULES:
+1. Answer ONLY using information from the context. Do not invent or guess information.
+2. If context lacks sufficient information, reply EXACTLY with: "${fallbackMsg}"
+3. DO NOT output your internal thinking process (<think> / reasoning). Provide ONLY the final conversational response.
 
 Context:
 ${contextText}`;
@@ -224,6 +268,6 @@ ${contextText}`;
   }
 
   return {
-    reply: responseText || FALLBACK_MESSAGE,
+    reply: responseText || fallbackMsg,
   };
 }

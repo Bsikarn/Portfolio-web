@@ -6,11 +6,11 @@ import SettingsPanel from "../components/admin/SettingsPanel";
 import CategoryManager from "../components/admin/CategoryManager";
 import ContentForm from "../components/admin/ContentForm";
 import ProjectList from "../components/admin/ProjectList";
-import { isSpecialType, sortByOrder, filterByContentType, parseLanguages } from "../lib/adminHelpers";
+import { isSpecialType, sortByOrder, filterByContentType, parseLanguages, getTableName } from "../lib/adminHelpers";
 
 // Default form state for a new project
 const INITIAL_FORM = {
-  title: "", category: "Frontend", category2: "", description: "", image_icon: "💻", year: "2026",
+  title: "", category: "Frontend", category2: "", description: "", year: "2026",
   link_url: "", github_url: "", tags: "", tools: "", features: "",
   my_role: "", problem: "", solution: "", results_impact: "", key_learnings: "",
   languages: "", video_url: "", gallery_urls: "", certificate_url: "", activity_url: "",
@@ -35,7 +35,6 @@ function projectToForm(project) {
     category: cats[0] || "Frontend",
     category2: cats[1] || "",
     description: project.description || "",
-    image_icon: project.image_icon || "💻",
     year: project.year || "",
     link_url: project.link_url || "",
     github_url: project.github_url || "",
@@ -78,7 +77,6 @@ function buildPayload(formData, contentType) {
     title: formData.title,
     category: isSpecialType(contentType) ? contentType : selectedCats.join(", "),
     description: formData.description,
-    image_icon: formData.image_icon,
     year: formData.year,
     link_url: formData.link_url,
     github_url: formData.github_url,
@@ -117,7 +115,6 @@ export default function AdminPage({ setPage }) {
   const [categoriesList, setCategoriesList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncingGithub, setIsSyncingGithub] = useState(false);
-
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [contentType, setContentType] = useState("Project");
@@ -133,19 +130,48 @@ export default function AdminPage({ setPage }) {
 
   const fetchProjects = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase.from("projects").select("*");
-    if (data) {
-      const mapped = data.map((p) => ({
+    try {
+      const [pRes, achRes, actRes, expRes] = await Promise.all([
+        supabase.from("projects").select("*"),
+        supabase.from("achievements").select("*"),
+        supabase.from("activities").select("*"),
+        supabase.from("experiences").select("*"),
+      ]);
+
+      const parseSortOrder = (p) => {
+        if (Array.isArray(p.tags)) {
+          const orderTag = p.tags.find((t) => typeof t === "string" && t.startsWith("__order:"));
+          if (orderTag) {
+            const match = orderTag.match(/__order:(\d+)__/);
+            if (match) return Number(match[1]);
+          }
+        }
+        if (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
+          return Number(p.sort_order);
+        }
+        return 0;
+      };
+
+      const processRows = (rows, defaultCategory) => (rows || []).map((p) => ({
         ...p,
-        sort_order: (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order)))
-          ? Number(p.sort_order)
-          : 0,
+        category: p.category || defaultCategory,
+        sort_order: parseSortOrder(p),
         is_hidden: p.is_hidden === true || (Array.isArray(p.tags) && p.tags.includes("__hidden__")),
       }));
-      setProjectsList(mapped.sort(sortByOrder));
+
+      const allItems = [
+        ...processRows(pRes.data, "Frontend"),
+        ...processRows(achRes.data, "Achievement"),
+        ...processRows(actRes.data, "Activity"),
+        ...processRows(expRes.data, "Experience"),
+      ];
+
+      setProjectsList(allItems.sort(sortByOrder));
+    } catch (err) {
+      console.error("Error fetching content items:", err);
+    } finally {
+      setIsLoading(false);
     }
-    if (error) console.error("Error fetching projects:", error);
-    setIsLoading(false);
   };
 
   const fetchCategories = async () => {
@@ -153,7 +179,6 @@ export default function AdminPage({ setPage }) {
     if (data) {
       const sorted = [...data].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
       setCategoriesList(sorted);
-      // Set default category to first available if not yet changed
       if (sorted.length > 0 && formData.category === "Frontend") {
         setFormData((prev) => ({ ...prev, category: sorted[0].name }));
       }
@@ -227,16 +252,30 @@ export default function AdminPage({ setPage }) {
     try {
       const promises = [];
 
-      // Save modified projects
       for (const id of pendingProjectIds) {
         const targetProject = projectsList.find((p) => p.id === id);
         if (!targetProject) continue;
         const pCategory = isSpecialType(targetProject.category) ? targetProject.category : "Project";
+        const tableName = getTableName(pCategory);
         const payload = buildPayload(projectToForm(targetProject), pCategory);
-        promises.push(supabase.rpc("admin_update_project", { p_id: id, payload }));
+
+        const updateOp = supabase
+          .from(tableName)
+          .update(payload)
+          .eq("id", id)
+          .then(async ({ error }) => {
+            if (error) {
+              if (tableName === "projects") {
+                const { error: rpcErr } = await supabase.rpc("admin_update_project", { p_id: id, payload });
+                if (rpcErr) throw rpcErr;
+              } else {
+                throw error;
+              }
+            }
+          });
+        promises.push(updateOp);
       }
 
-      // Save category actions
       for (const action of pendingCategoryActions) {
         if (action.type === "add") {
           promises.push(supabase.rpc("admin_insert_category", { p_name: action.name }));
@@ -262,7 +301,6 @@ export default function AdminPage({ setPage }) {
     }
   };
 
-  // Generic form field change handler
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
@@ -273,7 +311,6 @@ export default function AdminPage({ setPage }) {
     setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  // Sync language usage from GitHub API
   const handleSyncGithub = async () => {
     if (!formData.github_url) return alert("Please enter a GitHub URL first.");
     const match = formData.github_url.match(/github\.com\/([^/]+)\/([^/]+)/);
@@ -298,18 +335,29 @@ export default function AdminPage({ setPage }) {
     }
   };
 
-  // Submit form (insert or update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = buildPayload(formData, contentType);
+    const tableName = getTableName(contentType);
+
     if (isEditing) {
-      const { error } = await supabase.rpc("admin_update_project", { p_id: editId, payload });
-      if (error) return alert("Error updating project: " + error.message);
-      alert("Project updated successfully!");
+      const { error } = await supabase.from(tableName).update(payload).eq("id", editId);
+      if (error && tableName === "projects") {
+        const { error: rpcErr } = await supabase.rpc("admin_update_project", { p_id: editId, payload });
+        if (rpcErr) return alert("Error updating project: " + rpcErr.message);
+      } else if (error) {
+        return alert(`Error updating ${contentType.toLowerCase()}: ` + error.message);
+      }
+      alert(`${contentType} updated successfully!`);
     } else {
-      const { error } = await supabase.rpc("admin_insert_project", { payload });
-      if (error) return alert("Error adding project: " + error.message);
-      alert("Project added successfully!");
+      const { error } = await supabase.from(tableName).insert(payload);
+      if (error && tableName === "projects") {
+        const { error: rpcErr } = await supabase.rpc("admin_insert_project", { payload });
+        if (rpcErr) return alert("Error adding project: " + rpcErr.message);
+      } else if (error) {
+        return alert(`Error adding ${contentType.toLowerCase()}: ` + error.message);
+      }
+      alert(`${contentType} added successfully!`);
     }
     resetForm();
     fetchProjects();
@@ -326,8 +374,20 @@ export default function AdminPage({ setPage }) {
 
   const handleDelete = async (id, title) => {
     if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
-    const { error } = await supabase.rpc("admin_delete_project", { p_id: id });
-    if (error) return alert("Error deleting project: " + error.message);
+    const targetItem = projectsList.find((p) => p.id === id);
+    const categoryToUse = targetItem?.category || contentType;
+    const tableName = getTableName(categoryToUse);
+
+    if (tableName === "projects") {
+      const { error } = await supabase.rpc("admin_delete_project", { p_id: id });
+      if (error) {
+        const { error: directErr } = await supabase.from("projects").delete().eq("id", id);
+        if (directErr) return alert("Error deleting project: " + directErr.message);
+      }
+    } else {
+      const { error } = await supabase.from(tableName).delete().eq("id", id);
+      if (error) return alert("Error deleting item: " + error.message);
+    }
     alert(`"${title}" deleted successfully!`);
     fetchProjects();
   };
@@ -339,7 +399,7 @@ export default function AdminPage({ setPage }) {
     setContentType("Project");
   };
 
-  const hasPendingChanges = pendingProjectIds.size > 0 || pendingCategoryActions.length > 0;
+  const hasPendingChanges = pendingProjectIds.size > 0 || pendingCategoryActions.length > 0;0;
 
   return (
     <div style={styles.pageContainer}>
@@ -347,7 +407,7 @@ export default function AdminPage({ setPage }) {
 
       <div style={{ maxWidth: 920, margin: "0 auto 20px" }}>
         {/* Top Header Row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <div>
             <h1 style={{ fontSize: "24px", fontWeight: "800", color: "#0f172a", margin: 0 }}>⚙️ Admin Panel</h1>
             <p style={{ fontSize: "14px", color: "#64748b", margin: "4px 0 0 0" }}>Manage projects, content categories, and site settings</p>
@@ -361,13 +421,13 @@ export default function AdminPage({ setPage }) {
         </div>
 
         {/* Main Navigation Tabs */}
-        <div style={{ display: "flex", gap: "8px", background: "#ffffff", padding: "6px", borderRadius: "14px", border: "1px solid #e2e8f0", marginBottom: "24px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", background: "#ffffff", padding: "6px", borderRadius: "14px", border: "1px solid #e2e8f0", marginBottom: "24px" }}>
           {["Content", "Settings"].map((tab) => (
             <button
               key={tab}
               onClick={() => setAdminTab(tab)}
               style={{
-                flex: 1, padding: "12px 20px", borderRadius: "10px", fontWeight: "700", fontSize: "14px",
+                flex: "1 1 140px", padding: "12px 16px", borderRadius: "10px", fontWeight: "700", fontSize: "14px",
                 cursor: "pointer", border: "none",
                 background: adminTab === tab ? "#0D6EFD" : "transparent",
                 color: adminTab === tab ? "#ffffff" : "#64748b",
@@ -384,14 +444,14 @@ export default function AdminPage({ setPage }) {
         <>
           <div style={{ maxWidth: 920, margin: "0 auto 40px" }}>
             {/* Global Content Type Selector Bar */}
-            <div style={{ display: "flex", gap: "8px", marginBottom: "20px", background: "#ffffff", padding: "6px", borderRadius: "14px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px", background: "#ffffff", padding: "6px", borderRadius: "14px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)" }}>
               {["Project", "Achievement", "Activity", "Experience"].map((type) => (
                 <button
                   key={type}
                   type="button"
                   onClick={() => setContentType(type)}
                   style={{
-                    flex: 1, padding: "12px 16px", borderRadius: "10px", fontWeight: "700", fontSize: "14px",
+                    flex: "1 1 40%", minWidth: "120px", padding: "10px 12px", borderRadius: "10px", fontWeight: "700", fontSize: "13px",
                     cursor: "pointer", border: "none",
                     background: contentType === type ? "#0D6EFD" : "transparent",
                     color: contentType === type ? "#ffffff" : "#475569",

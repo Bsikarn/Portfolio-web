@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Menu, X } from "lucide-react";
 
 export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen, setContactOpen }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [menuOpen, setMenuOpen] = useState(false);
+  const clickTimerRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -22,6 +23,19 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
     } else {
       setPage(p);
       setMenuOpen(false);
+    }
+  };
+
+  const handleLogoClick = () => {
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+      handleNavClick("Admin");
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickTimerRef.current = null;
+        handleNavClick("Home");
+      }, 250);
     }
   };
 
@@ -45,9 +59,9 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
         {/* Center Section: Logo */}
         <div className="flex items-center justify-center flex-1">
           <div
-            className="cursor-pointer font-sans font-extrabold text-[22px] bg-gradient-to-br from-brand-primary to-brand-secondary bg-clip-text text-transparent tracking-[-0.5px]"
-            onDoubleClick={() => handleNavClick("Admin")}
-            title="Beaut.Portfolio"
+            className="cursor-pointer font-sans font-extrabold text-[22px] bg-gradient-to-br from-brand-primary to-brand-secondary bg-clip-text text-transparent tracking-[-0.5px] select-none"
+            onClick={handleLogoClick}
+            title="Click once for Home, double click for Admin"
           >
             Beaut.Portfolio
           </div>
@@ -94,6 +108,7 @@ export default function Navbar({ page, setPage, onCheerUp, chatOpen, setChatOpen
           {isMobile && (
             <button
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle navigation menu"
               className="bg-transparent border-none cursor-pointer ml-[12px] text-brand-primary flex justify-center items-center w-[32px] h-[32px]"
             >
               <div className="relative w-[24px] h-[24px]">

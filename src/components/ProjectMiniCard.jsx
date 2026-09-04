@@ -8,6 +8,7 @@ export default function ProjectMiniCard({ project, selectedId, isDragging, handl
     return (
         // motion.div enables layout animations and gesture responses
         <motion.div
+            data-project-id={project.id}
             layout // Automatically animate layout changes (e.g., when siblings are removed)
             initial={{ opacity: 0, scale: 0.9 }} // Starting state for entrance animation
             animate={{ opacity: 1, scale: 1 }} // Target state when component mounts

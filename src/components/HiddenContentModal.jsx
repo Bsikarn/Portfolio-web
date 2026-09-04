@@ -57,7 +57,7 @@ export default function HiddenContentModal({ isOpen, onClose, title, items = [],
                           <button
                             type="button"
                             onClick={() => {
-                              localStorage.setItem("targetProjectId", item.link_url);
+                              localStorage.setItem("targetProjectId", item.link_url || item.id);
                               if (setPage) setPage("Projects");
                               onClose();
                             }}
