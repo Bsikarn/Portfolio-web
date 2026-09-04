@@ -47,6 +47,7 @@ A personal portfolio website for Sikarn Pattarasirimongkol, a Full-Stack Develop
 - **Scroll Progress Bar** — Gradient progress bar at bottom with section tick marks
 - **Cute Spoon Cursor** — Custom CSS spoon cursor 🥄; rotates 35° when hovering clickable elements
 - **Back-to-Top Button** — Floating button appears after 300px scroll
+- **Web Performance Optimization** — Non-blocking Google Fonts loading, granular code splitting (`vendor`, `motion`, `icons`, `supabase`), IntersectionObserver reflow prevention, eager LCP profile image loading with explicit dimensions, resilient Supabase realtime connection error handling
 
 ---
 

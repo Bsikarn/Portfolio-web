@@ -223,11 +223,13 @@ export default function HomePage({ setPage, setContactOpen }) {
 
   // Fetch all dashboard data on mount
   useEffect(() => {
+    // Increment page views asynchronously without blocking critical rendering queries
+    supabase.rpc("increment_views").catch(() => {});
+
     const fetchData = async () => {
       try {
-        // Increment views and fetch stats in parallel
-        const [, { count: projectCount }, { data: statsData }, { data: settingsData }, { data: achData }, { data: actData }] = await Promise.all([
-          supabase.rpc("increment_views"),
+        // Fetch dashboard content in parallel
+        const [{ count: projectCount }, { data: statsData }, { data: settingsData }, { data: achData }, { data: actData }] = await Promise.all([
           supabase.from("projects").select("*", { count: "exact", head: true }),
           supabase.from("site_stats").select("*").eq("id", 1).single(),
           supabase.from("portfolio_settings").select("about_me").eq("id", 1).single(),
@@ -273,15 +275,24 @@ export default function HomePage({ setPage, setContactOpen }) {
 
     fetchData();
 
+    // Safely subscribe to site_stats updates with status fallback handler
     const subscription = supabase
       .channel("site_stats_channel")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "site_stats", filter: "id=eq.1" }, (payload) => {
         const { views, cheer_ups } = payload.new;
         setRealStats(STAT_TEMPLATE(projectCountRef.current, views, cheer_ups));
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          // Gracefully ignore realtime connection drops without polluting console logs
+        }
+      });
 
-    return () => supabase.removeChannel(subscription);
+    return () => {
+      try {
+        supabase.removeChannel(subscription);
+      } catch (_) {}
+    };
   }, []);
 
   const homeSections = ["achievements", "activities", "technologies-and-tools"];

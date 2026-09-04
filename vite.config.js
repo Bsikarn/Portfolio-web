@@ -13,9 +13,12 @@ export default defineConfig({
     cssMinify: true,
     rollupOptions: {
       output: {
-        // Implement code splitting to reduce the initial bundle load time
+        // Implement granular code splitting to eliminate long main thread tasks
         manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion'], // Core UI dependencies
+          vendor: ['react', 'react-dom'],
+          motion: ['framer-motion'],
+          icons: ['lucide-react'],
+          supabase: ['@supabase/supabase-js'],
         }
       }
     }
