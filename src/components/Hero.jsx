@@ -29,18 +29,23 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const achievementsEl = document.getElementById("achievements");
-      if (achievementsEl) {
-        const rect = achievementsEl.getBoundingClientRect();
-        setShowArrow(rect.top > window.innerHeight - 100);
-      } else {
-        setShowArrow(window.scrollY < 300);
-      }
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const achievementsEl = document.getElementById("achievements");
+    if (!achievementsEl) {
+      const handleScroll = () => setShowArrow(window.scrollY < 300);
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+
+    // Use IntersectionObserver to avoid forced reflow from getBoundingClientRect
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowArrow(!entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(achievementsEl);
+    return () => observer.disconnect();
   }, []);
 
   const languagesList = Array.isArray(aboutData?.languages)
@@ -78,9 +83,12 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
             <div className="w-full h-full rounded-[32px] overflow-hidden bg-white flex items-center justify-center border-2 border-white/90 relative">
               {aboutData?.image_url ? (
                 <img
-                  src={getTransformedUrl(aboutData.image_url, { width: 350 })}
+                  src={getTransformedUrl(aboutData.image_url, { width: 300 })}
                   alt={aboutData?.name || "Profile"}
-                  loading="lazy"
+                  width="175"
+                  height="175"
+                  loading="eager"
+                  fetchpriority="high"
                   onError={(e) => { e.target.src = aboutData.image_url; }}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
