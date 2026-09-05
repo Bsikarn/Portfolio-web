@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Portfolio Web - High-Level Runtime Architecture",
+    "output": "architecture_diagram.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Bsikarn/Portfolio-Web",
+      "revision": "e1a8d097cc1ceecf47b98a1482ed8237aeeffee1"
+    },
+    "views": [
+      {
+        "id": "public-path",
+        "label": "Public Visitor Flow",
+        "focus": ["browser_client", "vercel_cdn", "supabase_db", "supabase_realtime", "supabase_storage"],
+        "note": "Public visitors load SPA from Vercel CDN, query portfolio data & realtime stats directly from Supabase."
+      },
+      {
+        "id": "ai-chatbot",
+        "label": "AI ChatBot RAG Flow",
+        "focus": ["browser_client", "edge_function", "supabase_db", "openrouter_ai"],
+        "note": "ChatBot calls Edge Function, matches pgvector embeddings in DB, and gets response from OpenRouter/Gemini."
+      },
+      {
+        "id": "admin-management",
+        "label": "Admin Management Scope",
+        "focus": ["admin_client", "supabase_auth", "supabase_db", "github_api"],
+        "note": "Authenticated admin manages projects, categories, site statistics, and syncs repository details from GitHub API."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "admin_client",
+      "type": "security",
+      "label": "Admin Dashboard",
+      "sublabel": "Auth Gated UI",
+      "pos": [60, 60],
+      "size": [150, 64],
+      "tag": "Authenticated Session",
+      "sources": [
+        { "path": "src/pages/AdminPage.jsx", "line": 1, "label": "Admin Controls" }
+      ]
+    },
+    {
+      "id": "browser_client",
+      "type": "frontend",
+      "label": "Public Visitor",
+      "sublabel": "Browser SPA (React 19)",
+      "pos": [60, 220],
+      "size": [150, 64],
+      "sources": [
+        { "path": "src/App.jsx", "line": 1, "label": "App Entry" },
+        { "path": "src/pages/HomePage.jsx", "line": 1, "label": "Home View" }
+      ]
+    },
+    {
+      "id": "vercel_cdn",
+      "type": "cloud",
+      "label": "Vercel CDN",
+      "sublabel": "Edge Static Hosting",
+      "pos": [60, 420],
+      "size": [150, 64],
+      "tag": "Optimized Bundle"
+    },
+    {
+      "id": "supabase_auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "JWT / Session Gate",
+      "pos": [350, 60],
+      "size": [150, 64],
+      "sources": [
+        { "path": "src/lib/supabase.js", "line": 1, "label": "Supabase Client" }
+      ]
+    },
+    {
+      "id": "supabase_db",
+      "type": "database",
+      "label": "Supabase PostgreSQL",
+      "sublabel": "pgvector & RLS",
+      "pos": [350, 220],
+      "size": [150, 64],
+      "tag": "Data & Vector Store",
+      "sources": [
+        { "path": "src/lib/supabase.js", "line": 1, "label": "Data Access" }
+      ]
+    },
+    {
+      "id": "supabase_realtime",
+      "type": "messagebus",
+      "label": "Supabase Realtime",
+      "sublabel": "WebSocket Channel",
+      "pos": [350, 380],
+      "size": [150, 64],
+      "tag": "site_stats_channel"
+    },
+    {
+      "id": "supabase_storage",
+      "type": "database",
+      "label": "Supabase Storage",
+      "sublabel": "Image Assets CDN",
+      "pos": [350, 500],
+      "size": [150, 64]
+    },
+    {
+      "id": "github_api",
+      "type": "external",
+      "label": "GitHub REST API",
+      "sublabel": "Repo Stats & Languages",
+      "pos": [640, 60],
+      "size": [150, 64]
+    },
+    {
+      "id": "edge_function",
+      "type": "backend",
+      "label": "Chat Edge Function",
+      "sublabel": "chat-with-qwen (Deno)",
+      "pos": [640, 220],
+      "size": [150, 64],
+      "sources": [
+        { "path": "src/lib/portfolioChat.ts", "line": 1, "label": "Chat Interface" }
+      ]
+    },
+    {
+      "id": "openrouter_ai",
+      "type": "cloud",
+      "label": "OpenRouter / Gemini",
+      "sublabel": "LLM Inference API",
+      "pos": [910, 220],
+      "size": [160, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Client Environment (Browser)",
+      "wraps": ["admin_client", "browser_client", "vercel_cdn"]
+    },
+    {
+      "kind": "region",
+      "label": "Supabase Backend Cloud",
+      "wraps": ["supabase_auth", "supabase_db", "supabase_realtime", "supabase_storage", "edge_function"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Admin Authentication Gate",
+      "wraps": ["admin_client", "supabase_auth"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "auth-login",
+      "from": "admin_client",
+      "to": "supabase_auth",
+      "label": "Auth credentials",
+      "variant": "security",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "github-stats",
+      "from": "admin_client",
+      "to": "github_api",
+      "label": "Fetch repo languages",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [[135, 20], [715, 20]]
+    },
+    {
+      "id": "admin-db-write",
+      "from": "admin_client",
+      "to": "supabase_db",
+      "label": "CRUD project & category",
+      "variant": "security",
+      "fromSide": "right",
+      "toSide": "top",
+      "via": [[260, 92], [260, 160], [425, 160]],
+      "labelDy": 22
+    },
+    {
+      "id": "db-query",
+      "from": "browser_client",
+      "to": "supabase_db",
+      "label": "REST / RPC data fetch",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "fetch-bundle",
+      "from": "browser_client",
+      "to": "vercel_cdn",
+      "label": "HTTPS static assets",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 36
+    },
+    {
+      "id": "realtime-sync",
+      "from": "browser_client",
+      "to": "supabase_realtime",
+      "label": "WebSocket live stats",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [[230, 252], [230, 412]],
+      "labelDy": -15
+    },
+    {
+      "id": "storage-fetch",
+      "from": "browser_client",
+      "to": "supabase_storage",
+      "label": "Image URL transform",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [[310, 252], [310, 532]],
+      "labelAt": [310, 470]
+    },
+    {
+      "id": "chat-invoke",
+      "from": "browser_client",
+      "to": "edge_function",
+      "label": "Chat request",
+      "fromSide": "left",
+      "toSide": "bottom",
+      "via": [[20, 252], [20, 600], [715, 600]]
+    },
+    {
+      "id": "vector-search",
+      "from": "edge_function",
+      "to": "supabase_db",
+      "label": "Vector match RPC",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "llm-request",
+      "from": "edge_function",
+      "to": "openrouter_ai",
+      "label": "Prompt + Context",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Frontend & Edge Hosting",
+      "items": [
+        "Vite SPA bundle hosted on Vercel CDN",
+        "React 19 + Tailwind CSS single page layout",
+        "Background blur context and micro-animations"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Data & Realtime Integration",
+      "items": [
+        "Supabase PostgreSQL for projects, activities & settings",
+        "Supabase Realtime WebSockets for instant view & cheer counters",
+        "Supabase Storage with transformed image URLs"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "AI RAG Architecture",
+      "items": [
+        "Browser calls chat-with-qwen Deno Edge Function",
+        "Edge function queries pgvector vector embeddings in Supabase DB",
+        "Prompt with vector context sent to OpenRouter / Gemini API"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Trust & Security Boundaries",
+      "items": [
+        "Public endpoints restricted to read & stats increment RPCs",
+        "Admin Dashboard secured by Supabase Auth session",
+        "AI API key kept server-side inside Supabase Edge Function"
+      ]
+    }
+  ]
+}
