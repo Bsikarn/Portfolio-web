@@ -1,4 +1,4 @@
-// Shared helper functions for the Admin panel
+// Shared helper functions used across Admin, ProjectsPage, and HomePage
 
 // Check if a content type is a "special" (non-project) type
 export const isSpecialType = (type) =>
@@ -41,3 +41,22 @@ export function parseLanguages(str) {
     return { name: name?.trim(), percent: Number(percent) || 0, color: color?.trim() || "#ccc" };
   });
 }
+
+// Extract numeric sort order from a project row (checks __order: tag first, then sort_order column)
+export function getSortOrder(p) {
+  if (Array.isArray(p.tags)) {
+    const orderTag = p.tags.find((t) => typeof t === "string" && t.startsWith("__order:"));
+    if (orderTag) {
+      const match = orderTag.match(/__order:(\d+)__/);
+      if (match) return Number(match[1]);
+    }
+  }
+  if (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
+    return Number(p.sort_order);
+  }
+  return 999;
+}
+
+// Check if a list item is hidden (by is_hidden flag or __hidden__ tag)
+export const isItemHidden = (item) =>
+  item.is_hidden === true || (Array.isArray(item.tags) && item.tags.includes("__hidden__"));

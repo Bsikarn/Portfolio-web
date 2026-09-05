@@ -8,21 +8,8 @@ import ProjectMiniCard from "../components/ProjectMiniCard";
 import ProjectDetailsCard from "../components/ProjectDetailsCard";
 import { ProjectsSkeleton } from "../components/SkeletonLoader";
 import { supabase, getTransformedUrl } from "../lib/supabase";
+import { getSortOrder } from "../lib/adminHelpers";
 import { styles } from "../styles/ProjectsPage.styles";
-
-function getSortOrder(p) {
-  if (Array.isArray(p.tags)) {
-    const orderTag = p.tags.find((t) => typeof t === "string" && t.startsWith("__order:"));
-    if (orderTag) {
-      const match = orderTag.match(/__order:(\d+)__/);
-      if (match) return Number(match[1]);
-    }
-  }
-  if (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
-    return Number(p.sort_order);
-  }
-  return 999;
-}
 
 // Sort projects: strictly by sort_order / __order tag first, then by id
 function sortProjects(projects) {
@@ -163,23 +150,20 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
-    const handleScroll = () => {
-      const detailsEl = document.getElementById("project-details");
-      if (detailsEl) {
-        const rect = detailsEl.getBoundingClientRect();
-        setShowScrollIndicator(rect.top > window.innerHeight - 100);
-      } else {
-        setShowScrollIndicator(window.scrollY < 120);
-      }
-    };
-    handleScroll();
-
     window.addEventListener("resize", handleResize, { passive: true });
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Use IntersectionObserver to avoid Forced Reflow from getBoundingClientRect
+  useEffect(() => {
+    const detailsEl = document.getElementById("project-details");
+    if (!detailsEl) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowScrollIndicator(!entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(detailsEl);
+    return () => observer.disconnect();
   }, []);
 
   // Fetch categories and projects from DB

@@ -47,7 +47,8 @@ A personal portfolio website for Sikarn Pattarasirimongkol, a Full-Stack Develop
 - **Scroll Progress Bar** — Gradient progress bar at bottom with section tick marks
 - **Cute Spoon Cursor** — Custom CSS spoon cursor 🥄; rotates 35° when hovering clickable elements
 - **Back-to-Top Button** — Floating button appears after 300px scroll
-- **Web Performance Optimization** — Non-blocking Google Fonts loading, granular code splitting (`vendor`, `motion`, `icons`, `supabase`), IntersectionObserver reflow prevention, eager LCP profile image loading with explicit dimensions, resilient Supabase realtime connection error handling
+- **Web Performance Optimization** — Non-blocking Google Fonts loading, granular code splitting (`vendor`, `motion`, `icons`, `supabase`), IntersectionObserver reflow prevention (Hero + ProjectsPage), eager LCP profile image loading with explicit dimensions, resilient Supabase realtime connection error handling
+- **Codebase Health** — Dead code removed (`worker.js`, `TagButton`, `workerRef`, `techCounts`, `activeTag`); DRY violations fixed: shared `getSortOrder` and `isItemHidden` helpers in `adminHelpers.js`; `TechSection.jsx` modularized from `HomePage.jsx`
 
 ---
 
@@ -79,16 +80,17 @@ portfolio-web/
 │   │   ├── ProjectMiniCard.jsx  # Mini card in projects selector grid
 │   │   ├── RainbowSprinkles.jsx # Floating decorative sparkle particles
 │   │   ├── ScrollSection.jsx    # IntersectionObserver wrapper for blur context
-│   │   └── SkeletonLoader.jsx   # Shimmer skeleton components (Home, Experiences)
+│   │   ├── SkeletonLoader.jsx   # Shimmer skeleton components (Home, Experiences)
+│   │   ├── SpoonCursor.jsx      # CSS-only cursor (returns null; cursor managed via index.css)
+│   │   └── TechSection.jsx      # TechBadge, ContentSection, MediaRow, TechSkillsSection for HomePage
 │   ├── context/
 │   │   └── BackgroundBlurContext.jsx  # Global blur amount context (driven by scroll)
 │   ├── data/
 │   │   └── constants.jsx        # ABOUT_ME fallback data, EMOJIS array
 │   ├── lib/
-│   │   ├── adminHelpers.js      # Shared helpers: isSpecialType, sortByOrder, filterByContentType, parseLanguages
+│   │   ├── adminHelpers.js      # Shared helpers: isSpecialType, getTableName, sortByOrder, filterByContentType, parseLanguages, getSortOrder, isItemHidden
 │   │   ├── portfolioChat.ts     # RAG chatbot logic (Gemini API + Supabase vector search)
-│   │   ├── supabase.js          # Supabase client + getTransformedUrl helper
-│   │   └── worker.js            # Web worker (background task utility)
+│   │   └── supabase.js          # Supabase client + getTransformedUrl helper
 │   ├── pages/
 │   │   ├── AdminPage.jsx        # Admin dashboard (state + logic only; uses admin/ components)
 │   │   ├── ExperiencesPage.jsx  # Experiences timeline page

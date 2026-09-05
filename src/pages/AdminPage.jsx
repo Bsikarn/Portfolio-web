@@ -6,7 +6,7 @@ import SettingsPanel from "../components/admin/SettingsPanel";
 import CategoryManager from "../components/admin/CategoryManager";
 import ContentForm from "../components/admin/ContentForm";
 import ProjectList from "../components/admin/ProjectList";
-import { isSpecialType, sortByOrder, filterByContentType, parseLanguages, getTableName } from "../lib/adminHelpers";
+import { isSpecialType, sortByOrder, filterByContentType, parseLanguages, getTableName, getSortOrder, isItemHidden } from "../lib/adminHelpers";
 
 // Default form state for a new project
 const INITIAL_FORM = {
@@ -138,25 +138,11 @@ export default function AdminPage({ setPage }) {
         supabase.from("experiences").select("*"),
       ]);
 
-      const parseSortOrder = (p) => {
-        if (Array.isArray(p.tags)) {
-          const orderTag = p.tags.find((t) => typeof t === "string" && t.startsWith("__order:"));
-          if (orderTag) {
-            const match = orderTag.match(/__order:(\d+)__/);
-            if (match) return Number(match[1]);
-          }
-        }
-        if (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
-          return Number(p.sort_order);
-        }
-        return 0;
-      };
-
       const processRows = (rows, defaultCategory) => (rows || []).map((p) => ({
         ...p,
         category: p.category || defaultCategory,
-        sort_order: parseSortOrder(p),
-        is_hidden: p.is_hidden === true || (Array.isArray(p.tags) && p.tags.includes("__hidden__")),
+        sort_order: getSortOrder(p),
+        is_hidden: isItemHidden(p),
       }));
 
       const allItems = [
@@ -399,7 +385,7 @@ export default function AdminPage({ setPage }) {
     setContentType("Project");
   };
 
-  const hasPendingChanges = pendingProjectIds.size > 0 || pendingCategoryActions.length > 0;0;
+  const hasPendingChanges = pendingProjectIds.size > 0 || pendingCategoryActions.length > 0;
 
   return (
     <div style={styles.pageContainer}>
