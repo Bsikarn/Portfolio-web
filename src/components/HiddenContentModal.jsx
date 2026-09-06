@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ImageIcon } from "lucide-react";
+import { getCardStyle } from "../styles/ProjectsPage.styles";
 
 export default function HiddenContentModal({ isOpen, onClose, title, items = [], setPreviewImage, setPage }) {
   if (!isOpen) return null;
@@ -18,7 +19,8 @@ export default function HiddenContentModal({ isOpen, onClose, title, items = [],
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-white rounded-[24px] max-w-[820px] w-full max-h-[85vh] flex flex-col shadow-2xl border border-[#e2e8f0] overflow-hidden"
+          style={getCardStyle()}
+          className="max-w-[820px] w-full max-h-[85vh] flex flex-col"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-[24px] border-b border-[#f1f5f9] bg-[#f8fafc]">

@@ -119,7 +119,15 @@ export default function ContentForm({
                 }
                 <div style={styles.flex1}><label style={styles.labelStyle}>GitHub</label><input type="url" name="github_url" value={formData.github_url} onChange={handleChange} style={styles.inputStyle} /></div>
               </div>
-              {contentType === "Project" && <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>}
+              {contentType === "Project" && (
+                <>
+                  <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>
+                  <div style={styles.flexRow}>
+                    <div style={styles.flex1}><label style={styles.labelStyle}>Flow Architecture Image URL</label><input type="url" name="flow_pic" value={formData.flow_pic} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/flow.png" /></div>
+                    <div style={styles.flex1}><label style={styles.labelStyle}>Flow Link URL</label><input type="url" name="flow_url" value={formData.flow_url} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/architecture-doc" /></div>
+                  </div>
+                </>
+              )}
               {contentType === "Project"
                 ? <div><label style={styles.labelStyle}>Gallery URLs (Comma-separated)</label><textarea name="gallery_urls" value={formData.gallery_urls} onChange={handleChange} rows="2" style={{ ...styles.inputStyle, resize: "vertical" }} /></div>
                 : <>

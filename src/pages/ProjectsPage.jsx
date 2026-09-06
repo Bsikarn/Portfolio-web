@@ -6,6 +6,7 @@ import ScrollSection from "../components/ScrollSection";
 // Background blur managed inside ScrollSection wrapper
 import ProjectMiniCard from "../components/ProjectMiniCard";
 import ProjectDetailsCard from "../components/ProjectDetailsCard";
+import ImageModal from "../components/ImageModal";
 import { ProjectsSkeleton } from "../components/SkeletonLoader";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 import { getSortOrder } from "../lib/adminHelpers";
@@ -266,6 +267,13 @@ export default function ProjectsPage() {
   };
 
   // Lightbox openers
+  const openFlowLightbox = () => {
+    const flowImg = selected?.flow_pic || selected?.flow_image || selected?.flow_architecture_url;
+    if (!flowImg) return;
+    setLightboxItems([{ type: "image", url: flowImg }]);
+    setLightboxIndex(0);
+    setLightboxOpen(true);
+  };
   const openGalleryLightbox = (startIndex) => {
     if (!selected?.gallery?.length) return;
     setLightboxItems(selected.gallery.map((url) => ({ type: "image", url })));
@@ -495,6 +503,7 @@ export default function ProjectsPage() {
                     selected={selected}
                     nav={nav}
                     openVideoLightbox={openVideoLightbox}
+                    openFlowLightbox={openFlowLightbox}
                     openAwardLightbox={openAwardLightbox}
                     openGalleryLightbox={openGalleryLightbox}
                     handleLinkClick={handleLinkClick}
@@ -507,39 +516,13 @@ export default function ProjectsPage() {
         </div>
       </motion.div>
 
-
-
-      {/* Lightbox — rendered via Portal over document.body */}
-      {typeof document !== "undefined" && createPortal(
-        <AnimatePresence>
-          {lightboxOpen && lightboxItems.length > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setLightboxOpen(false)} style={styles.lightboxOverlay}>
-              <X onClick={() => setLightboxOpen(false)} style={styles.lightboxClose} size={36} />
-              {lightboxItems.length > 1 && (
-                <>
-                  <button type="button" onClick={prevLightbox} aria-label="Previous image" style={styles.lightboxLeftBtn}><ChevronLeft size={32} /></button>
-                  <button type="button" onClick={nextLightbox} aria-label="Next image" style={styles.lightboxRightBtn}><ChevronRight size={32} /></button>
-                  <div style={styles.lightboxCounter}>{lightboxIndex + 1} / {lightboxItems.length}</div>
-                </>
-              )}
-              <div onClick={(e) => e.stopPropagation()} style={styles.lightboxContent}>
-                {lightboxItems[lightboxIndex].type === "image"
-                  ? <img
-                    src={getTransformedUrl(lightboxItems[lightboxIndex].url, { width: 1200 })}
-                    alt="Gallery"
-                    loading="lazy"
-                    onLoad={() => setCurrentImageLoaded(true)}
-                    onError={(e) => { e.target.src = lightboxItems[lightboxIndex].url; }}
-                    style={{ ...styles.lightboxImage, aspectRatio: "16/9" }}
-                  />
-                  : <iframe src={lightboxItems[lightboxIndex].url} allowFullScreen style={{ ...styles.lightboxVideo, aspectRatio: "16/9" }} title="Video Player" />
-                }
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+      {/* Lightbox — ImageModal */}
+      <ImageModal
+        isOpen={lightboxOpen && lightboxItems.length > 0}
+        onClose={() => setLightboxOpen(false)}
+        items={lightboxItems}
+        initialIndex={lightboxIndex}
+      />
 
       {/* Scroll Down Indicator */}
       <AnimatePresence>

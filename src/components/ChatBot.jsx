@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { X, Send, Sparkles, RefreshCw } from "lucide-react";
 import { processPortfolioChat } from "../lib/portfolioChat";
+import { getCardStyle } from "../styles/ProjectsPage.styles";
 
 const INITIAL_MESSAGES_EN = [
   {
@@ -18,19 +19,13 @@ const INITIAL_MESSAGES_TH = [
 ];
 
 const S = {
-  card: {
+  card: getCardStyle({
     width: 360,
     height: 520,
-    background: "rgba(255, 255, 255, 0.95)",
-    backdropFilter: "blur(16px)",
-    borderRadius: 24,
-    boxShadow: "0 24px 64px rgba(13, 110, 253, 0.18), 0 4px 20px rgba(0, 0, 0, 0.06)",
     display: "flex",
     flexDirection: "column",
-    overflow: "hidden",
-    border: "1px solid rgba(163, 216, 244, 0.5)",
     fontFamily: "'Inter', sans-serif",
-  },
+  }),
   header: {
     background: "linear-gradient(135deg, #A3D8F4 0%, #ffc8d5 100%)",
     padding: "14px 18px",

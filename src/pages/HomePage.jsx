@@ -5,6 +5,7 @@ import ScrollSection from "../components/ScrollSection";
 import Hero from "../components/Hero";
 import { HomeSkeleton } from "../components/SkeletonLoader";
 import HiddenContentModal from "../components/HiddenContentModal";
+import ImageModal from "../components/ImageModal";
 import { ContentSection, TechSkillsSection, SECTION_ICONS } from "../components/TechSection";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 import { useBackgroundBlur } from "../context/BackgroundBlurContext";
@@ -238,40 +239,11 @@ export default function HomePage({ setPage, setContactOpen }) {
       />
 
       {/* Image Preview Modal */}
-      {typeof document !== "undefined" && createPortal(
-        <AnimatePresence>
-          {previewImage && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setPreviewImage(null)}
-              className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-[24px]"
-            >
-               <motion.img
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ type: "spring", bounce: 0.4 }}
-                src={getTransformedUrl(previewImage, { width: 1200 })}
-                alt="Preview"
-                loading="lazy"
-                onError={(e) => { e.target.src = previewImage; }}
-                className="max-w-full max-h-[90vh] rounded-[16px] object-contain shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              />
-              <button
-                onClick={() => setPreviewImage(null)}
-                aria-label="Close preview"
-                className="absolute top-[24px] right-[24px] w-[44px] h-[44px] rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-              >
-                ✕
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+      <ImageModal
+        isOpen={Boolean(previewImage)}
+        onClose={() => setPreviewImage(null)}
+        items={previewImage ? [previewImage] : []}
+      />
 
       {/* Active Section Indicator Float Box */}
       <AnimatePresence>

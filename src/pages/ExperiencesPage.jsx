@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ImageIcon } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 import { ExperiencesSkeleton } from "../components/SkeletonLoader";
+import ImageModal from "../components/ImageModal";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 
 export default function ExperiencesPage({ setPage }) {
@@ -112,29 +113,12 @@ export default function ExperiencesPage({ setPage }) {
         </div>
       </section>
 
-      {/* Simple Lightbox Overlay */}
-      <AnimatePresence>
-        {previewImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setPreviewImage(null)}
-            className="fixed inset-0 bg-brand-dark/85 backdrop-blur-[8px] z-[9999] flex items-center justify-center p-[24px] cursor-pointer"
-          >
-            <motion.img
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              src={getTransformedUrl(previewImage, { width: 1200 })}
-              alt="Enlarged view"
-              loading="lazy"
-              onError={(e) => { e.target.src = previewImage; }}
-              className="max-w-[95%] max-h-[90%] rounded-[16px] shadow-[0_24px_64px_rgba(0,0,0,0.5)] object-contain"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Image Preview Modal */}
+      <ImageModal
+        isOpen={Boolean(previewImage)}
+        onClose={() => setPreviewImage(null)}
+        items={previewImage ? [previewImage] : []}
+      />
     </div>
   );
 }

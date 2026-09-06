@@ -35,7 +35,8 @@ A personal portfolio website for Sikarn Pattarasirimongkol, a Full-Stack Develop
 - **Sticky Hero Layout** — Hero stays sticky while content scrolls beneath with blur mask gradient
 - **Achievements & Activities** — Card list with certificate/photo lightbox; hidden items accessible via "more" popup
 - **Technologies & Tools** — Manual skill badges grouped by Languages / Technologies / Tools
-- **Projects Page** — Expandable search box (hides category filters when active), filter unselect support, drag-scroll selector, full detail card with gallery, award, video, language bar; deep-link via `localStorage.targetProjectId` to auto-select a specific project on page load
+- **Projects Page** — Expandable search box (hides category filters when active), filter unselect support, drag-scroll selector, 3-card separated detail view with Flow Architecture diagram, gallery, award, video, language bar; deep-link via `localStorage.targetProjectId` to auto-select a specific project on page load
+- **Unified Image Viewer** — Component (`ImageModal.jsx`) providing image/video lightbox across all pages, next/prev navigation adjacent to counter text, zoom toggle with pan/drag support
 - **Fluid Typography** — Responsive font scaling across all devices using `clamp()` based on PC 1440px reference width with minimum limits
 - **Navbar Interactions** — Glassmorphism bar with single click (Home) and double click (Admin) logo navigation; mobile capsule menu with blur gradient backdrop
 - **Experiences Page** — Timeline-style list fetched directly from dedicated `experiences` table
@@ -73,6 +74,7 @@ portfolio-web/
 │   │   ├── FallingEmoji.jsx     # Cheer-up falling emoji animation
 │   │   ├── Hero.jsx             # Hero section (name, profile, buttons, stats)
 │   │   ├── HiddenContentModal.jsx   # "More" popup for hidden items
+│   │   ├── ImageModal.jsx           # Reusable image/video viewer modal with zoom & nav controls
 │   │   ├── LoadingPage.jsx      # Full-screen spinner overlay
 │   │   ├── MeshGradientBackground.jsx  # Animated CSS mesh gradient background
 │   │   ├── Navbar.jsx           # Top navigation bar (desktop + mobile capsule menu)
@@ -101,6 +103,16 @@ portfolio-web/
 │       ├── AdminPage.styles.js   # Inline style object map for AdminPage components
 │       ├── LoginPage.styles.js   # Inline style object map for LoginPage components
 │       └── ProjectsPage.styles.js # Inline style object map for ProjectsPage components
+├── docs/                       # Private documentation & database snapshots
+│   └── private/
+│       ├── database_snapshot.json # ⚠️ Real-time Supabase JSON snapshot backup
+│       ├── database_snapshot.md   # Human-readable Supabase data & schema summary
+│       ├── knowledge_portfolio-web.md # Comprehensive source code logic docs (Thai)
+│       └── setup_portfolio-web.md # Setup guide & exhaustive file mapping (Thai)
+├── scripts/                    # Helper & administration scripts
+│   ├── export-database-snapshot.js # Script to export real-time Supabase snapshot
+│   ├── ingest-portfolio.ts     # ⚠️ RAG vector embedding generator script
+│   └── seed-data.js            # ⚠️ Initial database seed script (DO NOT TOUCH)
 ├── supabase/                   # ⚠️ DO NOT TOUCH — Supabase migration files
 ├── tests/
 │   └── portfolio.spec.js       # Playwright E2E tests

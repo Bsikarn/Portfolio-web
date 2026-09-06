@@ -42,16 +42,21 @@ export function parseLanguages(str) {
   });
 }
 
-// Extract numeric sort order from a project row (checks __order: tag first, then sort_order column)
+// Filter out system tags (__order:*, __hidden__) from user-facing tech tags
+export function cleanTechTags(tags) {
+  if (!Array.isArray(tags)) return [];
+  return tags.filter(
+    (t) =>
+      typeof t === "string" &&
+      t.trim() !== "" &&
+      t !== "__hidden__" &&
+      !t.startsWith("__order:")
+  );
+}
+
+// Extract numeric sort order from a project row (strictly relies on sort_order column)
 export function getSortOrder(p) {
-  if (Array.isArray(p.tags)) {
-    const orderTag = p.tags.find((t) => typeof t === "string" && t.startsWith("__order:"));
-    if (orderTag) {
-      const match = orderTag.match(/__order:(\d+)__/);
-      if (match) return Number(match[1]);
-    }
-  }
-  if (p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
+  if (p && p.sort_order !== undefined && p.sort_order !== null && !isNaN(Number(p.sort_order))) {
     return Number(p.sort_order);
   }
   return 999;
@@ -60,3 +65,4 @@ export function getSortOrder(p) {
 // Check if a list item is hidden (by is_hidden flag or __hidden__ tag)
 export const isItemHidden = (item) =>
   item.is_hidden === true || (Array.isArray(item.tags) && item.tags.includes("__hidden__"));
+

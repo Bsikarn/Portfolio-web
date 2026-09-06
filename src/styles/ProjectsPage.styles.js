@@ -1,3 +1,15 @@
+// Shared card style helper function with 35% transparency (rgba 0.65) and shadowless card design
+export const getCardStyle = (extraStyle = {}) => ({
+  background: "rgba(255, 255, 255, 0.65)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  borderRadius: 24,
+  border: "1px solid rgba(255, 255, 255, 0.9)",
+  boxShadow: "none",
+  overflow: "hidden",
+  ...extraStyle,
+});
+
 export const styles = {
     pageContainer: { paddingTop: 64, minHeight: "100vh", position: "relative" },
     filterContainer: { padding: "24px 48px 16px", display: "flex", flexWrap: "wrap", gap: 10, maxWidth: 1440, margin: "0 auto", alignItems: "center" },
@@ -17,8 +29,8 @@ export const styles = {
     filterTab: { padding: "8px 20px", borderRadius: 50, border: "none", cursor: "pointer", fontFamily: "'Poppins',sans-serif", fontWeight: 600, fontSize: 13, transition: "all 0.2s" },
     mainContentWrapper: { maxWidth: 1440, margin: "0 auto", paddingBottom: 80, width: "100%", overflow: "hidden" },
     selectionSection: { padding: "0 24px", marginBottom: 32 },
-    // Match the styling of the project details card (detailsMainCard)
-    selectionCardOuter: { background: "rgba(255, 255, 255, 0.82)", backdropFilter: "blur(16px)", borderRadius: 24, padding: "24px 0", boxShadow: "14px 18px 36px rgba(13,110,253,0.08), -10px -10px 24px rgba(255,255,255,0.9), inset 2px 2px 6px rgba(255,255,255,0.9)", border: "1px solid rgba(255,255,255,0.9)", width: "100%", overflow: "hidden" },
+    // Unified card design using getCardStyle() helper
+    selectionCardOuter: getCardStyle({ padding: "24px 0", width: "100%" }),
     selectionHeading: { padding: "0 24px", marginBottom: 16, fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 18, color: "#0d1b2a" },
     noProjectsText: { padding: "20px 24px", textAlign: "center", color: "#8aabcc" },
     scrollRow: {
@@ -52,7 +64,7 @@ export const styles = {
     projectMiniTitle: { fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 15, color: "#0d1b2a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
     projectMiniCategory: { fontFamily: "'Poppins',sans-serif", fontSize: 12, color: "#8aabcc", fontWeight: 500, marginTop: 4 },
     detailsOuterContainer: { padding: "0 24px" },
-    detailsMainCard: { background: "rgba(255, 255, 255, 0.85)", backdropFilter: "blur(16px)", borderRadius: 24, boxShadow: "16px 22px 44px rgba(13,110,253,0.09), -12px -12px 28px rgba(255,255,255,0.9), inset 2px 2px 6px rgba(255,255,255,0.9)", overflow: "hidden", border: "1px solid rgba(255,255,255,0.9)" },
+    detailsMainCard: getCardStyle(),
     coverHeader: { height: 350, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" },
     playVideoButton: { width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", color: "#0D6EFD", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" },
     playIconMargin: { marginLeft: 4 },

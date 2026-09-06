@@ -13,7 +13,7 @@ const INITIAL_FORM = {
   title: "", category: "Frontend", category2: "", description: "", year: "2026",
   link_url: "", github_url: "", tags: "", tools: "", features: "",
   my_role: "", problem: "", solution: "", results_impact: "", key_learnings: "",
-  languages: "", video_url: "", gallery_urls: "", certificate_url: "", activity_url: "",
+  languages: "", video_url: "", flow_pic: "", flow_url: "", gallery_urls: "", certificate_url: "", activity_url: "",
   has_award: false, award_title: "", award_description: "", award_competition: "", award_image_url: "",
   is_recommended: false, sort_order: 0, is_hidden: false,
 };
@@ -24,7 +24,16 @@ function projectToForm(project) {
   const isHidden = typeof project.is_hidden === "boolean"
     ? project.is_hidden
     : (Array.isArray(project.tags) && project.tags.includes("__hidden__"));
-  const userTags = (project.tags || []).filter((t) => typeof t === "string" && t !== "__hidden__" && !t.startsWith("__order:"));
+
+  const flowImgVal = project.flow_pic || project.flow_image || "";
+  const flowUrlVal = project.flow_url || "";
+
+  const userTags = (project.tags || []).filter(
+    (t) =>
+      typeof t === "string" &&
+      t !== "__hidden__" &&
+      !t.startsWith("__order:")
+  );
 
   const sortOrder = (project.sort_order !== undefined && project.sort_order !== null && !isNaN(Number(project.sort_order)))
     ? Number(project.sort_order)
@@ -48,6 +57,8 @@ function projectToForm(project) {
     features: project.features?.join("\n") || "",
     languages: project.languages?.map((l) => `${l.name}:${l.percent}:${l.color}`).join(", ") || "",
     video_url: project.video_url || "",
+    flow_pic: flowImgVal,
+    flow_url: flowUrlVal,
     gallery_urls: project.gallery?.join(", ") || "",
     activity_url: project.gallery?.[0] || "",
     certificate_url: project.gallery?.[1] || "",
@@ -71,7 +82,6 @@ function buildPayload(formData, contentType) {
     : [];
   if (formData.is_hidden) parsedTags.push("__hidden__");
   const sortVal = Number(formData.sort_order) || 0;
-  parsedTags.push(`__order:${sortVal}__`);
 
   return {
     title: formData.title,
@@ -90,6 +100,8 @@ function buildPayload(formData, contentType) {
     features: formData.features ? formData.features.split("\n").map((f) => f.trim()).filter(Boolean) : [],
     languages: parseLanguages(formData.languages),
     video_url: formData.video_url,
+    flow_pic: formData.flow_pic || formData.flow_image || "",
+    flow_url: formData.flow_url || "",
     gallery: isSpecialType(contentType)
       ? [formData.activity_url?.trim() || "", formData.certificate_url?.trim() || ""]
       : (formData.gallery_urls ? formData.gallery_urls.split(",").map((u) => u.trim()).filter(Boolean) : []),
@@ -199,7 +211,6 @@ export default function AdminPage({ setPage }) {
         if (p.id !== id) return p;
         const currentTags = Array.isArray(p.tags) ? p.tags : [];
         const cleanTags = currentTags.filter((t) => typeof t === "string" && !t.startsWith("__order:"));
-        cleanTags.push(`__order:${parsed}__`);
         return { ...p, sort_order: parsed, tags: cleanTags };
       })].sort(sortByOrder)
     );

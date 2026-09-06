@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { FileBadge, Image as ImageIcon, Terminal, Database, Palette, Atom, Layers, Server, Sparkles, Boxes, Zap, GitBranch, Code, Code2, Send, Container, Figma, Wrench, Trophy, Activity } from "lucide-react";
 import ScrollSection from "./ScrollSection";
 import { isItemHidden } from "../lib/adminHelpers";
+import { getCardStyle } from "../styles/ProjectsPage.styles";
 
 // Get Icon component matching tech/language/tool name
 function getTechIcon(name) {
@@ -95,7 +96,7 @@ export const ContentSection = ({ id, icon, iconBg, iconColor, title, items, setP
   const cardPad = isMobile ? "p-[32px_24px] gap-[24px]" : "p-[48px] gap-[32px]";
   return (
     <section className={`max-w-[1440px] mx-auto ${isMobile ? "p-[0px_24px_40px]" : "p-[0px_48px_40px]"}`}>
-      <ScrollSection id={id} rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base flex flex-col ${cardPad}`}>
+      <ScrollSection id={id} rootMargin="-25% 0px -25% 0px" style={getCardStyle()} className={`flex flex-col ${cardPad}`}>
         <div className="flex items-center gap-[16px]">
           <div className={`w-[48px] h-[48px] rounded-[16px] flex items-center justify-center shrink-0 ${iconBg}`} style={{ color: iconColor }}>{icon}</div>
           <h2 className="font-sans font-extrabold text-[28px] text-brand-dark m-0">{title}</h2>
@@ -127,7 +128,7 @@ export const TechSkillsSection = ({ portfolioLanguages, portfolioTags, portfolio
   const sectionPad = isMobile ? "p-[40px_24px]" : "p-[40px_48px]";
   return (
     <section className={`max-w-[1440px] mx-auto ${sectionPad}`}>
-      <ScrollSection id="technologies-and-tools" rootMargin="-25% 0px -25% 0px" className={`bg-white/80 backdrop-blur-[16px] rounded-[24px] shadow-card-base ${isMobile ? "p-[32px_24px]" : "p-[48px]"}`}>
+      <ScrollSection id="technologies-and-tools" rootMargin="-25% 0px -25% 0px" style={getCardStyle()} className={isMobile ? "p-[32px_24px]" : "p-[48px]"}>
         {portfolioLanguages.length > 0 && (
           <>
             <h2 className="font-sans font-extrabold text-[24px] text-brand-dark mb-[24px] text-center">LANGUAGES</h2>
