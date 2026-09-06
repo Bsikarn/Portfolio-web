@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Github,
@@ -14,6 +15,8 @@ import {
   TrendingUp,
   BookOpen,
   Workflow,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { styles } from "../styles/ProjectsPage.styles";
 import { getTransformedUrl } from "../lib/supabase";
@@ -66,17 +69,24 @@ export default function ProjectDetailsCard({
   handleLinkClick,
   isMobile,
 }) {
+  const [isFlowExpanded, setIsFlowExpanded] = useState(false);
+
+  useEffect(() => {
+    setIsFlowExpanded(false);
+  }, [selected?.id]);
+
   if (!selected) return null;
 
   const liveValid = isValidUrl(selected.link_url);
   const ghValid = isValidUrl(selected.github_url);
 
-  const flowImage = selected.flow_pic || selected.flow_image;
-  const flowUrl = selected.flow_url;
-  const flowUrlValid = isValidUrl(flowUrl);
+  const flowEmbedUrl = selected.flow_pic || selected.flow_image || selected.flow_url;
+  const flowLinkUrl = selected.flow_url || selected.flow_pic;
+  const hasFlowEmbed = isValidUrl(flowEmbedUrl);
+  const hasFlowLink = isValidUrl(flowLinkUrl);
 
   const cleanTags = cleanTechTags(selected.tags);
-  const hasCard2Content = Boolean(flowImage || selected.gallery?.length > 0 || selected.award);
+  const hasCard2Content = Boolean(hasFlowEmbed || selected.gallery?.length > 0 || selected.award);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -281,18 +291,56 @@ export default function ProjectDetailsCard({
           style={styles.detailsMainCard}
         >
           <div style={{ ...styles.detailsPadding, padding: isMobile ? "28px 20px" : "40px 48px" }}>
-            {/* Flow Architecture Section */}
-            {flowImage && (
+            {/* System Architecture Section (Collapsible Dropdown Accordion with Lazy-Loaded Embed) */}
+            {hasFlowEmbed && (
               <div style={{ ...styles.gallerySection, marginBottom: selected.gallery?.length > 0 || selected.award ? 40 : 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <h3 style={{ ...styles.subHeadingStyle, margin: 0 }}>
-                    <Workflow size={20} color="#0D6EFD" /> Flow Architecture
-                  </h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: isFlowExpanded ? 16 : 0 }}>
+                  {/* Clickable Title & Dropdown Toggle Pill */}
+                  <button
+                    type="button"
+                    onClick={() => setIsFlowExpanded((prev) => !prev)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 10,
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                    title={isFlowExpanded ? "Click to hide System Architecture diagram" : "Click to load and view System Architecture diagram"}
+                  >
+                    <h3 style={{ ...styles.subHeadingStyle, margin: 0, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <Workflow size={20} color="#0D6EFD" /> System Architecture Diagram
+                    </h3>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                        padding: "4px 12px",
+                        borderRadius: 20,
+                        background: isFlowExpanded ? "rgba(13,110,253,0.15)" : "rgba(226, 232, 240, 0.7)",
+                        color: isFlowExpanded ? "#0D6EFD" : "#475569",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      {isFlowExpanded ? (
+                        <>Hide Diagram <ChevronUp size={14} /></>
+                      ) : (
+                        <>Show Diagram <ChevronDown size={14} /></>
+                      )}
+                    </span>
+                  </button>
+
                   <ActionLink
-                    href={flowUrl}
-                    isValid={flowUrlValid}
+                    href={flowLinkUrl}
+                    isValid={hasFlowLink}
                     onClick={(e) => {
-                      if (!flowUrlValid) e.preventDefault();
+                      if (!hasFlowLink) e.preventDefault();
                     }}
                     style={{
                       padding: "8px 16px",
@@ -305,46 +353,51 @@ export default function ProjectDetailsCard({
                       alignItems: "center",
                       gap: "6px",
                       textDecoration: "none",
-                      boxShadow: flowUrlValid ? "0 4px 12px rgba(13,110,253,0.2)" : "none",
+                      boxShadow: hasFlowLink ? "0 4px 12px rgba(13,110,253,0.2)" : "none",
                     }}
-                    title={flowUrlValid ? "Open Flow Diagram Link" : "No link connected for this flow"}
+                    title={hasFlowLink ? "Open System Architecture Diagram Link" : "No link connected for this architecture"}
                   >
-                    View Flow <ExternalLink size={14} />
+                    View Architecture <ExternalLink size={14} />
                   </ActionLink>
                 </div>
 
-                <div
-                  onClick={openFlowLightbox}
-                  style={{
-                    borderRadius: 16,
-                    overflow: "hidden",
-                    border: "1px solid rgba(226, 232, 240, 0.8)",
-                    background: "rgba(248, 251, 255, 0.8)",
-                    padding: 12,
-                    cursor: "pointer",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <motion.img
-                    whileHover={{ scale: 1.02 }}
-                    src={getTransformedUrl(flowImage, { width: 1200 })}
-                    alt="Flow Architecture"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.target.src = flowImage;
-                    }}
+                {/* Lazy-Loaded Embed Container (only renders iframe when opened) */}
+                {isFlowExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
                     style={{
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      border: "1px solid rgba(226, 232, 240, 0.8)",
+                      background: "#f8fbff",
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
+                      position: "relative",
+                      width: "100%",
                       maxWidth: "100%",
-                      maxHeight: 450,
-                      width: "auto",
-                      height: "auto",
-                      objectFit: "contain",
-                      borderRadius: 12,
+                      height: isMobile ? 550 : 750,
+                      minHeight: isMobile ? 480 : 650,
+                      boxSizing: "border-box",
                     }}
-                  />
-                </div>
+                  >
+                    <iframe
+                      src={flowEmbedUrl}
+                      title={`${selected.title} System Architecture Diagram`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        border: "none",
+                        borderRadius: 16,
+                        display: "block",
+                      }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      loading="lazy"
+                    />
+                  </motion.div>
+                )}
               </div>
             )}
 

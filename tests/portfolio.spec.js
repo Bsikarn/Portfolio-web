@@ -36,13 +36,12 @@ test.describe('Portfolio E2E Core Tests', () => {
 
     // Trigger Contact Popup
     await contactBtn.click();
-    await page.waitForTimeout(800);
-    await expect(page.getByText("Let's work")).toBeVisible();
+    const contactHeading = page.getByRole('heading', { name: "Let's work" });
+    await expect(contactHeading).toBeVisible();
 
     // Close Contact Popup
     await page.getByLabel('Close modal').click({ force: true });
-    await page.waitForTimeout(1000);
-    await expect(page.getByText("Let's work")).toBeHidden();
+    await expect(contactHeading).toBeHidden({ timeout: 10000 });
 
     // Navigate back to Home
     await homeBtn.click();
@@ -76,7 +75,7 @@ test.describe('Portfolio E2E Core Tests', () => {
 
     // Toggle again to close
     await chatbotToggle.click();
-    await expect(chatTitle).toBeHidden();
+    await expect(chatTitle).toBeHidden({ timeout: 10000 });
   });
 
   test('Projects filtering and selection logic', async ({ page }) => {

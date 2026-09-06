@@ -223,13 +223,9 @@ export default function App() {
       </Suspense>
 
       {/* Render Contact Popup Modal */}
-      <AnimatePresence>
-        {contactOpen ? (
-          <Suspense fallback={null}>
-            <ContactPopup isOpen={contactOpen} onClose={() => setContactOpen(false)} />
-          </Suspense>
-        ) : null}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <ContactPopup isOpen={contactOpen} onClose={() => setContactOpen(false)} />
+      </Suspense>
 
       {/* Scroll Progress Bar at the bottom of the screen */}
       {(page === "Home" || page === "Projects") && (

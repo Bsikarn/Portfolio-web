@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.17.0-dev.1">
-  <title>Portfolio Web - High-Level Runtime Architecture Diagram</title>
+  <title>Beaut.Portfolio - High-Level Runtime Architecture Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4955,11 +4955,11 @@
            data-preset-badge-blueprint="BLUEPRINT / REV 01"
            data-preset-badge-editorial="EDITORIAL / FIELD NOTE">
         <div class="pulse-dot"></div>
-        <h1>Portfolio Web - High-Level Runtime Architecture</h1>
+        <h1>Beaut.Portfolio - High-Level Runtime Architecture</h1>
       </div>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"public-flow","label":"Public Visitor Flow","focus":["public_user","cdn_edge","react_spa","supabase_postgrest","supabase_db","supabase_storage"],"note":"Follow public visitors fetching portfolio metadata, images, and project details via PostgREST API."},{"id":"admin-flow","label":"Admin CMS Management Flow","focus":["admin_user","react_spa","supabase_auth","supabase_postgrest","supabase_db","supabase_storage"],"note":"Track authenticated admin session validation and CRUD operations for projects, flow links, and achievements."},{"id":"data-sync-flow","label":"Analytics \u0026 Storage Pipeline","focus":["react_spa","site_stats_counter","supabase_storage","supabase_db"],"note":"Observe view counter persistence and project image asset streaming from Supabase Storage buckets."}]</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"user-flow","label":"Public Visitor Flow","focus":["browser_client","vercel_edge","supabase_realtime","pg_database","supabase_storage"],"note":"Standard user browsing portfolio projects, live stats, and dynamic media assets."},{"id":"ai-rag-flow","label":"AI Chatbot RAG Flow","focus":["browser_client","edge_function","pgvector","openrouter_api"],"note":"Visitor interacting with RAG AI Chatbot executing vector search and LLM inference."},{"id":"admin-ingest-flow","label":"Admin \u0026 Ingestion Pipeline","focus":["browser_client","supabase_auth","pg_database","ingest_script","pgvector"],"note":"Admin authentication and automated RAG document vector embedding pipeline."}]</script>
 
     <script id="archify-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"S cycles","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"ARCHIFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.story":"the guided story","viewer.owner.chapter":"the active chapter","viewer.owner.chapterPreview":"the chapter delta preview","viewer.owner.handoff":"the chapter handoff","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyShareCard":"Copy Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.period":"Clipboard image write not supported by this browser.","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.copiedShare":"Copied Share Card","viewer.export.downloadedShare":"Downloaded Share Card","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Route: {source} → {target} · {count} directed hop","viewer.export.card.routeSummary.other":"Route: {source} → {target} · {count} directed hops","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"ARCHIFY · ROUTE · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction} REACH","viewer.export.card.defaultBadge":"ARCHIFY · {preset} · {theme}","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guided.region":"Guided diagram views","viewer.guided.previous":"Previous guided view","viewer.guided.previous.title":"Previous guided view ([)","viewer.guided.next":"Next guided view","viewer.guided.next.title":"Next guided view (])","viewer.guided.views":"Guided views","viewer.guided.explore":"Explore this system","viewer.guided.intro":"Step through curated paths without changing the source diagram.","viewer.guided.trail":"Story trail","viewer.guided.beat":"Beat","viewer.guided.nextBeat":"Next","viewer.guided.play":"Play guided story","viewer.guided.play.title":"Play guided story (P)","viewer.guided.pause":"Pause guided story","viewer.guided.pause.title":"Pause guided story (P)","viewer.guided.replay":"Replay guided story","viewer.guided.replay.title":"Replay guided story (P)","viewer.guided.playStory":"Play story","viewer.guided.pauseStory":"Pause","viewer.guided.replayStory":"Replay story","viewer.guided.motionUnavailable":"Story playback unavailable while motion is Still","viewer.guided.enableMotion":"Switch motion to Live to play the guided story","viewer.guided.selectBeatLink":"Select a Story Beat to copy its exact link","viewer.guided.copyMoment":"Copy moment","viewer.guided.momentCopied":"Moment link copied","viewer.guided.momentCopyFailed":"Could not copy story moment link","viewer.guided.copied":"Copied","viewer.guided.copyFailed":"Copy failed","viewer.guided.showAll":"Show all","viewer.guided.showAll.aria":"Show entire diagram","viewer.guided.chapters":"Story chapters","viewer.guided.storyTrail":"Story trail for {label}: {count} beats","viewer.guided.chapter.open":"Open chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.current":"Current chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.selectedNodes":"{count} selected nodes","viewer.guided.chapter.stops":"{count} stops","viewer.guided.chapter.stop.one":"{count} stop","viewer.guided.chapter.stop.other":"{count} stops","viewer.guided.chapter.current.title":"{label} — current chapter, {count} stops","viewer.guided.chapter.delta.expanded":"{stay} stay, {enter} enter, {leave} leave","viewer.guided.chapter.delta.aria":"Open chapter {index} of {total}: {label}. Chapter focus delta: {delta}","viewer.guided.chapter.delta.title":"{label} — {delta} chapter focus","viewer.guided.handoff":"{from} → {to} · via {label}","viewer.guided.share.chapter":"Chapter {index} / {total}","viewer.guided.share.initial":"Chapter 01 / 01","viewer.guided.share.default":"Guided chapter","viewer.guided.state.ready":"Ready","viewer.guided.state.playing":"Playing","viewer.guided.state.settled":"Settled","viewer.guided.state.paused":"Paused","viewer.guided.state.pinned":"Pinned","viewer.guided.state.still":"Still","viewer.guided.share.step":"Step {index} / {total} · {label}","viewer.guided.share.staticMoment":"{step} · Static moment","viewer.guided.share.complete":"{count} steps complete · {note}","viewer.guided.share.settled":"Path settled for reading.","viewer.guided.share.staticPath":"{count} steps · Static path","viewer.guided.share.ready":"{count} steps · Ready","viewer.guided.share.aria":"{state} chapter {index} of {total}: {label}. {beat}. {route}","viewer.guided.beat.start":"Beat {index} / {total} · {label} · starting point","viewer.guided.beat.forward":"Beat {index} / {total} · {from} → {to}","viewer.guided.beat.reverse":"Beat {index} / {total} · {from} → {to} · reverse authored link","viewer.guided.beat.multiple":"Beat {index} / {total} · {from} ⇄ {to} · {count} authored links","viewer.guided.beat.group":"Beat {index} / {total} · {from} · {to} · grouped · no direct link","viewer.guided.beat.aria.prefix":"Story beat {index} of {total}: {label}. ","viewer.guided.beat.aria.start":"Starting point.","viewer.guided.beat.aria.forward":"From {from} through one authored forward relationship.","viewer.guided.beat.aria.reverse":"From {from}; the authored relationship points from {to} to {from}.","viewer.guided.beat.aria.multiple":"From {from} through {count} authored relationships; shown without arbitrary motion.","viewer.guided.beat.aria.group":"Grouped from {from} with no direct authored relationship.","viewer.guided.caption.start":"Starting point","viewer.guided.caption.grouped":"Grouped transition · no direct authored link","viewer.guided.caption.more":" +{count} more","viewer.guided.caption.reverse":"Reverse authored relationship","viewer.guided.caption.relationships":"{count} authored relationships","viewer.guided.caption.relationship":"Authored relationship","viewer.guided.caption.direction":"authored direction: {from} → {to}","viewer.guided.caption.starting":"Authored starting point","viewer.guided.beatLink":"Copy link to current story moment: Beat {index} of {total}: {label}","viewer.guided.noStory":"This diagram has no authored guided story.","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.story":"Play the guided story","viewer.guide.story.hint":"Walk the authored chapters and real relationships.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.facts":"{nodes} · {relationships} · {views}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.fact.view.one":"{count} guided view","viewer.guide.fact.view.other":"{count} guided views","viewer.guide.story.available.one":"Walk {count} authored chapter and its real relationships.","viewer.guide.story.available.other":"Walk {count} authored chapters and their real relationships.","viewer.guide.story.unavailable":"No authored guided story in this diagram.","viewer.guide.open":"Open diagram guide","viewer.guide.noStory":"This diagram has no authored guided story.","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.sourceMarker":"SRC","viewer.passport.beacon.one":"{count} verified source; focus this node to inspect","viewer.passport.beacon.other":"{count} verified sources; focus this node to inspect","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Route probe","viewer.route.start":"Choose a start node","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Traced route","viewer.route.pickTwo":"Pick two semantic nodes on the diagram","viewer.route.pickOne":"Pick a semantic node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Choose the source, then the destination. Direction matters.","viewer.route.destination":"Choose a destination from {label}","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"A route needs two distinct semantic nodes.","viewer.route.unreachable":"No directed route to {label}","viewer.route.unreachable.detail":"{target} is not reachable from {source}. Pick a highlighted destination.","viewer.route.start.instructions":"Select the source. The next step will reveal only directed destinations.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest authored route","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} directed hop","viewer.route.overview.hop.other":"{count} directed hops","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} directed destination available. Pick a highlighted node.","viewer.route.destination.count.other":"{count} directed destinations available. Pick a highlighted node.","viewer.route.noOutgoing":"No outgoing route starts here. Clear and choose another source.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"PATH","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
@@ -5004,8 +5004,8 @@
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
-      <svg viewBox="0 0 999 548" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
-        <title id="archify-diagram-title">Portfolio Web - High-Level Runtime Architecture</title>
+      <svg viewBox="0 0 1360 612" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="archify-diagram-title">Beaut.Portfolio - High-Level Runtime Architecture</title>
         <desc id="archify-diagram-description">An architecture diagram generated by Archify.</desc>
         <!-- Definitions -->
         <defs>
@@ -5030,219 +5030,223 @@
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Client Environment" x="20" y="76" width="175" height="254" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Client Environment" x="30" y="250" width="230" height="114" rx="12" class="c-region" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Frontend &amp; Edge Tier" x="250" y="76" width="180" height="254" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" data-composition-frame-label="Edge &amp; Delivery Infrastructure" x="280" y="70" width="230" height="114" rx="12" class="c-region" stroke-width="1"/>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" data-composition-frame-label="Supabase Cloud Platform" x="506" y="76" width="453" height="404" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" data-composition-frame-label="Cloud Backend (Supabase Services)" x="550" y="70" width="500" height="474" rx="12" class="c-region" stroke-width="1"/>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="3" data-composition-frame-label="External AI Services &amp; Ingestion Workers" x="1090" y="70" width="230" height="474" rx="12" class="c-region" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="public_user" data-edge-to="cdn_edge" data-edge-label="HTTPS GET" data-edge-key="0" data-edge-id="c1" data-composition-points="175,130;270,130" d="M 175 130 L 270 130" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="cdn_edge" data-edge-to="react_spa" data-edge-label="Serve App Bundle" data-edge-key="1" data-edge-id="c2" data-composition-points="340,160;340,250" d="M 340 160 L 340 250" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="admin_user" data-edge-to="react_spa" data-edge-label="Manage CMS" data-edge-key="2" data-edge-id="c3" data-composition-points="175,280;270,280" d="M 175 280 L 270 280" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="react_spa" data-edge-to="supabase_auth" data-edge-label="JWT Auth" data-edge-key="3" data-edge-id="c4" data-composition-points="410,280;480,280;480,130;530,130" d="M 410 280 L 472 280 Q 480 280 480 272 L 480 138 Q 480 130 488 130 L 530 130" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
-        <path data-edge-from="react_spa" data-edge-to="supabase_postgrest" data-edge-label="REST Query" data-edge-key="4" data-edge-id="c5" data-composition-points="410,280;530,280" d="M 410 280 L 530 280" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="react_spa" data-edge-to="site_stats_counter" data-edge-label="Increment View" data-edge-key="5" data-edge-id="c6" data-composition-points="410,280;440,280;440,430;530,430" d="M 410 280 L 432 280 Q 440 280 440 288 L 440 422 Q 440 430 448 430 L 530 430" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="supabase_postgrest" data-edge-to="supabase_db" data-edge-label="SQL Query" data-edge-key="6" data-edge-id="c7" data-composition-points="670,280;790,280" d="M 670 280 L 790 280" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="site_stats_counter" data-edge-to="supabase_db" data-edge-label="Save Stats" data-edge-key="7" data-edge-id="c8" data-composition-points="670,430;862.5,430;862.5,310" d="M 670 430 L 854.5 430 Q 862.5 430 862.5 422 L 862.5 310" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="supabase_postgrest" data-edge-to="supabase_storage" data-edge-label="Fetch Media" data-edge-key="8" data-edge-id="c9" data-composition-points="600,250;600,226;766,226;766,130;790,130" d="M 600 250 L 600 234 Q 600 226 608 226 L 758 226 Q 766 226 766 218 L 766 138 Q 766 130 774 130 L 790 130" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="browser_client" data-edge-to="vercel_edge" data-edge-label="Static Assets" data-edge-key="0" data-edge-id="client-to-edge" data-composition-points="138,280;138,256;286,256;286,132;310,132" d="M 138 280 L 138 264 Q 138 256 146 256 L 278 256 Q 286 256 286 248 L 286 140 Q 286 132 294 132 L 310 132" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="browser_client" data-edge-to="supabase_auth" data-edge-label="Auth JWT" data-edge-key="1" data-edge-id="client-auth" data-composition-points="152,280;152,256;556,256;556,132;580,132" d="M 152 280 L 152 264 Q 152 256 160 256 L 548 256 Q 556 256 556 248 L 556 140 Q 556 132 564 132 L 580 132" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="browser_client" data-edge-to="supabase_realtime" data-edge-label="WebSocket Stats" data-edge-key="2" data-edge-id="client-realtime" data-composition-points="230,312;580,312" d="M 230 312 L 580 312" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="browser_client" data-edge-to="supabase_storage" data-edge-label="Media Fetch" data-edge-key="3" data-edge-id="client-storage" data-composition-points="145,344;145,368;556,368;556,492;580,492" d="M 145 344 L 145 360 Q 145 368 153 368 L 548 368 Q 556 368 556 376 L 556 484 Q 556 492 564 492 L 580 492" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="supabase_realtime" data-edge-to="pg_database" data-edge-label="Postgres Sync" data-edge-key="4" data-edge-id="realtime-pg" data-composition-points="750,312;850,312" d="M 750 312 L 850 312" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="edge_function" data-edge-to="pgvector" data-edge-label="Vector Search" data-edge-key="5" data-edge-id="edge-fn-vector" data-composition-points="1020,132;1030,132;1060,132;1060,492;1020,492;1020,492" d="M 1020 132 L 1025 132 Q 1030 132 1035 132 L 1052 132 Q 1060 132 1060 140 L 1060 484 Q 1060 492 1052 492 L 1020 492 L 1020 492" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="edge_function" data-edge-to="openrouter_api" data-edge-label="LLM API Request" data-edge-key="6" data-edge-id="edge-fn-openrouter" data-composition-points="1020,132;1120,132" d="M 1020 132 L 1120 132" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="ingest_script" data-edge-to="pgvector" data-edge-label="Vector Sync" data-edge-key="7" data-edge-id="ingest-vector" data-composition-points="1120,492;1020,492" d="M 1120 492 L 1020 492" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
 
         <!-- Components -->
-        <g id="node-public_user" data-node-id="public_user" data-node-label="Public Visitor" tabindex="0" role="button" aria-label="Focus Public Visitor, Browser / Mobile Client, Client Environment" aria-pressed="false" data-node-kind="external" data-node-sublabel="Browser / Mobile Client" data-node-tag="Public Access" data-node-context="Client Environment">
-          <title>Public Visitor · Browser / Mobile Client · Client Environment · Public Access</title>
-          <rect x="40" y="100" width="135" height="60" rx="6" class="c-mask"/>
-          <rect x="40" y="100" width="135" height="60" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 106) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="107.5" y="128" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Public Visitor</text>
-        <text data-detail="context" x="107.5" y="144" class="t-muted" font-size="9" text-anchor="middle">Browser / Mobile Client</text>
-        <text data-detail="fine" x="107.5" y="152" class="t-external" font-size="7" text-anchor="middle">Public Access</text>
-        </g>
-
-        <g id="node-admin_user" data-node-id="admin_user" data-node-label="Admin Operator" tabindex="0" role="button" aria-label="Focus Admin Operator, CMS Portal Client, Client Environment" aria-pressed="false" data-node-kind="security" data-node-sublabel="CMS Portal Client" data-node-tag="Authenticated" data-node-context="Client Environment">
-          <title>Admin Operator · CMS Portal Client · Client Environment · Authenticated</title>
-          <rect x="40" y="250" width="135" height="60" rx="6" class="c-mask"/>
-          <rect x="40" y="250" width="135" height="60" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(46 256) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="107.5" y="278" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Admin Operator</text>
-        <text data-detail="context" x="107.5" y="294" class="t-muted" font-size="9" text-anchor="middle">CMS Portal Client</text>
-        <text data-detail="fine" x="107.5" y="302" class="t-security" font-size="7" text-anchor="middle">Authenticated</text>
-        </g>
-
-        <g id="node-cdn_edge" data-node-id="cdn_edge" data-node-label="CDN &amp; Static Host" tabindex="0" role="button" aria-label="Focus CDN &amp; Static Host, Vite Bundle Hosting, Frontend &amp; Edge Tier" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="Vite Bundle Hosting" data-node-tag="Edge Hosting" data-node-context="Frontend &amp; Edge Tier">
-          <title>CDN &amp; Static Host · Vite Bundle Hosting · Frontend &amp; Edge Tier · Edge Hosting</title>
-          <rect x="270" y="100" width="140" height="60" rx="6" class="c-mask"/>
-          <rect x="270" y="100" width="140" height="60" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(276 106) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="340" y="128" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CDN &amp; Static Host</text>
-        <text data-detail="context" x="340" y="144" class="t-muted" font-size="9" text-anchor="middle">Vite Bundle Hosting</text>
-        <text data-detail="fine" x="340" y="152" class="t-cloud" font-size="7" text-anchor="middle">Edge Hosting</text>
-        </g>
-
-        <g id="node-react_spa" data-node-id="react_spa" data-node-label="React Portfolio SPA" tabindex="0" role="button" aria-label="Focus React Portfolio SPA, Tailwind + Framer Motion, Frontend &amp; Edge Tier" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Tailwind + Framer Motion" data-node-tag="Single-Page App" data-node-context="Frontend &amp; Edge Tier">
-          <title>React Portfolio SPA · Tailwind + Framer Motion · Frontend &amp; Edge Tier · Single-Page App</title>
-          <rect x="270" y="250" width="140" height="60" rx="6" class="c-mask"/>
-          <rect x="270" y="250" width="140" height="60" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(276 256) scale(0.6875)">
+        <g id="node-browser_client" data-node-id="browser_client" data-node-label="React Single Page App" tabindex="0" role="button" aria-label="Focus React Single Page App, Vite + Tailwind + Motion, Client Environment" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Vite + Tailwind + Motion" data-node-context="Client Environment">
+          <title>React Single Page App · Vite + Tailwind + Motion · Client Environment</title>
+          <rect x="60" y="280" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="60" y="280" width="170" height="64" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(66 286) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="340" y="278" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">React Portfolio SPA</text>
-        <text data-detail="context" x="340" y="294" class="t-muted" font-size="9" text-anchor="middle">Tailwind + Framer Motion</text>
-        <text data-detail="fine" x="340" y="302" class="t-frontend" font-size="7" text-anchor="middle">Single-Page App</text>
+          <text data-node-label="" data-detail-anchor="" x="145" y="310" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">React Single Page App</text>
+        <text data-detail="context" x="145" y="326" class="t-muted" font-size="9" text-anchor="middle">Vite + Tailwind + Motion</text>
         </g>
 
-        <g id="node-supabase_auth" data-node-id="supabase_auth" data-node-label="Supabase Auth" tabindex="0" role="button" aria-label="Focus Supabase Auth, JWT &amp; Auth Provider, Supabase Cloud Platform" aria-pressed="false" data-node-kind="security" data-node-sublabel="JWT &amp; Auth Provider" data-node-tag="Identity Provider" data-node-context="Supabase Cloud Platform">
-          <title>Supabase Auth · JWT &amp; Auth Provider · Supabase Cloud Platform · Identity Provider</title>
-          <rect x="530" y="100" width="140" height="60" rx="6" class="c-mask"/>
-          <rect x="530" y="100" width="140" height="60" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(536 106) scale(0.6875)">
+        <g id="node-vercel_edge" data-node-id="vercel_edge" data-node-label="Vercel Edge Network" tabindex="0" role="button" aria-label="Focus Vercel Edge Network, CDN &amp; Asset Server, Edge &amp; Delivery Infrastructure" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="CDN &amp; Asset Server" data-node-context="Edge &amp; Delivery Infrastructure">
+          <title>Vercel Edge Network · CDN &amp; Asset Server · Edge &amp; Delivery Infrastructure</title>
+          <rect x="310" y="100" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="310" y="100" width="170" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(316 106) scale(0.6875)">
+            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="395" y="130" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Vercel Edge Network</text>
+        <text data-detail="context" x="395" y="146" class="t-muted" font-size="9" text-anchor="middle">CDN &amp; Asset Server</text>
+        </g>
+
+        <g id="node-supabase_auth" data-node-id="supabase_auth" data-node-label="Supabase Auth" tabindex="0" role="button" aria-label="Focus Supabase Auth, Email/Password &amp; JWT, Cloud Backend (Supabase Services)" aria-pressed="false" data-node-kind="security" data-node-sublabel="Email/Password &amp; JWT" data-node-context="Cloud Backend (Supabase Services)">
+          <title>Supabase Auth · Email/Password &amp; JWT · Cloud Backend (Supabase Services)</title>
+          <rect x="580" y="100" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="580" y="100" width="170" height="64" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(586 106) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="600" y="128" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Supabase Auth</text>
-        <text data-detail="context" x="600" y="144" class="t-muted" font-size="9" text-anchor="middle">JWT &amp; Auth Provider</text>
-        <text data-detail="fine" x="600" y="152" class="t-security" font-size="7" text-anchor="middle">Identity Provider</text>
+          <text data-node-label="" data-detail-anchor="" x="665" y="130" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Supabase Auth</text>
+        <text data-detail="context" x="665" y="146" class="t-muted" font-size="9" text-anchor="middle">Email/Password &amp; JWT</text>
         </g>
 
-        <g id="node-supabase_postgrest" data-node-id="supabase_postgrest" data-node-label="PostgREST Gateway" tabindex="0" role="button" aria-label="Focus PostgREST Gateway, REST API Gateway, Supabase Cloud Platform" aria-pressed="false" data-node-kind="backend" data-node-sublabel="REST API Gateway" data-node-tag="API Middleware" data-node-context="Supabase Cloud Platform">
-          <title>PostgREST Gateway · REST API Gateway · Supabase Cloud Platform · API Middleware</title>
-          <rect x="530" y="250" width="140" height="60" rx="6" class="c-mask"/>
-          <rect x="530" y="250" width="140" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(536 256) scale(0.6875)">
+        <g id="node-supabase_realtime" data-node-id="supabase_realtime" data-node-label="Supabase Realtime" tabindex="0" role="button" aria-label="Focus Supabase Realtime, WebSocket Engine, Cloud Backend (Supabase Services)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="WebSocket Engine" data-node-context="Cloud Backend (Supabase Services)">
+          <title>Supabase Realtime · WebSocket Engine · Cloud Backend (Supabase Services)</title>
+          <rect x="580" y="280" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="580" y="280" width="170" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(586 286) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="600" y="278" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">PostgREST Gateway</text>
-        <text data-detail="context" x="600" y="294" class="t-muted" font-size="9" text-anchor="middle">REST API Gateway</text>
-        <text data-detail="fine" x="600" y="302" class="t-backend" font-size="7" text-anchor="middle">API Middleware</text>
+          <text data-node-label="" data-detail-anchor="" x="665" y="310" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Supabase Realtime</text>
+        <text data-detail="context" x="665" y="326" class="t-muted" font-size="9" text-anchor="middle">WebSocket Engine</text>
         </g>
 
-        <g id="node-site_stats_counter" data-node-id="site_stats_counter" data-node-label="Site Stats Counter" tabindex="0" role="button" aria-label="Focus Site Stats Counter, Analytics Tracker, Supabase Cloud Platform" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Analytics Tracker" data-node-tag="Analytics" data-node-context="Supabase Cloud Platform">
-          <title>Site Stats Counter · Analytics Tracker · Supabase Cloud Platform · Analytics</title>
-          <rect x="530" y="400" width="140" height="60" rx="6" class="c-mask"/>
-          <rect x="530" y="400" width="140" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(536 406) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="600" y="428" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Site Stats Counter</text>
-        <text data-detail="context" x="600" y="444" class="t-muted" font-size="9" text-anchor="middle">Analytics Tracker</text>
-        <text data-detail="fine" x="600" y="452" class="t-backend" font-size="7" text-anchor="middle">Analytics</text>
-        </g>
-
-        <g id="node-supabase_storage" data-node-id="supabase_storage" data-node-label="Supabase Storage" tabindex="0" role="button" aria-label="Focus Supabase Storage, project-images bucket, Supabase Cloud Platform" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="project-images bucket" data-node-tag="Asset Storage" data-node-context="Supabase Cloud Platform">
-          <title>Supabase Storage · project-images bucket · Supabase Cloud Platform · Asset Storage</title>
-          <rect x="790" y="100" width="145" height="60" rx="6" class="c-mask"/>
-          <rect x="790" y="100" width="145" height="60" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(796 106) scale(0.6875)">
+        <g id="node-supabase_storage" data-node-id="supabase_storage" data-node-label="Supabase Storage" tabindex="0" role="button" aria-label="Focus Supabase Storage, CDN + Transformations, Cloud Backend (Supabase Services)" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="CDN + Transformations" data-node-context="Cloud Backend (Supabase Services)">
+          <title>Supabase Storage · CDN + Transformations · Cloud Backend (Supabase Services)</title>
+          <rect x="580" y="460" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="580" y="460" width="170" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(586 466) scale(0.6875)">
             <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="862.5" y="128" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Supabase Storage</text>
-        <text data-detail="context" x="862.5" y="144" class="t-muted" font-size="9" text-anchor="middle">project-images bucket</text>
-        <text data-detail="fine" x="862.5" y="152" class="t-cloud" font-size="7" text-anchor="middle">Asset Storage</text>
+          <text data-node-label="" data-detail-anchor="" x="665" y="490" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Supabase Storage</text>
+        <text data-detail="context" x="665" y="506" class="t-muted" font-size="9" text-anchor="middle">CDN + Transformations</text>
         </g>
 
-        <g id="node-supabase_db" data-node-id="supabase_db" data-node-label="PostgreSQL Database" tabindex="0" role="button" aria-label="Focus PostgreSQL Database, Projects, Stats, Activities, Supabase Cloud Platform" aria-pressed="false" data-node-kind="database" data-node-sublabel="Projects, Stats, Activities" data-node-tag="Durable State" data-node-context="Supabase Cloud Platform">
-          <title>PostgreSQL Database · Projects, Stats, Activities · Supabase Cloud Platform · Durable State</title>
-          <rect x="790" y="250" width="145" height="60" rx="6" class="c-mask"/>
-          <rect x="790" y="250" width="145" height="60" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(796 256) scale(0.6875)">
+        <g id="node-edge_function" data-node-id="edge_function" data-node-label="Supabase Edge Function" tabindex="0" role="button" aria-label="Focus Supabase Edge Function, chat-with-qwen / Gemini, Cloud Backend (Supabase Services)" aria-pressed="false" data-node-kind="backend" data-node-sublabel="chat-with-qwen / Gemini" data-node-context="Cloud Backend (Supabase Services)">
+          <title>Supabase Edge Function · chat-with-qwen / Gemini · Cloud Backend (Supabase Services)</title>
+          <rect x="850" y="100" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="850" y="100" width="170" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(856 106) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="935" y="130" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Supabase Edge Function</text>
+        <text data-detail="context" x="935" y="146" class="t-muted" font-size="9" text-anchor="middle">chat-with-qwen / Gemini</text>
+        </g>
+
+        <g id="node-pg_database" data-node-id="pg_database" data-node-label="PostgreSQL Database" tabindex="0" role="button" aria-label="Focus PostgreSQL Database, Projects, Stats, Experiences, Cloud Backend (Supabase Services)" aria-pressed="false" data-node-kind="database" data-node-sublabel="Projects, Stats, Experiences" data-node-context="Cloud Backend (Supabase Services)">
+          <title>PostgreSQL Database · Projects, Stats, Experiences · Cloud Backend (Supabase Services)</title>
+          <rect x="850" y="280" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="850" y="280" width="170" height="64" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(856 286) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="862.5" y="278" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">PostgreSQL Database</text>
-        <text data-detail="context" x="862.5" y="294" class="t-muted" font-size="8.4" text-anchor="middle">Projects, Stats, Activities</text>
-        <text data-detail="fine" x="862.5" y="302" class="t-database" font-size="7" text-anchor="middle">Durable State</text>
+          <text data-node-label="" data-detail-anchor="" x="935" y="310" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">PostgreSQL Database</text>
+        <text data-detail="context" x="935" y="326" class="t-muted" font-size="9" text-anchor="middle">Projects, Stats, Experiences</text>
+        </g>
+
+        <g id="node-pgvector" data-node-id="pgvector" data-node-label="pgvector Storage" tabindex="0" role="button" aria-label="Focus pgvector Storage, 3072d Embeddings &amp; RAG, Cloud Backend (Supabase Services)" aria-pressed="false" data-node-kind="database" data-node-sublabel="3072d Embeddings &amp; RAG" data-node-context="Cloud Backend (Supabase Services)">
+          <title>pgvector Storage · 3072d Embeddings &amp; RAG · Cloud Backend (Supabase Services)</title>
+          <rect x="850" y="460" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="850" y="460" width="170" height="64" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(856 466) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="935" y="490" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">pgvector Storage</text>
+        <text data-detail="context" x="935" y="506" class="t-muted" font-size="9" text-anchor="middle">3072d Embeddings &amp; RAG</text>
+        </g>
+
+        <g id="node-openrouter_api" data-node-id="openrouter_api" data-node-label="OpenRouter AI Gateway" tabindex="0" role="button" aria-label="Focus OpenRouter AI Gateway, RAG Prompt &amp; LLM, External AI Services &amp; Ingestion Workers" aria-pressed="false" data-node-kind="external" data-node-sublabel="RAG Prompt &amp; LLM" data-node-context="External AI Services &amp; Ingestion Workers">
+          <title>OpenRouter AI Gateway · RAG Prompt &amp; LLM · External AI Services &amp; Ingestion Workers</title>
+          <rect x="1120" y="100" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="1120" y="100" width="170" height="64" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(1126 106) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1205" y="130" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">OpenRouter AI Gateway</text>
+        <text data-detail="context" x="1205" y="146" class="t-muted" font-size="9" text-anchor="middle">RAG Prompt &amp; LLM</text>
+        </g>
+
+        <g id="node-ingest_script" data-node-id="ingest_script" data-node-label="RAG Ingestion Pipeline" tabindex="0" role="button" aria-label="Focus RAG Ingestion Pipeline, ingest-portfolio.ts, External AI Services &amp; Ingestion Workers" aria-pressed="false" data-node-kind="backend" data-node-sublabel="ingest-portfolio.ts" data-node-context="External AI Services &amp; Ingestion Workers">
+          <title>RAG Ingestion Pipeline · ingest-portfolio.ts · External AI Services &amp; Ingestion Workers</title>
+          <rect x="1120" y="460" width="170" height="64" rx="6" class="c-mask"/>
+          <rect x="1120" y="460" width="170" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1126 466) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1205" y="490" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">RAG Ingestion Pipeline</text>
+        <text data-detail="context" x="1205" y="506" class="t-muted" font-size="9" text-anchor="middle">ingest-portfolio.ts</text>
         </g>
 
         <!-- Connection labels -->
-        <g data-detail="context" data-edge-from="public_user" data-edge-to="cdn_edge" data-edge-label="HTTPS GET" data-edge-key="0" data-edge-id="c1">
-          <rect x="195.9" y="110" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
-          <text x="222.5" y="120" class="t-backend" font-size="8" text-anchor="middle">HTTPS GET</text>
+        <g data-detail="context" data-edge-from="browser_client" data-edge-to="vercel_edge" data-edge-label="Static Assets" data-edge-key="0" data-edge-id="client-to-edge">
+          <rect x="175.8" y="236" width="72.4" height="14" rx="3" class="c-mask"/>
+          <text x="212" y="246" class="t-backend" font-size="8" text-anchor="middle">Static Assets</text>
         </g>
-        <g data-detail="context" data-edge-from="cdn_edge" data-edge-to="react_spa" data-edge-label="Serve App Bundle" data-edge-key="1" data-edge-id="c2">
-          <rect x="296.6" y="170" width="86.8" height="14" rx="3" class="c-mask"/>
-          <text x="340" y="180" class="t-messagebus" font-size="8" text-anchor="middle">Serve App Bundle</text>
+        <g data-detail="context" data-edge-from="browser_client" data-edge-to="supabase_auth" data-edge-label="Auth JWT" data-edge-key="1" data-edge-id="client-auth">
+          <rect x="329.8" y="236" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="354" y="246" class="t-security" font-size="8" text-anchor="middle">Auth JWT</text>
         </g>
-        <g data-detail="context" data-edge-from="admin_user" data-edge-to="react_spa" data-edge-label="Manage CMS" data-edge-key="2" data-edge-id="c3">
-          <rect x="193.5" y="260" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="222.5" y="270" class="t-backend" font-size="8" text-anchor="middle">Manage CMS</text>
+        <g data-detail="context" data-edge-from="browser_client" data-edge-to="supabase_realtime" data-edge-label="WebSocket Stats" data-edge-key="2" data-edge-id="client-realtime">
+          <rect x="364" y="292" width="82" height="14" rx="3" class="c-mask"/>
+          <text x="405" y="302" class="t-muted" font-size="8" text-anchor="middle">WebSocket Stats</text>
         </g>
-        <g data-detail="context" data-edge-from="react_spa" data-edge-to="supabase_auth" data-edge-label="JWT Auth" data-edge-key="3" data-edge-id="c4">
-          <rect x="455.8" y="185" width="48.4" height="14" rx="3" class="c-mask"/>
-          <text x="480" y="195" class="t-security" font-size="8" text-anchor="middle">JWT Auth</text>
+        <g data-detail="context" data-edge-from="browser_client" data-edge-to="supabase_storage" data-edge-label="Media Fetch" data-edge-key="3" data-edge-id="client-storage">
+          <rect x="319.1" y="348" width="62.8" height="14" rx="3" class="c-mask"/>
+          <text x="350.5" y="358" class="t-muted" font-size="8" text-anchor="middle">Media Fetch</text>
         </g>
-        <g data-detail="context" data-edge-from="react_spa" data-edge-to="supabase_postgrest" data-edge-label="REST Query" data-edge-key="4" data-edge-id="c5">
-          <rect x="416" y="260" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="445" y="270" class="t-backend" font-size="8" text-anchor="middle">REST Query</text>
+        <g data-detail="context" data-edge-from="supabase_realtime" data-edge-to="pg_database" data-edge-label="Postgres Sync" data-edge-key="4" data-edge-id="realtime-pg">
+          <rect x="763.8" y="292" width="72.4" height="14" rx="3" class="c-mask"/>
+          <text x="800" y="302" class="t-muted" font-size="8" text-anchor="middle">Postgres Sync</text>
         </g>
-        <g data-detail="context" data-edge-from="react_spa" data-edge-to="site_stats_counter" data-edge-label="Increment View" data-edge-key="5" data-edge-id="c6">
-          <rect x="401.4" y="335" width="77.2" height="14" rx="3" class="c-mask"/>
-          <text x="440" y="345" class="t-messagebus" font-size="8" text-anchor="middle">Increment View</text>
+        <g data-detail="context" data-edge-from="edge_function" data-edge-to="pgvector" data-edge-label="Vector Search" data-edge-key="5" data-edge-id="edge-fn-vector">
+          <rect x="1038.8" y="300" width="72.4" height="14" rx="3" class="c-mask"/>
+          <text x="1075" y="310" class="t-muted" font-size="8" text-anchor="middle">Vector Search</text>
         </g>
-        <g data-detail="context" data-edge-from="supabase_postgrest" data-edge-to="supabase_db" data-edge-label="SQL Query" data-edge-key="6" data-edge-id="c7">
-          <rect x="703.4" y="260" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
-          <text x="730" y="270" class="t-muted" font-size="8" text-anchor="middle">SQL Query</text>
+        <g data-detail="context" data-edge-from="edge_function" data-edge-to="openrouter_api" data-edge-label="LLM API Request" data-edge-key="6" data-edge-id="edge-fn-openrouter">
+          <rect x="1029" y="112" width="82" height="14" rx="3" class="c-mask"/>
+          <text x="1070" y="122" class="t-muted" font-size="8" text-anchor="middle">LLM API Request</text>
         </g>
-        <g data-detail="context" data-edge-from="site_stats_counter" data-edge-to="supabase_db" data-edge-label="Save Stats" data-edge-key="7" data-edge-id="c8">
-          <rect x="833.5" y="350" width="58" height="14" rx="3" class="c-mask"/>
-          <text x="862.5" y="360" class="t-messagebus" font-size="8" text-anchor="middle">Save Stats</text>
-        </g>
-        <g data-detail="context" data-edge-from="supabase_postgrest" data-edge-to="supabase_storage" data-edge-label="Fetch Media" data-edge-key="8" data-edge-id="c9">
-          <rect x="651.6" y="206" width="62.8" height="14" rx="3" class="c-mask"/>
-          <text x="683" y="216" class="t-messagebus" font-size="8" text-anchor="middle">Fetch Media</text>
+        <g data-detail="context" data-edge-from="ingest_script" data-edge-to="pgvector" data-edge-label="Vector Sync" data-edge-key="7" data-edge-id="ingest-vector">
+          <rect x="1038.6" y="496" width="62.8" height="14" rx="3" class="c-mask"/>
+          <text x="1070" y="506" class="t-messagebus" font-size="8" text-anchor="middle">Vector Sync</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
         <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="Client Environment">
-          <rect data-graph-role="structural-frame-label-mask" x="24" y="80" width="107.2" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="28" y="93" class="t-cloud" font-size="9" font-weight="600">Client Environment</text>
+          <rect data-graph-role="structural-frame-label-mask" x="34" y="260" width="107.2" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="38" y="273" class="t-cloud" font-size="9" font-weight="600">Client Environment</text>
         </g>
 
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Frontend &amp; Edge Tier">
-          <rect data-graph-role="structural-frame-label-mask" x="254" y="80" width="118" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="258" y="93" class="t-cloud" font-size="9" font-weight="600">Frontend &amp; Edge Tier</text>
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="region" data-composition-frame-label="Edge &amp; Delivery Infrastructure">
+          <rect data-graph-role="structural-frame-label-mask" x="284" y="80" width="172" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="288" y="93" class="t-cloud" font-size="9" font-weight="600">Edge &amp; Delivery Infrastructure</text>
         </g>
 
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="region" data-composition-frame-label="Supabase Cloud Platform">
-          <rect data-graph-role="structural-frame-label-mask" x="510" y="80" width="134.2" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="514" y="93" class="t-cloud" font-size="9" font-weight="600">Supabase Cloud Platform</text>
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="region" data-composition-frame-label="Cloud Backend (Supabase Services)">
+          <rect data-graph-role="structural-frame-label-mask" x="554" y="80" width="188.2" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="558" y="93" class="t-cloud" font-size="9" font-weight="600">Cloud Backend (Supabase Services)</text>
+        </g>
+
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="3" data-composition-frame-kind="region" data-composition-frame-label="External AI Services &amp; Ingestion Workers">
+          <rect data-graph-role="structural-frame-label-mask" x="1094" y="80" width="222" height="16" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="1098" y="92.83333333333333" class="t-cloud" font-size="8.833333333333334" font-weight="600">External AI Services &amp; Ingestion Workers</text>
         </g>
 
         <!-- Legend -->
         <g data-legend="" data-legend-bridge="">
-          <text x="40" y="512" class="t-primary" font-size="12" font-weight="650">Legend</text>
-          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="532" data-legend-width="83">
-            <rect x="40" y="523" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
-            <text x="62" y="532" class="t-muted" font-size="10" font-weight="500">Frontend</text>
+          <text x="40" y="576" class="t-primary" font-size="12" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="596" data-legend-width="83">
+            <rect x="40" y="587" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
+            <text x="62" y="596" class="t-muted" font-size="10" font-weight="500">Frontend</text>
           </g>
-          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Backend" data-legend-x="145" data-legend-baseline="532" data-legend-width="78">
-            <rect x="145" y="523" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
-            <text x="167" y="532" class="t-muted" font-size="10" font-weight="500">Backend</text>
+          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Backend" data-legend-x="145" data-legend-baseline="596" data-legend-width="78">
+            <rect x="145" y="587" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
+            <text x="167" y="596" class="t-muted" font-size="10" font-weight="500">Backend</text>
           </g>
-          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Database" data-legend-x="245" data-legend-baseline="532" data-legend-width="83">
-            <rect x="245" y="523" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
-            <text x="267" y="532" class="t-muted" font-size="10" font-weight="500">Database</text>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Database" data-legend-x="245" data-legend-baseline="596" data-legend-width="83">
+            <rect x="245" y="587" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
+            <text x="267" y="596" class="t-muted" font-size="10" font-weight="500">Database</text>
           </g>
-          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="Cloud" data-legend-x="350" data-legend-baseline="532" data-legend-width="68">
-            <rect x="350" y="523" width="16" height="10" rx="2.5" class="c-cloud" stroke-width="1"/>
-            <text x="372" y="532" class="t-muted" font-size="10" font-weight="500">Cloud</text>
+          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="Cloud" data-legend-x="350" data-legend-baseline="596" data-legend-width="68">
+            <rect x="350" y="587" width="16" height="10" rx="2.5" class="c-cloud" stroke-width="1"/>
+            <text x="372" y="596" class="t-muted" font-size="10" font-weight="500">Cloud</text>
           </g>
-          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Security" data-legend-x="440" data-legend-baseline="532" data-legend-width="83">
-            <rect x="440" y="523" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
-            <text x="462" y="532" class="t-muted" font-size="10" font-weight="500">Security</text>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Security" data-legend-x="440" data-legend-baseline="596" data-legend-width="83">
+            <rect x="440" y="587" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
+            <text x="462" y="596" class="t-muted" font-size="10" font-weight="500">Security</text>
           </g>
-          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="545" data-legend-baseline="532" data-legend-width="83">
-            <rect x="545" y="523" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
-            <text x="567" y="532" class="t-muted" font-size="10" font-weight="500">External</text>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="545" data-legend-baseline="596" data-legend-width="83">
+            <rect x="545" y="587" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
+            <text x="567" y="596" class="t-muted" font-size="10" font-weight="500">External</text>
           </g>
         </g>
       </svg>
@@ -5437,8 +5441,8 @@
           <h3>Frontend &amp; Edge Hosting</h3>
         </div>
         <ul>
-          <li>&bull; React Single Page Application built with Vite and styled via Vanilla CSS &amp; Tailwind</li>
-          <li>&bull; Static asset bundle optimized and cached for instant client side hydration</li>
+          <li>&bull; React 18 + Vite SPA built with Tailwind CSS &amp; Framer Motion</li>
+          <li>&bull; Hosted on Vercel Edge CDN with fluid typography &amp; custom spoon cursor</li>
         </ul>
       </div>
 
@@ -5448,19 +5452,19 @@
           <h3>Data, State &amp; Realtime</h3>
         </div>
         <ul>
-          <li>&bull; Supabase PostgreSQL powering projects, achievements, activities, and site statistics</li>
-          <li>&bull; PostgREST middleware exposing high-performance REST API endpoints</li>
+          <li>&bull; PostgreSQL storing relational Projects, Experiences, Achievements, and Stats</li>
+          <li>&bull; Supabase Realtime WebSockets for live View &amp; Cheer counters</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot violet"></div>
-          <h3>Core Business &amp; CMS Pipelines</h3>
+          <h3>Core Business &amp; AI Pipelines</h3>
         </div>
         <ul>
-          <li>&bull; Admin Portal supporting full CRUD management, project ordering, and image URL bindings</li>
-          <li>&bull; Flow Pic &amp; Flow URL links enabling technical process diagram views</li>
+          <li>&bull; RAG AI Chatbot with pgvector (3072d) similarity search</li>
+          <li>&bull; Supabase Edge Functions streaming responses via OpenRouter API</li>
         </ul>
       </div>
 
@@ -5470,8 +5474,8 @@
           <h3>Security, Auth &amp; Trust Boundaries</h3>
         </div>
         <ul>
-          <li>&bull; Supabase Auth with encrypted password verification and JWT token checks</li>
-          <li>&bull; Strict isolation between client-side view logic and protected admin database mutations</li>
+          <li>&bull; Row Level Security (RLS) policies protecting database tables</li>
+          <li>&bull; Supabase Auth with JWT session management for Admin Dashboard</li>
         </ul>
       </div>
     </div>

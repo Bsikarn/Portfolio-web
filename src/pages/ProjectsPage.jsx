@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, ArrowDown, Minimize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ArrowLeftRight, Search, Minimize2 } from "lucide-react";
 import ScrollSection from "../components/ScrollSection";
 // Background blur managed inside ScrollSection wrapper
 import ProjectMiniCard from "../components/ProjectMiniCard";
 import ProjectDetailsCard from "../components/ProjectDetailsCard";
 import ImageModal from "../components/ImageModal";
+import ScrollDownIndicator from "../components/ScrollDownIndicator";
 import { ProjectsSkeleton } from "../components/SkeletonLoader";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 import { getSortOrder } from "../lib/adminHelpers";
@@ -89,7 +90,6 @@ export default function ProjectsPage() {
 
   const [selectedId, setSelectedId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
   const [projectsData, setProjectsData] = useState([]);
   const [categoriesData, setCategoriesData] = useState(["All"]);
@@ -153,18 +153,6 @@ export default function ProjectsPage() {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize, { passive: true });
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Use IntersectionObserver to avoid Forced Reflow from getBoundingClientRect
-  useEffect(() => {
-    const detailsEl = document.getElementById("project-details");
-    if (!detailsEl) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowScrollIndicator(!entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    observer.observe(detailsEl);
-    return () => observer.disconnect();
   }, []);
 
   // Fetch categories and projects from DB
@@ -525,53 +513,12 @@ export default function ProjectsPage() {
       />
 
       {/* Scroll Down Indicator */}
-      <AnimatePresence>
-        {showScrollIndicator && (
-          <div style={{
-            position: "fixed",
-            bottom: 24,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 100,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 6,
-            pointerEvents: "none"
-          }}>
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 15 }}
-              transition={{ duration: 0.4 }}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 6
-              }}
-            >
-              <div style={{
-                fontSize: 11,
-                fontFamily: "inherit",
-                fontWeight: 600,
-                color: "#4a6a8a",
-                textTransform: "uppercase",
-                letterSpacing: "1px"
-              }}>
-                Scroll down for details
-              </div>
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                style={{ willChange: "transform", color: "#0D6EFD" }}
-              >
-                <ArrowDown size={20} />
-              </motion.div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <ScrollDownIndicator
+        targetId="project-details"
+        text="Scroll down for details"
+        scrollThreshold={120}
+        zIndex={100}
+      />
 
     </div>
   );

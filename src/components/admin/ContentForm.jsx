@@ -123,8 +123,8 @@ export default function ContentForm({
                 <>
                   <div><label style={styles.labelStyle}>Video URL</label><input type="url" name="video_url" value={formData.video_url} onChange={handleChange} style={styles.inputStyle} /></div>
                   <div style={styles.flexRow}>
-                    <div style={styles.flex1}><label style={styles.labelStyle}>Flow Architecture Image URL</label><input type="url" name="flow_pic" value={formData.flow_pic} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/flow.png" /></div>
-                    <div style={styles.flex1}><label style={styles.labelStyle}>Flow Link URL</label><input type="url" name="flow_url" value={formData.flow_url} onChange={handleChange} style={styles.inputStyle} placeholder="https://example.com/architecture-doc" /></div>
+                    <div style={styles.flex1}><label style={styles.labelStyle}>System Architecture Embed URL (Interactive Embed Box)</label><input type="url" name="flow_pic" value={formData.flow_pic} onChange={handleChange} style={styles.inputStyle} placeholder="https://beaut-architecture.vercel.app/iot-board-aibridge?embed=1" /></div>
+                    <div style={styles.flex1}><label style={styles.labelStyle}>System Architecture Link URL (View Architecture Button Link)</label><input type="url" name="flow_url" value={formData.flow_url} onChange={handleChange} style={styles.inputStyle} placeholder="https://beaut-architecture.vercel.app/iot-board-aibridge" /></div>
                   </div>
                 </>
               )}

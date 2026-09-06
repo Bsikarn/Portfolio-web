@@ -81,6 +81,7 @@ portfolio-web/
 │   │   ├── ProjectDetailsCard.jsx  # Full project detail view component
 │   │   ├── ProjectMiniCard.jsx  # Mini card in projects selector grid
 │   │   ├── RainbowSprinkles.jsx # Floating decorative sparkle particles
+│   │   ├── ScrollDownIndicator.jsx # Global reusable scroll-down arrow & text indicator
 │   │   ├── ScrollSection.jsx    # IntersectionObserver wrapper for blur context
 │   │   ├── SkeletonLoader.jsx   # Shimmer skeleton components (Home, Experiences)
 │   │   ├── SpoonCursor.jsx      # CSS-only cursor (returns null; cursor managed via index.css)

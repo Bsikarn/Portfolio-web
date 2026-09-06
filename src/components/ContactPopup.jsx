@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Github, Linkedin, X, Check } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
@@ -36,10 +36,10 @@ export default function ContactPopup({ isOpen, onClose }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-[24px]">
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-[24px]">
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -125,6 +125,8 @@ export default function ContactPopup({ isOpen, onClose }) {
           Based in Bangkok, TH
         </div>
       </motion.div>
-    </div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

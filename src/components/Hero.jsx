@@ -1,14 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, GraduationCap, Award, Languages, User, Terminal, ArrowDown, Sparkles } from "lucide-react";
+import { FileText, GraduationCap, Award, Languages, User, Terminal, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase, getTransformedUrl } from "../lib/supabase";
 import { ABOUT_ME } from "../data/constants";
+import ScrollDownIndicator from "./ScrollDownIndicator";
 
 export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setContactOpen }) {
   const [links, setLinks] = useState({ resume: "", cv: "", portfolio: "" });
   const [aboutData, setAboutData] = useState(ABOUT_ME);
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const [showArrow, setShowArrow] = useState(true);
   const [isEduHovered, setIsEduHovered] = useState(false);
 
   useEffect(() => {
@@ -26,26 +26,6 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
       }
     };
     fetchSettings();
-  }, []);
-
-  useEffect(() => {
-    const achievementsEl = document.getElementById("achievements");
-    if (!achievementsEl) {
-      const handleScroll = () => setShowArrow(window.scrollY < 300);
-      window.addEventListener("scroll", handleScroll, { passive: true });
-      return () => window.removeEventListener("scroll", handleScroll);
-    }
-
-    // Use IntersectionObserver to avoid forced reflow from getBoundingClientRect
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowArrow(!entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(achievementsEl);
-    return () => observer.disconnect();
   }, []);
 
   const languagesList = Array.isArray(aboutData?.languages)
@@ -380,23 +360,7 @@ export default function Hero({ realStats, setPage, isPdfOpen, setIsPdfOpen, setC
       </div>
 
       {/* Fixed Bouncing Down Arrow attached at screen bottom center until scrolled */}
-      <AnimatePresence>
-        {showArrow && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: [0, 8, 0] }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{
-              opacity: { duration: 0.3 },
-              y: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
-            }}
-            className="fixed bottom-[24px] left-1/2 -translate-x-1/2 z-[90] text-[#5a7a9a]/60 flex items-center justify-center pointer-events-none"
-            style={{ willChange: "transform" }}
-          >
-            <ArrowDown size={22} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ScrollDownIndicator targetId="achievements" scrollThreshold={200} iconSize={22} />
     </section>
   );
 }
